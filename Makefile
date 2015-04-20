@@ -1,6 +1,6 @@
 # The Potato Processor - A simple RISC-V based processor for FPGAs
 # (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
-# Report bugs and issues on <https://github.com/skordal/potato/issues>
+# Report bugs and issues on <http://opencores.org/project,potato,bugtracker>
 
 .PHONY: all clean checkout-riscv-tests potato.prj
 

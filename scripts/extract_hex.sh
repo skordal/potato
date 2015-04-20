@@ -1,7 +1,7 @@
 #!/bin/bash
 # The Potato Processor - A simple processor for FPGAs
 # (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
-# Report bugs and issues on <https://github.com/skordal/potato/issues>
+# Report bugs and issues on <http://opencores.org/project,potato,bugtracker>
 
 # This script extracts the code and data sections from executables and
 # produces hex files that can be used to initialize the instruction and
