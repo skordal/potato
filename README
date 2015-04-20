@@ -13,6 +13,7 @@ Potato is a simple processor for use in FPGAs, implementing the RV32I subset of 
 
 The wishbone interface for the processor is provided by the pp_wb_adapter module. Its details are as follows:
 
+|-----------------------|---------------|
 | Name                  | Value         |
 | --------------------- | ------------- |
 | Wishbone revision     | B4            |
@@ -23,6 +24,7 @@ The wishbone interface for the processor is provided by the pp_wb_adapter module
 | Maximum operand size  | 32 bits       |
 | Endianess             | Little endian |
 | Sequence of data xfer | Undefined     |
+|---------------------------------------|
 
 For all Wishbone interfaces included in this project, the Wishbone signals are prefixed with `wb` and suffixed by the
 signal direction.
