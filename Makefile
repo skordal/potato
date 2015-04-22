@@ -86,28 +86,16 @@ potato.prj:
 		echo "vhdl work $$file" >> potato.prj; \
 	done
 
-checkout-riscv-tests:
-	if [ ! -d riscv-tests ]; then \
-		git clone https://github.com/ucb-bar/riscv-tests.git; \
-		pushd riscv-tests; \
-		git submodule update --init --recursive; \
-		popd; \
-	else \
-		pushd riscv-tests; \
-		git pull; \
-		popd; \
-	fi
-
 copy-riscv-tests: checkout-riscv-tests
 	for test in $(RISCV_TESTS); do \
-		cp riscv-tests/isa/rv32ui/$$test.S tests; \
+		cp riscv-tests/$$test.S tests; \
 	done
 
 compile-tests: copy-riscv-tests
 	test -d tests-build || mkdir tests-build
 	for test in $(RISCV_TESTS) $(LOCAL_TESTS); do \
 		echo "Compiling test $$test..."; \
-		$(TOOLCHAIN_PREFIX)-gcc -I riscv-tests/env/p -c -I riscv-tests/isa/macros/scalar -m32 -o tests-build/$$test.o tests/$$test.S; \
+		$(TOOLCHAIN_PREFIX)-gcc -c -m32 -Iriscv-tests -o tests-build/$$test.o tests/$$test.S; \
 		$(TOOLCHAIN_PREFIX)-ld -m elf32lriscv -T tests.ld tests-build/$$test.o -o tests-build/$$test.elf; \
 		scripts/extract_hex.sh tests-build/$$test.elf tests-build/$$test-imem.hex tests-build/$$test-dmem.hex; \
 	done
@@ -142,5 +130,4 @@ clean: remove-xilinx-garbage
 	-$(RM) potato.prj
 
 distclean: clean
-	-$(RM) -r riscv-tests
 
