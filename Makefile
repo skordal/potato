@@ -86,7 +86,7 @@ potato.prj:
 		echo "vhdl work $$file" >> potato.prj; \
 	done
 
-copy-riscv-tests: checkout-riscv-tests
+copy-riscv-tests:
 	for test in $(RISCV_TESTS); do \
 		cp riscv-tests/$$test.S tests; \
 	done
