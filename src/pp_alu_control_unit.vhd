@@ -89,7 +89,7 @@ begin
 					when b"111" =>
 						alu_op <= ALU_AND;
 					when others =>
-						alu_op <= ALU_NOP;
+						alu_op <= ALU_INVALID;
 				end case; 
 			when b"01100" => -- Register-register operations
 				alu_x_src <= ALU_SRC_REG;
@@ -121,8 +121,12 @@ begin
 					when b"111" =>
 						alu_op <= ALU_AND;
 					when others =>
-						alu_op <= ALU_NOP;
+						alu_op <= ALU_INVALID;
 				end case;
+			when b"00011" => -- Fence instructions, ignored
+				alu_x_src <= ALU_SRC_REG;
+				alu_y_src <= ALU_SRC_REG;
+				alu_op <= ALU_NOP;
 			when b"11100" => -- System instructions
 				alu_x_src <= ALU_SRC_CSR;
 				alu_y_src <= ALU_SRC_NULL;
@@ -130,7 +134,7 @@ begin
 			when others =>
 				alu_x_src <= ALU_SRC_REG;
 				alu_y_src <= ALU_SRC_REG;
-				alu_op <= ALU_NOP;
+				alu_op <= ALU_INVALID;
 		end case;
 	end process decode_alu;
 

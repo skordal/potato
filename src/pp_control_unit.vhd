@@ -5,9 +5,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-use work.pp_types.all;
 use work.pp_constants.all;
 use work.pp_csr.all;
+use work.pp_types.all;
+use work.pp_utilities.all;
 
 --! @brief Unit decoding instructions and setting control signals apropriately.
 entity pp_control_unit is
@@ -43,9 +44,17 @@ entity pp_control_unit is
 end entity pp_control_unit;
 
 architecture behaviour of pp_control_unit is
+	signal exception       : std_logic;
+	signal exception_cause : std_logic_vector(4 downto 0);
+	signal alu_op_temp     : alu_operation;
 begin
 
 	csr_imm <= funct3(2);
+	alu_op <= alu_op_temp;
+
+	decode_exception <= exception or to_std_logic(alu_op_temp = ALU_INVALID);
+	decode_exception_cause <= exception_cause when alu_op_temp /= ALU_INVALID
+		else CSR_CAUSE_INVALID_INSTR;
 
 	alu_control: entity work.pp_alu_control_unit
 		port map(
@@ -54,7 +63,7 @@ begin
 			funct7 => funct7,
 			alu_x_src => alu_x_src,
 			alu_y_src => alu_y_src,
-			alu_op => alu_op
+			alu_op => alu_op_temp
 		);
 
 	decode_ctrl: process(opcode, funct3, funct12)
@@ -62,85 +71,85 @@ begin
 		case opcode is
 			when b"01101" => -- Load upper immediate
 				rd_write <= '1';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_NONE;
 			when b"00101" => -- Add upper immediate to PC
 				rd_write <= '1';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_NONE;
 			when b"11011" => -- Jump and link
 				rd_write <= '1';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_JUMP;
 			when b"11001" => -- Jump and link register
 				rd_write <= '1';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_JUMP_INDIRECT;
 			when b"11000" => -- Branch operations
 				rd_write <= '0';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_CONDITIONAL;
 			when b"00000" => -- Load instructions
 				rd_write <= '1';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_NONE;
 			when b"01000" => -- Store instructions
 				rd_write <= '0';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_NONE;
 			when b"00100" => -- Register-immediate operations
 				rd_write <= '1';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_NONE;
 			when b"01100" => -- Register-register operations
 				rd_write <= '1';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_NONE;
 			when b"00011" => -- Fence instructions, ignored
 				rd_write <= '0';
-				decode_exception <= '0';
-				decode_exception_cause <= CSR_CAUSE_NONE;
+				exception <= '0';
+				exception_cause <= CSR_CAUSE_NONE;
 				branch <= BRANCH_NONE;
 			when b"11100" => -- System instructions
 				if funct3 = b"000" then
 					rd_write <= '0';
 
 					if funct12 = x"000" then
-						decode_exception <= '1';
-						decode_exception_cause <= CSR_CAUSE_SYSCALL;
+						exception <= '1';
+						exception_cause <= CSR_CAUSE_SYSCALL;
 						branch <= BRANCH_NONE;
 					elsif funct12 = x"001" then
-						decode_exception <= '1';
-						decode_exception_cause <= CSR_CAUSE_BREAKPOINT;
+						exception <= '1';
+						exception_cause <= CSR_CAUSE_BREAKPOINT;
 						branch <= BRANCH_NONE;
 					elsif funct12 = x"800" then
-						decode_exception <= '0';
-						decode_exception_cause <= CSR_CAUSE_NONE;
+						exception <= '0';
+						exception_cause <= CSR_CAUSE_NONE;
 						branch <= BRANCH_SRET;
 					else
-						decode_exception <= '1';
-						decode_exception_cause <= CSR_CAUSE_INVALID_INSTR;
+						exception <= '1';
+						exception_cause <= CSR_CAUSE_INVALID_INSTR;
 						branch <= BRANCH_NONE;
 					end if;
 				else
 					rd_write <= '1';
-					decode_exception <= '0';
-					decode_exception_cause <= CSR_CAUSE_NONE;
+					exception <= '0';
+					exception_cause <= CSR_CAUSE_NONE;
 					branch <= BRANCH_NONE;
 				end if;
 			when others =>
 				rd_write <= '0';
-				decode_exception <= '1';
-				decode_exception_cause <= CSR_CAUSE_INVALID_INSTR;
+				exception <= '1';
+				exception_cause <= CSR_CAUSE_INVALID_INSTR;
 				branch <= BRANCH_NONE;
 		end case;
 	end process decode_ctrl;

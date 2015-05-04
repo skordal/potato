@@ -16,7 +16,7 @@ package pp_types is
 			ALU_SLT, ALU_SLTU,
 			ALU_ADD, ALU_SUB,
 			ALU_SRL, ALU_SLL, ALU_SRA,
-			ALU_NOP
+			ALU_NOP, ALU_INVALID
 		);
 
 	--! Types of branches.
