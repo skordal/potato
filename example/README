@@ -6,11 +6,12 @@ processor. It has been tested using Vivado 2014.4.
 ## Quick Start
 
 In order to use the design, first import all source files from the folders
-`src/`, `soc/` and `example/` into your project.
+`src/`, `soc/` and `example/` into your project. Make sure the testbench files
+(the files starting with "tb_") is added as simulation-only files.
 
 ### Clocking
 
-Then add a clock generator using the Clocking Wizard. To seamlessly integrate
+Add a clock generator using the Clocking Wizard. To seamlessly integrate
 it into the design, name it "clock_generator". Choose the following options:
 
 * Frequency Synthesis
@@ -26,7 +27,7 @@ Add a block RAM to use as instruction ROM using the Block Memory Generator.
 Choose "Single Port ROM" as memory type, name it "instruction_rom" and set
 port A width to 32 bits and port A depth to 2048. Initialize it with your
 application binary and, optionally, fill the remaining memory locations with
-0x00000013.
+0x00000013 (no-operation opcode).
 
 ### Test it!
 

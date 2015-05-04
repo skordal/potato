@@ -1,6 +1,6 @@
--- Practical Test Application for the Potato Processor
+-- The Potato Processor - A simple processor for FPGAs
 -- (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
--- Report bugs and issues on <https://github.com/skordal/potato-test/issues>
+-- Report bugs and issues on <http://opencores.org/project,potato,bugtracker>
 
 library ieee;
 use ieee.std_logic_1164.all;
