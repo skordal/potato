@@ -61,7 +61,7 @@ call_main:
 
 .global exception_handler_wrapper
 exception_handler_wrapper:
-	// Save all registers that isn't saved by the IRQ handler function:
+	// Save all registers that aren't saved by the IRQ handler function:
 	addi sp, sp, -64
 	sw ra, 0(sp)
 	sw t0, 4(sp)
