@@ -140,6 +140,7 @@ architecture behaviour of pp_execute is
 
 	signal branch : branch_type;
 	signal branch_condition : std_logic;
+	signal do_jump : std_logic;
 	signal jump_target : std_logic_vector(31 downto 0);
 
 	signal sr : csr_status_register;
@@ -189,9 +190,10 @@ begin
 				badvaddr => exception_vaddr
 			) when exception_taken = '1' else exception_context_forwarded;
 
-	jump_out <= to_std_logic(branch = BRANCH_JUMP or branch = BRANCH_JUMP_INDIRECT)
+	do_jump <= to_std_logic(branch = BRANCH_JUMP or branch = BRANCH_JUMP_INDIRECT)
 		or (to_std_logic(branch = BRANCH_CONDITIONAL) and branch_condition)
 		or to_std_logic(branch = BRANCH_SRET);
+	jump_out <= do_jump;
 	jump_target_out <= jump_target;
 
 	evec_out <= evec_forwarded;
@@ -311,7 +313,14 @@ begin
 		end case;
 	end process data_misalign_check;
 
-	instr_misalign_check: instr_misaligned <= '1' when jump_target(1 downto 0) /= b"00" else '0';
+	instr_misalign_check: process(jump_target, branch, branch_condition)
+	begin
+		if jump_target(1 downto 0) /= b"00" and do_jump = '1' then
+			instr_misaligned <= '1';
+		else
+			instr_misaligned <= '0';
+		end if;
+	end process instr_misalign_check;
 
 	find_exception_cause: process(decode_exception, decode_exception_cause, mem_op,
 		data_misaligned, instr_misaligned, irq_asserted, irq_asserted_num)
