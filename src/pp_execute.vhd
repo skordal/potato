@@ -313,7 +313,7 @@ begin
 		end case;
 	end process data_misalign_check;
 
-	instr_misalign_check: process(jump_target, branch, branch_condition)
+	instr_misalign_check: process(jump_target, branch, branch_condition, do_jump)
 	begin
 		if jump_target(1 downto 0) /= b"00" and do_jump = '1' then
 			instr_misaligned <= '1';
