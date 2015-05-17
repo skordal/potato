@@ -75,11 +75,11 @@
 
 #define potato_get_badvaddr(n) \
 	do { \
-		register uint32_t temp = 0; \
+		register uint32_t __temp = 0; \
 		asm volatile ( \
-			"csrr %[temp], CSR_BADVADDR\n" \
-			: [temp] "=r" (temp)); \
-		n = temp; \
+			"csrr %[temp], %[badvaddr]\n" \
+			: [temp] "=r" (__temp) : [badvaddr] "i" (CSR_BADVADDR)); \
+		n = __temp; \
 	} while(0)
 
 #endif
