@@ -108,7 +108,7 @@ architecture behaviour of toplevel is
 			MODULE_UART,	-- UART module
 			MODULE_TIMER,	-- Timer module
 			MODULE_DUMMY,	-- Dummy module, used for invalid addresses
-			MODULE_NONE		-- Boring no-module mode, uses the dummy module
+			MODULE_NONE		-- Boring no-module mode
 		);
 	signal active_module : module_name;
 
@@ -209,7 +209,8 @@ begin
 	uart1: entity work.pp_soc_uart
 		generic map(
 			FIFO_DEPTH => 64,
-			SAMPLE_CLK_DIVISOR => 27
+			--SAMPLE_CLK_DIVISOR => 27 -- For 50 MHz
+			SAMPLE_CLK_DIVISOR => 33 -- For 60 MHz
 		) port map(
 			clk => system_clk,
 			reset => reset,
@@ -320,7 +321,6 @@ begin
 								active_module <= MODULE_TIMER;
 								ad_state <= BUSY;
 							else
-								--active_module <= MODULE_NONE;
 								active_module <= MODULE_DUMMY;
 								ad_state <= BUSY;
 							end if;

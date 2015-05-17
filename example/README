@@ -17,7 +17,7 @@ it into the design, name it "clock_generator". Choose the following options:
 * Frequency Synthesis
 * Safe Clock Startup
 
-Set up two output clocks, `clk_out1` with frequency 50 MHz, and `clk_out2` with
+Set up two output clocks, `clk_out1` with frequency 60 MHz, and `clk_out2` with
 a frequency of 10 MHz. Rename the corresponding ports to `system_clk` and
 `timer_clk` respectively. Name the input clock `clk`.
 

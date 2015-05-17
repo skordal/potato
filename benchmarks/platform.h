@@ -9,7 +9,7 @@
 #define PLATFORM_H
 
 // Clock frequency in Hz:
-#define SYSTEM_CLK_FREQ	50000000
+#define SYSTEM_CLK_FREQ	60000000
 
 // Macro for using the addresses below in C code:
 #define IO_ADDRESS(x)	((volatile void *) x)
