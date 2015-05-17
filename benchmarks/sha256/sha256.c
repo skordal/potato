@@ -11,13 +11,13 @@
 
 // Software SHA256 module
 
-static uint32_t initial[] =
+static const uint32_t initial[8] =
 {
 		0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
 		0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
 
-static uint32_t constants[] =
+static const uint32_t constants[64] =
 {
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -29,42 +29,37 @@ static uint32_t constants[] =
 	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-static inline uint32_t rotate_right(uint32_t x, int n)
+static uint32_t rotate_right(uint32_t x, int n)
 {
-	uint32_t retval = 0;
-
-	retval = x >> n;
-	retval |= x << (32 - n);
-
-	return retval;
+	return (x >> n) | (x << (32 - n));
 }
 
-static inline uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
+static uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
 {
 	return (x & y) ^ ((~x) & z);
 }
 
-static inline uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
+static uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
 {
 	return (x & y) ^ (x & z) ^ (y & z);
 }
 
-static inline uint32_t s0(uint32_t x)
+static uint32_t s0(uint32_t x)
 {
 	return rotate_right(x, 2) ^ rotate_right(x, 13) ^ rotate_right(x, 22);
 }
 
-static inline uint32_t s1(uint32_t x)
+static uint32_t s1(uint32_t x)
 {
 	return rotate_right(x, 6) ^ rotate_right(x, 11) ^ rotate_right(x, 25);
 }
 
-static inline uint32_t o0(uint32_t x)
+static uint32_t o0(uint32_t x)
 {
 	return rotate_right(x, 7) ^ rotate_right(x, 18) ^ (x >> 3);
 }
 
-static inline uint32_t o1(uint32_t x)
+static uint32_t o1(uint32_t x)
 {
 	return rotate_right(x, 17) ^ rotate_right(x, 19) ^ (x >> 10);
 }
@@ -73,9 +68,8 @@ static uint32_t schedule(uint32_t input, const uint32_t * W, int i)
 {
 	if(i < 16)
 		return input;
-	else {
+	else
 		return o1(W[i - 2]) + W[i - 7] + o0(W[i - 15]) + W[i - 16];
-	}
 }
 
 static void compress(uint32_t * i, uint32_t W, uint32_t K)
