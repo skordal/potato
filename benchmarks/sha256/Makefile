@@ -11,7 +11,8 @@ TARGET_SIZE := $(TARGET_PREFIX)-size
 TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
 HEXDUMP ?= hexdump
 
-TARGET_CFLAGS += -m32 -Wall -O3 -fomit-frame-pointer -ffreestanding -fno-builtin -I.. -std=gnu99
+TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
+	-ffreestanding -fno-builtin -I.. -std=gnu99
 TARGET_LDFLAGS += -m elf32lriscv -T../benchmark.ld
 
 OBJECTS := gpio.o main.o sha256.o start.o timer.o uart.o utilities.o

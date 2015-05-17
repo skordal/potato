@@ -16,23 +16,42 @@
 static int led_status = 0;
 static volatile int hashes_per_second = 0;
 
-void exception_handler(uint32_t cause, void * epc)
+// Handle an exception/interrupt.
+// Arguments:
+// - cause: exception cause, see potato.h for values
+// - epc: exception return address
+// - regbase: base of the stored context, can be used for printing all
+//            registers with regbase[0] = x1 and upwards.
+void exception_handler(uint32_t cause, void * epc, void * regbase)
 {
-	uart_puts(IO_ADDRESS(UART_BASE), "Hashes per second: ");
-	uart_puth(IO_ADDRESS(UART_BASE), hashes_per_second);
-	uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
-
-	if(led_status == 0)
+	if(cause == (CAUSE_IRQ_BASE + 5)) // Timer interrupt
 	{
-		gpio_set_output(IO_ADDRESS(GPIO2_BASE), 1);
-		led_status = 1;
-	} else {
-		gpio_set_output(IO_ADDRESS(GPIO2_BASE), 0);
-		led_status = 0;
-	}
+		uart_puts(IO_ADDRESS(UART_BASE), "Hashes per second: ");
+		uart_puth(IO_ADDRESS(UART_BASE), hashes_per_second);
+		uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
 
-	timer_reset(IO_ADDRESS(TIMER_BASE));
-	hashes_per_second = 0;
+		if(led_status == 0)
+		{
+			gpio_set_output(IO_ADDRESS(GPIO2_BASE), 1);
+			led_status = 1;
+		} else {
+			gpio_set_output(IO_ADDRESS(GPIO2_BASE), 0);
+			led_status = 0;
+		}
+
+		hashes_per_second = 0;
+		timer_reset(IO_ADDRESS(TIMER_BASE));
+	} else {
+		uart_puts(IO_ADDRESS(UART_BASE), "Unhandled exception!\n\r");
+		uart_puts(IO_ADDRESS(UART_BASE), "Cause: ");
+		uart_puth(IO_ADDRESS(UART_BASE), cause);
+		uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
+		uart_puts(IO_ADDRESS(UART_BASE), "EPC: ");
+		uart_puth(IO_ADDRESS(UART_BASE), (uint32_t) epc);
+		uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
+
+		while(1) asm volatile("nop\n");
+	}
 }
 
 int main(void)
@@ -42,7 +61,7 @@ int main(void)
 	gpio_set_direction(IO_ADDRESS(GPIO2_BASE), 0xffff); // LEDs
 
 	// Set up the timer:
-	timer_set(IO_ADDRESS(TIMER_BASE), 50000000);
+	timer_set(IO_ADDRESS(TIMER_BASE), SYSTEM_CLK_FREQ);
 
 	// Print a startup message:
 	uart_puts(IO_ADDRESS(UART_BASE), "The Potato Processor SHA256 Benchmark\n\r\n\r");
