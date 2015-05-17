@@ -47,9 +47,6 @@
 #define STATUS_IM_MASK	0x00ff0000	// Interrupt Mask
 #define STATUS_PIM_MASK	0xff000000	// Previous Interrupt Mask
 
-#define STRINGIFY(x)	_STRINGIFY(x)
-#define _STRINGIFY(x)	#x
-
 #define potato_enable_interrupts()	asm volatile("csrsi %[status], 1 << %[ei_bit]\n" \
 		:: [status] "i" (CSR_STATUS), [ei_bit] "i" (STATUS_EI))
 #define potato_disable_interrupts()	asm volatile("csrci %[status], 1 << %[ei_bit] | 1 << %[pei_bit]\n" \
