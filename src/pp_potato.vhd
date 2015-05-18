@@ -5,6 +5,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+use work.pp_types.all;
+
 --! @brief The Potato Processor.
 --! This file provides a Wishbone-compatible interface to the Potato processor.
 entity pp_potato is
@@ -54,6 +56,10 @@ architecture behaviour of pp_potato is
 	signal dmem_write_req : std_logic;
 	signal dmem_write_ack : std_logic;
 
+	-- Wishbone signals:
+	signal icache_inputs, dcache_inputs   : wishbone_master_inputs;
+	signal icache_outputs, dcache_outputs : wishbone_master_outputs;
+
 begin
 	processor: entity work.pp_core
 		generic map(
@@ -82,22 +88,52 @@ begin
 			irq => irq
 		);
 
-	wb_if: entity work.pp_wb_adapter
+	icache: entity work.pp_cache
 		port map(
 			clk => clk,
 			reset => reset,
-			imem_address => imem_address,
-			imem_data_out => imem_data,
-			imem_read_req => imem_req,
-			imem_read_ack => imem_ack,
-			dmem_address => dmem_address,
-			dmem_data_in => dmem_data_out,
-			dmem_data_out => dmem_data_in,
-			dmem_data_size => dmem_data_size,
-			dmem_read_req => dmem_read_req,
-			dmem_write_req => dmem_write_req,
-			dmem_read_ack => dmem_read_ack,
-			dmem_write_ack => dmem_write_ack,
+			cache_enable => '0',
+			cache_flush => '0',
+			cached_areas => (others => '0'),
+			mem_address_in => imem_address,
+			mem_data_out => imem_data,
+			mem_data_in => (others => '0'),
+			mem_data_size => b"00",
+			mem_read_req => imem_req,
+			mem_read_ack => imem_ack,
+			mem_write_req => '0',
+			mem_write_ack => open,
+			wb_inputs => icache_inputs,
+			wb_outputs => icache_outputs
+		);
+
+	dcache: entity work.pp_cache
+		port map(
+			clk => clk,
+			reset => reset,
+			cache_enable => '0',
+			cache_flush => '0',
+			cached_areas => (others => '0'),
+			mem_address_in => dmem_address,
+			mem_data_in => dmem_data_out,
+			mem_data_out => dmem_data_in,
+			mem_data_size => dmem_data_size,
+			mem_read_req => dmem_read_req,
+			mem_read_ack => dmem_read_ack,
+			mem_write_req => dmem_write_req,
+			mem_write_ack => dmem_write_ack,
+			wb_inputs => dcache_inputs,
+			wb_outputs => dcache_outputs
+		);
+
+	arbiter: entity work.pp_wb_arbiter
+		port map(
+			clk => clk,
+			reset => reset,
+			m1_inputs => dcache_inputs,
+			m1_outputs => dcache_outputs,
+			m2_inputs => icache_inputs,
+			m2_outputs => icache_outputs,
 			wb_adr_out => wb_adr_out,
 			wb_sel_out => wb_sel_out,
 			wb_cyc_out => wb_cyc_out,
