@@ -199,7 +199,7 @@ begin
 	evec_out <= evec_forwarded;
 	exception_taken <= decode_exception or to_std_logic(exception_cause /= CSR_CAUSE_NONE) or irq_asserted; 
 
-	irq_asserted <= to_std_logic(exception_context_forwarded.status.ei = '1' and
+	irq_asserted <= (not stall) and to_std_logic(exception_context_forwarded.status.ei = '1' and
 		(irq and exception_context_forwarded.status.im) /= x"00");
 
 	rs1_data <= rs1_data_in;
