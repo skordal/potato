@@ -77,7 +77,8 @@ RISCV_TESTS += \
 # Local tests to run:
 LOCAL_TESTS ?= \
 	scall \
-	sbreak
+	sbreak \
+	sw-jal
 
 all: potato.prj run-tests
 
