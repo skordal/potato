@@ -40,22 +40,16 @@ entity pp_fetch is
 end entity pp_fetch;
 
 architecture behaviour of pp_fetch is
-	--signal pc, pc_next : std_logic_vector(31 downto 0);
-	--signal acknowledge, ready : std_logic;
-
-	signal pc : std_logic_vector(31 downto 0);
-	signal pc_next : std_logic_vector(31 downto 0);
-
+	signal pc           : std_logic_vector(31 downto 0);
+	signal pc_next      : std_logic_vector(31 downto 0);
 	signal cancel_fetch : std_logic;
 begin
 
-	imem_address <= pc_next;
+	imem_address <= pc_next when cancel_fetch = '0' else pc;
 
 	instruction_data <= imem_data_in;
 	instruction_ready <= imem_ack and (not stall) and (not cancel_fetch);
 	instruction_address <= pc;
-
-	--imem_req <= '1' when cancel_fetch = '0' and 
 
 	imem_req <= '1';
 
@@ -81,9 +75,7 @@ begin
 
 	calc_next_pc: process(reset, stall, branch, exception, imem_ack, branch_target, evec, pc, cancel_fetch)
 	begin
-		if reset = '1' then
-			pc_next <= RESET_ADDRESS;
-		elsif exception = '1' then
+		if exception = '1' then
 			pc_next <= evec;
 		elsif branch = '1' then
 			pc_next <= branch_target;

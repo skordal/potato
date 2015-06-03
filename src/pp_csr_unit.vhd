@@ -130,14 +130,16 @@ begin
 		end if;
 	end process write;
 
+	status_out <= exception_context.status when exception_context_write = '1' else status_register;
+
 	read: process(clk)
 	begin
 		if rising_edge(clk) then
-			if exception_context_write  = '1' then
-				status_out <= exception_context.status;
-			else
-				status_out <= status_register;
-			end if;
+			--if exception_context_write  = '1' then
+			--	status_out <= exception_context.status;
+			--else
+			--	status_out <= status_register;
+			--end if;
 
 			if write_mode /= CSR_WRITE_NONE and write_address = CSR_EVEC then
 				evec_out <= write_data_in;

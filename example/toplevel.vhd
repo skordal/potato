@@ -209,8 +209,8 @@ begin
 	uart1: entity work.pp_soc_uart
 		generic map(
 			FIFO_DEPTH => 64,
-			--SAMPLE_CLK_DIVISOR => 27 -- For 50 MHz
-			SAMPLE_CLK_DIVISOR => 33 -- For 60 MHz
+			SAMPLE_CLK_DIVISOR => 27 -- For 50 MHz
+			--SAMPLE_CLK_DIVISOR => 33 -- For 60 MHz
 		) port map(
 			clk => system_clk,
 			reset => reset,
@@ -301,7 +301,7 @@ begin
 			else
 				case ad_state is
 					when IDLE =>
-						if p_cyc_out = '1' and p_stb_out = '1' then
+						if p_cyc_out = '1' then
 							if p_adr_out(31 downto 13) = b"0000000000000000000" then
 								active_module <= MODULE_IMEM;
 								ad_state <= BUSY;
@@ -324,6 +324,8 @@ begin
 								active_module <= MODULE_DUMMY;
 								ad_state <= BUSY;
 							end if;
+						else
+							active_module <= MODULE_NONE;
 						end if;
 					when BUSY =>
 						if p_cyc_out = '0' then

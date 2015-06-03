@@ -19,6 +19,11 @@ package pp_utilities is
 	--! Calculates log2 with integers.
 	function log2(input : in natural) return natural;
 
+	-- Gets the value of the sel signals to the wishbone interconnect for the specified
+	-- operand size and address.
+	function wb_get_data_sel(size : in std_logic_vector(1 downto 0); address : in std_logic_vector)
+		return std_logic_vector;
+
 end package pp_utilities;
 
 package body pp_utilities is
@@ -35,7 +40,7 @@ package body pp_utilities is
 	function is_pow2(input : in natural) return boolean is
 		variable c : natural := 1;
 	begin
-		for i in 0 to 31 loop
+		for i in 0 to 30 loop -- FIXME: Simulator complains about 2^31 being out of range!
 			if input = i then
 				return true;
 			end if;
@@ -57,5 +62,33 @@ package body pp_utilities is
 
 		return retval;
 	end function log2;
+
+	function wb_get_data_sel(size : in std_logic_vector(1 downto 0); address : in std_logic_vector)
+		return std_logic_vector is
+	begin
+		case size is
+			when b"01" =>
+				case address(1 downto 0) is
+					when b"00" =>
+						return b"0001";
+					when b"01" =>
+						return b"0010";
+					when b"10" =>
+						return b"0100";
+					when b"11" =>
+						return b"1000";
+					when others =>
+						return b"0001";
+				end case;
+			when b"10" =>
+				if address(1) = '0' then
+					return b"0011";
+				else
+					return b"1100";
+				end if;
+			when others =>
+				return b"1111";
+		end case;
+	end function wb_get_data_sel;
 
 end package body pp_utilities;

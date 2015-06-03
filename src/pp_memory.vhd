@@ -110,7 +110,7 @@ begin
 				if exception_in = '1' then
 					exception_context_out.status <= (
 							pim => exception_context_in.status.im,
-							im => exception_context_in.status.im,
+							im => (others => '0'),
 							pei => exception_context_in.status.ei,
 							ei => '0'
 						);

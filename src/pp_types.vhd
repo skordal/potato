@@ -42,6 +42,22 @@ package pp_types is
 			MEMOP_SIZE_BYTE, MEMOP_SIZE_HALFWORD, MEMOP_SIZE_WORD
 		);
 
+	--! Wishbone master output signals:
+	type wishbone_master_outputs is record	
+			adr : std_logic_vector(31 downto 0);
+			sel : std_logic_vector( 3 downto 0);
+			cyc : std_logic;
+			stb : std_logic;
+			we  : std_logic;
+			dat : std_logic_vector(31 downto 0);
+		end record; 
+
+	--! Wishbone master input signals:
+	type wishbone_master_inputs is record
+			dat : std_logic_vector(31 downto 0);
+			ack : std_logic;
+		end record;
+
 end package pp_types;
 
 package body pp_types is

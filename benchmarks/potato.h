@@ -52,6 +52,13 @@
 #define potato_disable_interrupts()	asm volatile("csrci %[status], 1 << %[ei_bit] | 1 << %[pei_bit]\n" \
 		:: [status] "i" (CSR_STATUS), [ei_bit] "i" (STATUS_EI), [pei_bit] "i" (STATUS_PEI))
 
+#define potato_write_host(data)	\
+	do { \
+		register uint32_t temp = data; \
+		asm volatile("csrw %[tohost], %[temp]\n" \
+			:: [tohost] "i" (CSR_TOHOST), [temp] "r" (temp)); \
+	} while(0);
+
 #define potato_enable_irq(n) \
 	do { \
 		register uint32_t temp = 0; \

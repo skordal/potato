@@ -8,6 +8,7 @@ SOURCE_FILES := \
 	src/pp_alu.vhd \
 	src/pp_alu_mux.vhd \
 	src/pp_alu_control_unit.vhd \
+	src/pp_icache.vhd \
 	src/pp_comparator.vhd \
 	src/pp_constants.vhd \
 	src/pp_control_unit.vhd \
@@ -25,6 +26,7 @@ SOURCE_FILES := \
 	src/pp_register_file.vhd \
 	src/pp_types.vhd \
 	src/pp_utilities.vhd \
+	src/pp_wb_arbiter.vhd \
 	src/pp_wb_adapter.vhd \
 	src/pp_writeback.vhd
 TESTBENCHES := \
@@ -76,7 +78,8 @@ RISCV_TESTS += \
 # Local tests to run:
 LOCAL_TESTS ?= \
 	scall \
-	sbreak
+	sbreak \
+	sw-jal
 
 all: potato.prj run-tests
 
@@ -95,7 +98,7 @@ compile-tests: copy-riscv-tests
 	test -d tests-build || mkdir tests-build
 	for test in $(RISCV_TESTS) $(LOCAL_TESTS); do \
 		echo "Compiling test $$test..."; \
-		$(TOOLCHAIN_PREFIX)-gcc -c -m32 -Iriscv-tests -o tests-build/$$test.o tests/$$test.S; \
+		$(TOOLCHAIN_PREFIX)-gcc -c -m32 -march=RV32I -Iriscv-tests -o tests-build/$$test.o tests/$$test.S; \
 		$(TOOLCHAIN_PREFIX)-ld -m elf32lriscv -T tests.ld tests-build/$$test.o -o tests-build/$$test.elf; \
 		scripts/extract_hex.sh tests-build/$$test.elf tests-build/$$test-imem.hex tests-build/$$test-dmem.hex; \
 	done
