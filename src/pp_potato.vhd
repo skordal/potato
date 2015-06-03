@@ -57,8 +57,8 @@ architecture behaviour of pp_potato is
 	signal dmem_write_ack : std_logic;
 
 	-- Wishbone signals:
-	signal icache_inputs, dcache_inputs   : wishbone_master_inputs;
-	signal icache_outputs, dcache_outputs : wishbone_master_outputs;
+	signal icache_inputs, dmem_if_inputs   : wishbone_master_inputs;
+	signal icache_outputs, dmem_if_outputs : wishbone_master_outputs;
 
 begin
 	processor: entity work.pp_core
@@ -88,13 +88,16 @@ begin
 			irq => irq
 		);
 
-	icache: entity work.pp_cache
-		port map(
+	icache: entity work.pp_icache
+		generic map(
+			LINE_SIZE => 4,
+			NUM_LINES => 128
+		) port map(
 			clk => clk,
 			reset => reset,
-			cache_enable => '0',
+			cache_enable => '1',
 			cache_flush => '0',
-			cached_areas => (others => '0'),
+			cached_areas => (others => '1'),
 			mem_address_in => imem_address,
 			mem_data_out => imem_data,
 			mem_data_in => (others => '0'),
@@ -107,33 +110,32 @@ begin
 			wb_outputs => icache_outputs
 		);
 
-	dcache: entity work.pp_cache
+	dmem_if: entity work.pp_wb_adapter
 		port map(
 			clk => clk,
 			reset => reset,
-			cache_enable => '0',
-			cache_flush => '0',
-			cached_areas => (others => '0'),
-			mem_address_in => dmem_address,
-			mem_data_in => dmem_data_out,
-			mem_data_out => dmem_data_in,
-			mem_data_size => dmem_data_size,
-			mem_read_req => dmem_read_req,
-			mem_read_ack => dmem_read_ack,
-			mem_write_req => dmem_write_req,
-			mem_write_ack => dmem_write_ack,
-			wb_inputs => dcache_inputs,
-			wb_outputs => dcache_outputs
+			dmem_address => dmem_address,
+			dmem_data_in => dmem_data_out,
+			dmem_data_out => dmem_data_in,
+			dmem_data_size => dmem_data_size,
+			dmem_read_req => dmem_read_req,
+			dmem_read_ack => dmem_read_ack,
+			dmem_write_req => dmem_write_req,
+			dmem_write_ack => dmem_write_ack,
+			wb_inputs => dmem_if_inputs,
+			wb_outputs => dmem_if_outputs
 		);
 
 	arbiter: entity work.pp_wb_arbiter
 		port map(
 			clk => clk,
 			reset => reset,
-			m1_inputs => dcache_inputs,
-			m1_outputs => dcache_outputs,
-			m2_inputs => icache_inputs,
-			m2_outputs => icache_outputs,
+			--m1_inputs => dmem_if_inputs,
+			--m1_outputs => dmem_if_outputs,
+			m1_inputs => icache_inputs,
+			m1_outputs => icache_outputs,
+			m2_inputs => dmem_if_inputs,
+			m2_outputs => dmem_if_outputs,
 			wb_adr_out => wb_adr_out,
 			wb_sel_out => wb_sel_out,
 			wb_cyc_out => wb_cyc_out,
