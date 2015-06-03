@@ -169,9 +169,9 @@ begin
 	stall_mem <= to_std_logic(memop_is_load(mem_mem_op) and dmem_read_ack = '0')
 		or to_std_logic(mem_mem_op = MEMOP_TYPE_STORE and dmem_write_ack = '0');
 
-	flush_if <= branch_taken or exception_taken;
-	flush_id <= branch_taken or exception_taken;
-	flush_ex <= branch_taken or exception_taken;
+	flush_if <= (branch_taken or exception_taken) and not stall_if;
+	flush_id <= (branch_taken or exception_taken) and not stall_id;
+	flush_ex <= (branch_taken or exception_taken) and not stall_ex;
 
 	------- Control and status module -------
 	csr_unit: entity work.pp_csr_unit
