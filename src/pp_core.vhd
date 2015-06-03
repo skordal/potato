@@ -72,6 +72,7 @@ architecture behaviour of pp_core is
 	-- CSR read port signals:
 	signal csr_read_data      : std_logic_vector(31 downto 0);
 	signal csr_read_writeable : boolean;
+	signal csr_read_address, csr_read_address_p : csr_address;
 
 	-- Status register outputs:
 	signal status : csr_status_register;
@@ -186,7 +187,7 @@ begin
 				fromhost_updated => fromhost_write_en,
 				tohost_data => tohost_data,
 				tohost_updated => tohost_write_en,
-				read_address => id_csr_address,
+				read_address => csr_read_address,
 				read_data_out => csr_read_data,
 				read_writeable => csr_read_writeable,
 				write_address => wb_csr_address,
@@ -197,6 +198,15 @@ begin
 				status_out => status,
 				evec_out => evec
 			);
+
+	csr_read_address <= id_csr_address when stall_ex = '0' else csr_read_address_p;
+
+	store_previous_csr_addr: process(clk, stall_ex)
+	begin
+		if rising_edge(clk) and stall_ex = '0' then
+			csr_read_address_p <= id_csr_address;
+		end if;
+	end process store_previous_csr_addr;
 
 	------- Register file -------
 	regfile: entity work.pp_register_file
@@ -305,7 +315,7 @@ begin
 			funct3_in => id_funct3,
 			pc_in => id_pc,
 			pc_out => ex_pc,
-			csr_addr_in => id_csr_address,
+			csr_addr_in => csr_read_address,
 			csr_addr_out => ex_csr_address,
 			csr_write_in => id_csr_write,
 			csr_write_out => ex_csr_write,
