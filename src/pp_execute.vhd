@@ -190,9 +190,9 @@ begin
 				badvaddr => exception_vaddr
 			) when exception_taken = '1' else exception_context_forwarded;
 
-	do_jump <= to_std_logic(branch = BRANCH_JUMP or branch = BRANCH_JUMP_INDIRECT)
+	do_jump <= (to_std_logic(branch = BRANCH_JUMP or branch = BRANCH_JUMP_INDIRECT)
 		or (to_std_logic(branch = BRANCH_CONDITIONAL) and branch_condition)
-		or to_std_logic(branch = BRANCH_SRET);
+		or to_std_logic(branch = BRANCH_SRET)) and not stall;
 	jump_out <= do_jump;
 	jump_target_out <= jump_target;
 
