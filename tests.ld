@@ -9,17 +9,18 @@
  * 2048 bytes (each) of separate instruction and data memory.
  */
 
+OUTPUT_ARCH(riscv);
 ENTRY(_start);
 
 SECTIONS
 {
-	.text 0x0 :
+	.text 0x100 :
 	{
-		*(.init*)
-		*(.text*)
+		*(.text.init)
+		*(.text)
 	}
 
-	.data 0x800 :
+	.data 0x1000 :
 	{
 		__data_begin = .;
 		*(.data*)
@@ -33,6 +34,6 @@ SECTIONS
 	}
 	__data_end = .;
 
-	__stack_top = 0x1000;
+	__stack_top = 0x2000;
 }
 

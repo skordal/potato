@@ -14,10 +14,12 @@ use work.pp_utilities.all;
 --! @brief Testbench providing a full SoC architecture connected with a Wishbone bus.
 entity tb_soc is
 	generic(
-		IMEM_SIZE : natural := 2048; --! Size of the instruction memory in bytes.
-		DMEM_SIZE : natural := 2048; --! Size of the data memory in bytes.
-		IMEM_FILENAME : string := "imem_testfile.hex"; --! File containing the contents of instruction memory.
-		DMEM_FILENAME : string := "dmem_testfile.hex"  --! File containing the contents of data memory.
+		IMEM_SIZE : natural := 4096; --! Size of the instruction memory in bytes.
+		DMEM_SIZE : natural := 4096; --! Size of the data memory in bytes.
+		RESET_ADDRESS   : std_logic_vector := x"00000200"; --! Processor reset address
+		IMEM_START_ADDR : std_logic_vector := x"00000100"; --! Instruction memory start address
+		IMEM_FILENAME   : string := "imem_testfile.hex"; --! File containing the contents of instruction memory.
+		DMEM_FILENAME   : string := "dmem_testfile.hex"  --! File containing the contents of data memory.
 	);
 end entity tb_soc;
 
@@ -93,7 +95,9 @@ architecture testbench of tb_soc is
 begin
 
 	processor: entity work.pp_potato
-		port map(
+		generic map(
+			RESET_ADDRESS => RESET_ADDRESS
+		) port map(
 			clk => clk,
 			reset => processor_reset,
 			irq => irq,
@@ -204,9 +208,9 @@ begin
 	begin
 		if not initialized then
 			-- Read the instruction memory file:
-			for i in 0 to IMEM_SIZE loop
+			for i in to_integer(unsigned(IMEM_START_ADDR)) to IMEM_SIZE loop
 				exit when endfile(imem_file);
-				
+
 				readline(imem_file, input_line);
 				hread(input_line, input_value);
 

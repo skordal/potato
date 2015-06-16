@@ -12,49 +12,16 @@ use work.pp_constants.all;
 
 entity tb_processor is
 	generic(
-		IMEM_SIZE : natural := 2048; --! Size of the instruction memory in bytes.
-		DMEM_SIZE : natural := 2048; --! Size of the data memory in bytes.
-		IMEM_FILENAME : string := "imem_testfile.hex"; --! File containing the contents of instruction memory.
-		DMEM_FILENAME : string := "dmem_testfile.hex"  --! File containing the contents of data memory.
+		IMEM_SIZE : natural := 4096; --! Size of the instruction memory in bytes.
+		DMEM_SIZE : natural := 4096; --! Size of the data memory in bytes.
+		RESET_ADDRESS   : std_logic_vector := x"00000200"; --! Processor reset address
+		IMEM_START_ADDR : std_logic_vector := x"00000100"; --! Instruction memory start address
+		IMEM_FILENAME   : string := "imem_testfile.hex";   --! File containing the contents of instruction memory.
+		DMEM_FILENAME   : string := "dmem_testfile.hex"    --! File containing the contents of data memory.
 	);
 end entity tb_processor;
 
 architecture testbench of tb_processor is
-
-	-- Processor component prototype:
-	component pp_core is
-		port(
-			-- Common inputs:
-			clk       : in std_logic; --! Processor clock
-			reset     : in std_logic; --! Reset signal
-			timer_clk : in std_logic; --! Timer clock input
-	
-			-- Instruction memory interface:
-			imem_address : out std_logic_vector(31 downto 0); --! Address of the next instruction
-			imem_data_in : in  std_logic_vector(31 downto 0); --! Instruction input
-			imem_req     : out std_logic;
-			imem_ack     : in  std_logic;
-
-			-- Data memory interface:
-			dmem_address   : out std_logic_vector(31 downto 0); --! Data address
-			dmem_data_in   : in  std_logic_vector(31 downto 0); --! Input from the data memory
-			dmem_data_out  : out std_logic_vector(31 downto 0); --! Ouptut to the data memory
-			dmem_data_size : out std_logic_vector( 1 downto 0);  --! Size of the data, 1 = 8 bits, 2 = 16 bits, 0 = 32 bits. 
-			dmem_read_req  : out std_logic; --! Data memory read request
-			dmem_read_ack  : in  std_logic; --! Data memory read acknowledge
-			dmem_write_req : out std_logic; --! Data memory write request
-			dmem_write_ack : in  std_logic; --! Data memory write acknowledge
-
-			-- Tohost/fromhost interface:
-			fromhost_data     : in  std_logic_vector(31 downto 0); --! Data from the host/simulator.
-			fromhost_write_en : in  std_logic;                     --! Write enable signal from the host/simulator.
-			tohost_data       : out std_logic_vector(31 downto 0); --! Data to the host/simulator.
-			tohost_write_en   : out std_logic;                     --! Write enable signal to the host/simulator.
-
-			-- External interrupt input:
-			irq : in std_logic_vector(7 downto 0) --! IRQ input
-		);
-	end component pp_core;
 
 	-- Clock signal:
 	signal clk : std_logic := '0';
@@ -92,9 +59,9 @@ architecture testbench of tb_processor is
 	-- Memory array type:
 	type memory_array is array(natural range <>) of std_logic_vector(7 downto 0);
 	constant IMEM_BASE : natural := 0;
-	constant IMEM_END  : natural := IMEM_SIZE - 1;
-	constant DMEM_BASE : natural := IMEM_SIZE;
-	constant DMEM_END  : natural := IMEM_SIZE + DMEM_SIZE - 1;
+	constant IMEM_END  : natural := IMEM_BASE + IMEM_SIZE - 1;
+	constant DMEM_BASE : natural := IMEM_END + 1;
+	constant DMEM_END  : natural := IMEM_END + DMEM_SIZE;
 
 	-- Memories:
 	signal imem_memory : memory_array(IMEM_BASE to IMEM_END);
@@ -104,8 +71,10 @@ architecture testbench of tb_processor is
 
 begin
 
-	uut: pp_core
-		port map(
+	uut: entity work.pp_core
+		generic map(
+			RESET_ADDRESS => RESET_ADDRESS
+		) port map(
 			clk => clk,
 			reset => reset,
 			timer_clk => clk,
@@ -147,7 +116,8 @@ begin
 		variable input_index : natural;
 		variable input_value : std_logic_vector(31 downto 0);
 	begin
-		for i in IMEM_BASE / 4 to IMEM_END / 4 loop
+		for i in to_integer(unsigned(IMEM_START_ADDR)) / 4 to IMEM_END / 4 loop
+		--for i in IMEM_BASE / 4 to IMEM_END / 4 loop
 			if not endfile(imem_file) then
 				readline(imem_file, input_line);
 				hread(input_line, input_value);
@@ -211,7 +181,7 @@ begin
 					when b"10" => -- 16 bits
 						dmem_memory(to_integer(unsigned(dmem_address)) + 0) <= dmem_data_out( 7 downto 0);
 						dmem_memory(to_integer(unsigned(dmem_address)) + 1) <= dmem_data_out(15 downto 8);
-					when others => -- Reserved for possible future 64 bit support
+					when others =>
 				end case;
 				dmem_write_ack <= '1';
 			end if;
@@ -259,7 +229,7 @@ begin
 						dmem_data_in( 7 downto 0) <= dmem_memory(to_integer(unsigned(dmem_address)) + 0);
 					when b"01" => -- 8  bits
 						dmem_data_in(7 downto 0) <= dmem_memory(to_integer(unsigned(dmem_address)));
-					when others => -- Reserved for possible future 64 bit support
+					when others =>
 				end case;
 				dmem_read_ack <= '1';
 			end if;

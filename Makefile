@@ -39,6 +39,7 @@ TOOLCHAIN_PREFIX ?= riscv64-unknown-elf
 # ISA tests to use from the riscv-tests repository:
 RISCV_TESTS += \
 	simple \
+	ma_addr \
 	add \
 	addi \
 	and \
@@ -69,6 +70,7 @@ RISCV_TESTS += \
 	sw \
 	xor \
 	xori \
+	lui \
 	lb \
 	lbu \
 	lh \
@@ -77,8 +79,6 @@ RISCV_TESTS += \
 
 # Local tests to run:
 LOCAL_TESTS ?= \
-	scall \
-	sbreak \
 	sw-jal
 
 all: potato.prj run-tests

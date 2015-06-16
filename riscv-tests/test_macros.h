@@ -492,12 +492,12 @@ test_ ## testnum: \
   TEST_FP_OP_S_INTERNAL( testnum, 0, float result, val1, 0.0, 0.0, \
                     fcvt.d.s f3, f0; fcvt.s.d f3, f3; fmv.x.s a0, f3)
 
-#define TEST_FP_OP1_S( testnum, inst, result, val1 ) \
-  TEST_FP_OP_S_INTERNAL( testnum, 0, float result, val1, 0.0, 0.0, \
+#define TEST_FP_OP1_S( testnum, inst, flags, result, val1 ) \
+  TEST_FP_OP_S_INTERNAL( testnum, flags, float result, val1, 0.0, 0.0, \
                     inst f3, f0; fmv.x.s a0, f3)
 
-#define TEST_FP_OP1_D( testnum, inst, result, val1 ) \
-  TEST_FP_OP_D_INTERNAL( testnum, 0, double result, val1, 0.0, 0.0, \
+#define TEST_FP_OP1_D( testnum, inst, flags, result, val1 ) \
+  TEST_FP_OP_D_INTERNAL( testnum, flags, double result, val1, 0.0, 0.0, \
                     inst f3, f0; fmv.x.d a0, f3)
 
 #define TEST_FP_OP2_S( testnum, inst, flags, result, val1, val2 ) \
@@ -570,9 +570,8 @@ test_ ## testnum: \
 #-----------------------------------------------------------------------
 
 #define TEST_ILLEGAL_TVEC_REGID( testnum, nxreg, nfreg, inst, reg1, reg2) \
-  csrs status, SR_EI; \
   la a0, handler ## testnum; \
-  csrw evec, a0; \
+  csrw stvec, a0; \
   vsetcfg nxreg, nfreg; \
   li a0, 4; \
   vsetvl a0, a0; \
@@ -597,10 +596,10 @@ vtcode2 ## testnum: \
 handler ## testnum: \
   vxcptkill; \
   li TESTNUM,2; \
-  vxcptcause a0; \
+  csrr a0, scause; \
   li a1,HWACHA_CAUSE_TVEC_ILLEGAL_REGID; \
   bne a0,a1,fail; \
-  vxcptaux a0; \
+  csrr a0, sbadaddr; \
   la a1, illegal ## testnum; \
   lw a2, 0(a1); \
   bne a0, a2, fail; \
@@ -631,9 +630,8 @@ handler ## testnum: \
   bne a1,a2,fail; \
 
 #define TEST_ILLEGAL_VT_REGID( testnum, nxreg, nfreg, inst, reg1, reg2, reg3) \
-  csrs status, SR_EI; \
   la a0, handler ## testnum; \
-  csrw evec, a0; \
+  csrw stvec, a0; \
   vsetcfg nxreg, nfreg; \
   li a0, 4; \
   vsetvl a0, a0; \
@@ -657,10 +655,10 @@ vtcode2 ## testnum: \
 handler ## testnum: \
   vxcptkill; \
   li TESTNUM,2; \
-  vxcptcause a0; \
+  csrr a0, scause; \
   li a1,HWACHA_CAUSE_VF_ILLEGAL_REGID; \
   bne a0,a1,fail; \
-  vxcptaux a0; \
+  csrr a0, sbadaddr; \
   la a1,illegal ## testnum; \
   bne a0,a1,fail; \
   vsetcfg 32,0; \
@@ -696,7 +694,7 @@ handler ## testnum: \
 #define TEST_PASSFAIL \
         bne x0, TESTNUM, pass; \
 fail: \
-        RVTEST_FAIL \
+        RVTEST_FAIL; \
 pass: \
         RVTEST_PASS \
 
