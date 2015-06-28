@@ -6,7 +6,7 @@
 #include "test_macros.h"
 
 .section .text
-RVTEST_RV32U
+RVTEST_RV32M
 RVTEST_CODE_BEGIN
 
 test_1:
@@ -33,9 +33,14 @@ RVTEST_CODE_END
 test_failed:
 	RVTEST_FAIL
 	
-# Allocate a 32-bit word to store some data into
 .section .data
+RVTEST_DATA_BEGIN
+	TEST_DATA
+
+# Allocate a 32-bit word to store some data into
+#.section .data
 temp:
 	.word 0x00000000
 
+RVTEST_DATA_END
 
