@@ -12,7 +12,7 @@ use work.pp_types.all;
 entity pp_potato is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
-		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000000"  --! Address of the first instruction to execute.
+		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"  --! Address of the first instruction to execute.
 	);
 	port(
 		clk   : in std_logic;

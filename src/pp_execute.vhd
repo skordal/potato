@@ -17,8 +17,9 @@ entity pp_execute is
 
 		stall, flush : in std_logic;
 
-		-- IRQ input:
+		-- Interrupt inputs:
 		irq : in std_logic_vector(7 downto 0);
+		software_interrupt, timer_interrupt : in std_logic;
 
 		-- Data memory outputs:
 		dmem_address   : out std_logic_vector(31 downto 0);
@@ -77,9 +78,11 @@ entity pp_execute is
 		count_instruction_out : out std_logic;
 
 		-- Exception control registers:
-		status_in : in  csr_status_register;
-		evec_in   : in  std_logic_vector(31 downto 0);
-		evec_out  : out std_logic_vector(31 downto 0);
+		ie_in, ie1_in : in  std_logic;
+		mie_in        : in  std_logic_vector(31 downto 0);
+		mtvec_in      : in  std_logic_vector(31 downto 0);
+		mtvec_out     : out std_logic_vector(31 downto 0);
+		--mepc_in       : in  std_logic_vector(31 downto 0);
 
 		-- Exception signals:
 		decode_exception_in       : in std_logic;
@@ -143,8 +146,8 @@ architecture behaviour of pp_execute is
 	signal do_jump : std_logic;
 	signal jump_target : std_logic_vector(31 downto 0);
 
-	signal sr : csr_status_register;
-	signal evec, evec_forwarded : std_logic_vector(31 downto 0);
+	signal mtvec, mtvec_forwarded : std_logic_vector(31 downto 0);
+	signal mie, mie_forwarded : std_logic_vector(31 downto 0);
 
 	signal csr_write : csr_write_mode;
 	signal csr_addr  : csr_address;
@@ -158,7 +161,7 @@ architecture behaviour of pp_execute is
 
 	signal exception_taken : std_logic;
 	signal exception_cause : csr_exception_cause;
-	signal exception_vaddr : std_logic_vector(31 downto 0);
+	signal exception_addr  : std_logic_vector(31 downto 0);
 
 	signal exception_context_forwarded : csr_exception_context;
 
@@ -185,9 +188,10 @@ begin
 
 	exception_out <= exception_taken;
 	exception_context_out <= (
-				status => exception_context_forwarded.status,
+				ie => exception_context_forwarded.ie,
+				ie1 => exception_context_forwarded.ie1,
 				cause => exception_cause,
-				badvaddr => exception_vaddr
+				badaddr => exception_addr
 			) when exception_taken = '1' else exception_context_forwarded;
 
 	do_jump <= (to_std_logic(branch = BRANCH_JUMP or branch = BRANCH_JUMP_INDIRECT)
@@ -196,19 +200,19 @@ begin
 	jump_out <= do_jump;
 	jump_target_out <= jump_target;
 
-	evec_out <= evec_forwarded;
-	exception_taken <= (decode_exception or to_std_logic(exception_cause /= CSR_CAUSE_NONE) or irq_asserted) and not stall; 
+	mtvec_out <= std_logic_vector(unsigned(mtvec_forwarded) + CSR_MTVEC_M_OFFSET);
+	exception_taken <= not stall and (decode_exception or to_std_logic(exception_cause /= CSR_CAUSE_NONE)); 
 
-	irq_asserted <= to_std_logic(exception_context_forwarded.status.ei = '1' and
-		(irq and exception_context_forwarded.status.im) /= x"00");
+	irq_asserted <= to_std_logic(exception_context_forwarded.ie = '1' and (irq and mie_forwarded(31 downto 24)) /= x"00");
 
 	rs1_data <= rs1_data_in;
 	rs2_data <= rs2_data_in;
 
-	dmem_address <= alu_result;
+	dmem_address <= alu_result when (mem_op /= MEMOP_TYPE_NONE and mem_op /= MEMOP_TYPE_INVALID) and exception_taken = '0'
+		else (others => '0');
 	dmem_data_out <= rs2_forwarded;
-	dmem_write_req <= '1' when mem_op = MEMOP_TYPE_STORE else '0';
-	dmem_read_req <= '1' when memop_is_load(mem_op) else '0';
+	dmem_write_req <= '1' when mem_op = MEMOP_TYPE_STORE and exception_taken = '0' else '0';
+	dmem_read_req <= '1' when memop_is_load(mem_op) and exception_taken = '0' else '0';
 
 	pipeline_register: process(clk)
 	begin
@@ -251,11 +255,9 @@ begin
 				csr_use_immediate <= csr_use_immediate_in;
 				csr_writeable <= csr_writeable_in;
 
-				-- Status register;
-				sr <= status_in;
-
 				-- Exception vector base:
-				evec <= evec_in;
+				mtvec <= mtvec_in;
+				mie <= mie_in;
 
 				-- Instruction decoder exceptions:
 				decode_exception <= decode_exception_in;
@@ -278,13 +280,13 @@ begin
 		end case;
 	end process set_data_size;
 
-	get_irq_num: process(irq, exception_context_forwarded)
+	get_irq_num: process(irq, exception_context_forwarded, mie_forwarded)
 		variable temp : std_logic_vector(3 downto 0);
 	begin
 		temp := (others => '0');
 
 		for i in 0 to 7 loop
-			if irq(i) = '1' and exception_context_forwarded.status.im(i) = '1' then
+			if irq(i) = '1' and mie_forwarded(24 + i) = '1' then
 				temp := std_logic_vector(to_unsigned(i, temp'length));
 				exit;
 			end if;
@@ -323,10 +325,15 @@ begin
 	end process instr_misalign_check;
 
 	find_exception_cause: process(decode_exception, decode_exception_cause, mem_op,
-		data_misaligned, instr_misaligned, irq_asserted, irq_asserted_num)
+		data_misaligned, instr_misaligned, irq_asserted, irq_asserted_num, mie_forwarded,
+		software_interrupt, timer_interrupt, exception_context_forwarded)
 	begin
 		if irq_asserted = '1' then
 			exception_cause <= std_logic_vector(unsigned(CSR_CAUSE_IRQ_BASE) + unsigned(irq_asserted_num));
+		elsif software_interrupt = '1' and mie_forwarded(CSR_MIE_MSIE) = '1' and exception_context_forwarded.ie = '1' then
+			exception_cause <= CSR_CAUSE_SOFTWARE_INT;
+		elsif timer_interrupt = '1' and mie_forwarded(CSR_MIE_MTIE) = '1' and exception_context_forwarded.ie = '1' then
+			exception_cause <= CSR_CAUSE_TIMER_INT;
 		elsif decode_exception = '1' then
 			exception_cause <= decode_exception_cause;
 		elsif mem_op = MEMOP_TYPE_INVALID then
@@ -342,16 +349,16 @@ begin
 		end if;
 	end process find_exception_cause;
 
-	find_exception_vaddr: process(instr_misaligned, data_misaligned, jump_target, alu_result)
+	find_exception_addr: process(instr_misaligned, data_misaligned, jump_target, alu_result)
 	begin
 		if instr_misaligned = '1' then
-			exception_vaddr <= jump_target;
+			exception_addr <= jump_target;
 		elsif data_misaligned = '1' then
-			exception_vaddr <= alu_result;
+			exception_addr <= alu_result;
 		else
-			exception_vaddr <= (others => '0');
+			exception_addr <= (others => '0');
 		end if;
-	end process find_exception_vaddr;
+	end process find_exception_addr;
 
 	calc_jump_tgt: process(branch, pc, rs1_forwarded, immediate, csr_value_forwarded)
 	begin
@@ -361,7 +368,7 @@ begin
 			when BRANCH_JUMP_INDIRECT =>
 				jump_target <= std_logic_vector(unsigned(rs1_forwarded) + unsigned(immediate));
 			when BRANCH_SRET =>
-				jump_target <= csr_value_forwarded; -- Will be the EPC value in the case of SRET
+				jump_target <= csr_value_forwarded;
 			when others =>
 				jump_target <= (others => '0');
 		end case;
@@ -417,20 +424,20 @@ begin
 		csr_value, mem_csr_value, wb_csr_value, csr_writeable, mem_exception, wb_exception,
 		mem_exception_context, wb_exception_context)
 	begin
-		if csr_addr = CSR_CAUSE and mem_exception = '1' then
+		if csr_addr = CSR_MCAUSE and mem_exception = '1' then
 			csr_value_forwarded <= to_std_logic_vector(mem_exception_context.cause);
-		elsif csr_addr = CSR_STATUS and mem_exception = '1' then
-			csr_value_forwarded <= to_std_logic_vector(mem_exception_context.status);
-		elsif csr_addr = CSR_BADVADDR and mem_exception = '1' then
-			csr_value_forwarded <= mem_exception_context.badvaddr;
+		elsif csr_addr = CSR_MSTATUS and mem_exception = '1' then
+			csr_value_forwarded <= csr_make_mstatus(mem_exception_context.ie, mem_exception_context.ie1);
+		elsif csr_addr = CSR_MBADADDR and mem_exception = '1' then
+			csr_value_forwarded <= mem_exception_context.badaddr;
 		elsif mem_csr_write /= CSR_WRITE_NONE and mem_csr_addr = csr_addr and csr_writeable then
 			csr_value_forwarded <= mem_csr_value;
-		elsif csr_addr = CSR_CAUSE and wb_exception = '1' then
+		elsif csr_addr = CSR_MCAUSE and wb_exception = '1' then
 			csr_value_forwarded <= to_std_logic_vector(wb_exception_context.cause);
-		elsif csr_addr = CSR_STATUS and wb_exception = '1' then
-			csr_value_forwarded <= to_std_logic_vector(wb_exception_context.status);
-		elsif csr_addr = CSR_BADVADDR and wb_exception = '1' then
-			csr_value_forwarded <= wb_exception_context.badvaddr;
+		elsif csr_addr = CSR_MSTATUS and wb_exception = '1' then
+			csr_value_forwarded <= csr_make_mstatus(wb_exception_context.ie, wb_exception_context.ie1);
+		elsif csr_addr = CSR_MBADADDR and wb_exception = '1' then
+			csr_value_forwarded <= wb_exception_context.badaddr;
 		elsif wb_csr_write /= CSR_WRITE_NONE and wb_csr_addr = csr_addr and csr_writeable then
 			csr_value_forwarded <= wb_csr_value;
 		else
@@ -438,40 +445,55 @@ begin
 		end if;
 	end process csr_forward;
 
-	evec_forward: process(mem_csr_write, mem_csr_addr, mem_csr_value,
-		wb_csr_write, wb_csr_addr, wb_csr_value, evec)
+	mtvec_forward: process(mem_csr_write, mem_csr_addr, mem_csr_value,
+		wb_csr_write, wb_csr_addr, wb_csr_value, mtvec)
 	begin
-		if mem_csr_write /= CSR_WRITE_NONE and mem_csr_addr = CSR_EVEC then
-			evec_forwarded <= mem_csr_value;
-		elsif wb_csr_write /= CSR_WRITE_NONE and wb_csr_addr = CSR_EVEC then
-			evec_forwarded <= wb_csr_value;
+		if mem_csr_write /= CSR_WRITE_NONE and mem_csr_addr = CSR_MTVEC then
+			mtvec_forwarded <= mem_csr_value;
+		elsif wb_csr_write /= CSR_WRITE_NONE and wb_csr_addr = CSR_MTVEC then
+			mtvec_forwarded <= wb_csr_value;
 		else
-			evec_forwarded <= evec;
+			mtvec_forwarded <= mtvec;
 		end if;
-	end process evec_forward;
+	end process mtvec_forward;
+
+	mie_forward: process(mem_csr_write, mem_csr_addr, mem_csr_value,
+		wb_csr_write, wb_csr_addr, wb_csr_value, mie)
+	begin
+		if mem_csr_write /= CSR_WRITE_NONE and mem_csr_addr = CSR_MIE then
+			mie_forwarded <= mem_csr_value;
+		elsif wb_csr_write /= CSR_WRITE_NONE and wb_csr_addr = CSR_MIE then
+			mie_forwarded <= wb_csr_value;
+		else
+			mie_forwarded <= mie;
+		end if;
+	end process mie_forward;
 
 	exception_ctx_forward: process(mem_exception, wb_exception, mem_exception_context, wb_exception_context,
-		exception_cause, exception_vaddr, mem_csr_write, mem_csr_addr, mem_csr_value,
-		wb_csr_write, wb_csr_addr, wb_csr_value, sr)
+		exception_cause, exception_addr, mem_csr_write, mem_csr_addr, mem_csr_value,
+		wb_csr_write, wb_csr_addr, wb_csr_value, ie_in, ie1_in)
 	begin
 		if mem_exception = '1' then
 			exception_context_forwarded <= mem_exception_context;
-		elsif mem_csr_write /= CSR_WRITE_NONE and mem_csr_addr = CSR_STATUS then
+		elsif mem_csr_write /= CSR_WRITE_NONE and mem_csr_addr = CSR_MSTATUS then
 			exception_context_forwarded <= (
-				status => to_csr_status_register(mem_csr_value),
-				cause => mem_exception_context.cause,
-				badvaddr => mem_exception_context.badvaddr);
+				ie => mem_csr_value(CSR_SR_IE),
+				ie1 => mem_csr_value(CSR_SR_IE1),
+				cause => exception_cause,
+				badaddr => exception_addr);
 		elsif wb_exception = '1' then
 			exception_context_forwarded <= wb_exception_context;
-		elsif wb_csr_write /= CSR_WRITE_NONE and wb_csr_addr = CSR_STATUS then
+		elsif wb_csr_write /= CSR_WRITE_NONE and wb_csr_addr = CSR_MSTATUS then
 			exception_context_forwarded <= (
-				status => to_csr_status_register(wb_csr_value),
-				cause => wb_exception_context.cause,
-				badvaddr => wb_exception_context.badvaddr);
+				ie => wb_csr_value(CSR_SR_IE),
+				ie1 => wb_csr_value(CSR_SR_IE1),
+				cause => exception_cause,
+				badaddr => exception_addr);
 		else
-			exception_context_forwarded.status <= sr;
+			exception_context_forwarded.ie <= ie_in;
+			exception_context_forwarded.ie1 <= ie1_in;
 			exception_context_forwarded.cause <= exception_cause;
-			exception_context_forwarded.badvaddr <= exception_vaddr;
+			exception_context_forwarded.badaddr <= exception_addr;
 		end if;
 	end process exception_ctx_forward;
 

@@ -11,7 +11,7 @@ use work.pp_constants.all;
 --! @brief Instruction fetch unit.
 entity pp_fetch is
 	generic(
-		RESET_ADDRESS : std_logic_vector(31 downto 0) := x"00000000"
+		RESET_ADDRESS : std_logic_vector(31 downto 0)
 	);
 	port(
 		clk    : in std_logic;

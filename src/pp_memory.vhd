@@ -84,7 +84,7 @@ begin
 					mem_op <= MEMOP_TYPE_NONE;
 					rd_write_out <= '0';
 					csr_write_out <= CSR_WRITE_REPLACE;
-					csr_addr_out <= CSR_EPC;
+					csr_addr_out <= CSR_MEPC;
 					csr_data_out <= pc;
 					count_instr_out <= '0';
 				else
@@ -108,27 +108,20 @@ begin
 				exception_out <= exception_in or to_std_logic(branch = BRANCH_SRET);
 
 				if exception_in = '1' then
-					exception_context_out.status <= (
-							pim => exception_context_in.status.im,
-							im => (others => '0'),
-							pei => exception_context_in.status.ei,
-							ei => '0'
-						);
+					exception_context_out.ie <= '0';
+					exception_context_out.ie1 <= exception_context_in.ie;
 					exception_context_out.cause <= exception_context_in.cause;
-					exception_context_out.badvaddr <= exception_context_in.badvaddr;
+					exception_context_out.badaddr <= exception_context_in.badaddr;
 				elsif branch = BRANCH_SRET then
-					exception_context_out.status <= (
-							pim => exception_context_in.status.pim,
-							im => exception_context_in.status.pim,
-							pei => exception_context_in.status.pei,
-							ei => exception_context_in.status.pei
-						);
+					exception_context_out.ie <= exception_context_in.ie1;
+					exception_context_out.ie1 <= exception_context_in.ie;
 					exception_context_out.cause <= CSR_CAUSE_NONE;
-					exception_context_out.badvaddr <= (others => '0');
+					exception_context_out.badaddr <= (others => '0');
 				else
-					exception_context_out.status <= exception_context_in.status;
+					exception_context_out.ie <= exception_context_in.ie;
+					exception_context_out.ie1 <= exception_context_in.ie1;
 					exception_context_out.cause <= CSR_CAUSE_NONE;
-					exception_context_out.badvaddr <= (others => '0');
+					exception_context_out.badaddr <= (others => '0');
 				end if;
 			end if;
 		end if;

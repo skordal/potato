@@ -12,8 +12,9 @@ package pp_csr is
 	subtype csr_address is std_logic_vector(11 downto 0);
 
 	--! Type used for exception cause values.
-	subtype csr_exception_cause is std_logic_vector(4 downto 0);
+	subtype csr_exception_cause is std_logic_vector(5 downto 0); -- Upper bit is the interrupt bit
 
+	--! Converts an exception cause to a std_logic_vector.
 	function to_std_logic_vector(input : in csr_exception_cause) return std_logic_vector;
 
 	--! Control/status register write mode:
@@ -22,84 +23,82 @@ package pp_csr is
 		);
 
 	-- Exception cause values:
-	constant CSR_CAUSE_INSTR_MISALIGN : csr_exception_cause := b"00000";
-	constant CSR_CAUSE_INSTR_FETCH    : csr_exception_cause := b"00001";
-	constant CSR_CAUSE_INVALID_INSTR  : csr_exception_cause := b"00010";
-	constant CSR_CAUSE_SYSCALL        : csr_exception_cause := b"00110";
-	constant CSR_CAUSE_BREAKPOINT     : csr_exception_cause := b"00111";
-	constant CSR_CAUSE_LOAD_MISALIGN  : csr_exception_cause := b"01000";
-	constant CSR_CAUSE_STORE_MISALIGN : csr_exception_cause := b"01001";
-	constant CSR_CAUSE_LOAD_ERROR     : csr_exception_cause := b"01010";
-	constant CSR_CAUSE_STORE_ERROR    : csr_exception_cause := b"01011";
-	constant CSR_CAUSE_FROMHOST       : csr_exception_cause := b"11110";
-	constant CSR_CAUSE_NONE           : csr_exception_cause := b"11111";
+	constant CSR_CAUSE_INSTR_MISALIGN : csr_exception_cause := b"000000";
+	constant CSR_CAUSE_INSTR_FETCH    : csr_exception_cause := b"000001";
+	constant CSR_CAUSE_INVALID_INSTR  : csr_exception_cause := b"000010";
+	constant CSR_CAUSE_BREAKPOINT     : csr_exception_cause := b"000011";
+	constant CSR_CAUSE_LOAD_MISALIGN  : csr_exception_cause := b"000100";
+	constant CSR_CAUSE_LOAD_ERROR     : csr_exception_cause := b"000101";
+	constant CSR_CAUSE_STORE_MISALIGN : csr_exception_cause := b"000110";
+	constant CSR_CAUSE_STORE_ERROR    : csr_exception_cause := b"000111";
+	constant CSR_CAUSE_ECALL          : csr_exception_cause := b"001011";
+	constant CSR_CAUSE_NONE           : csr_exception_cause := b"011111";
 
-	constant CSR_CAUSE_IRQ_BASE       : csr_exception_cause := b"10000";
+	constant CSR_CAUSE_SOFTWARE_INT   : csr_exception_cause := b"100000";
+	constant CSR_CAUSE_TIMER_INT      : csr_exception_cause := b"100001";
+	constant CSR_CAUSE_IRQ_BASE       : csr_exception_cause := b"110000";
 
-	-- Control register IDs, specified in the immediate of csr* instructions:
-	constant CSR_STATUS   : csr_address := x"50a";
-	constant CSR_HARTID   : csr_address := x"50b";
-	constant CSR_SUP0     : csr_address := x"500";
-	constant CSR_SUP1     : csr_address := x"501";
-	constant CSR_BADVADDR : csr_address := x"503";
-	constant CSR_TOHOST   : csr_address := x"51e";
-	constant CSR_FROMHOST : csr_address := x"51f";
+	-- Control register IDs, specified in the immediate field of csr* instructions:
 	constant CSR_CYCLE    : csr_address := x"c00";
 	constant CSR_CYCLEH   : csr_address := x"c80";
 	constant CSR_TIME     : csr_address := x"c01";
 	constant CSR_TIMEH    : csr_address := x"c81";
 	constant CSR_INSTRET  : csr_address := x"c02";
 	constant CSR_INSTRETH : csr_address := x"c82";
-	constant CSR_EPC      : csr_address := x"502";
-	constant CSR_EVEC     : csr_address := x"508";
-	constant CSR_CAUSE    : csr_address := x"509";
 
-	-- Values used as control register IDs in SRET, SCALL and SBREAK:
-	constant CSR_EPC_SRET   : csr_address := x"800";
+	constant CSR_MCPUID   : csr_address := x"f00";
+	constant CSR_MIMPID   : csr_address := x"f01";
+	constant CSR_MHARTID  : csr_address := x"f10";
+
+	constant CSR_MSTATUS  : csr_address := x"300";
+	constant CSR_MTVEC    : csr_address := x"301";
+	constant CSR_MTDELEG  : csr_address := x"302";
+	constant CSR_MIE      : csr_address := x"304";
+
+	constant CSR_MTIMECMP : csr_address := x"321";
+	constant CSR_MTIME    : csr_address := x"701";
+
+	constant CSR_MSCRATCH : csr_address := x"340";
+	constant CSR_MEPC     : csr_address := x"341";
+	constant CSR_MCAUSE   : csr_address := x"342";
+	constant CSR_MBADADDR : csr_address := x"343";
+	constant CSR_MIP      : csr_address := x"344";
+
+	constant CSR_MTOHOST   : csr_address := x"780";
+	constant CSR_MFROMHOST : csr_address := x"781";
+
+	-- Values used as control register IDs in ERET:
+	constant CSR_EPC_ERET   : csr_address := x"100";
+
+	-- Offset into the exception vector for handling machine-mode exceptions:
+	constant CSR_MTVEC_M_OFFSET : natural := 192;
+
+	-- Additional CSRs from supervisor mode that aliases machine mode registers
+	-- in this implementation:
+	--constant CSR_STVEC : csr_address := x"101";
+	--constant CSR_SEPC  : csr_address := x"141";
 
 	-- Status register bit indices:
-	constant CSR_SR_S   : natural := 0;
-	constant CSR_SR_PS  : natural := 1;
-	constant CSR_SR_EI  : natural := 2;
-	constant CSR_SR_PEI : natural := 3;
+	constant CSR_SR_IE  : natural := 0;
+	constant CSR_SR_IE1 : natural := 3;
 
-	-- Status register in Potato:
-	-- * Bit 0, S: Supervisor mode, always 1
-	-- * Bit 1, PS: Previous supervisor mode bit, always 1
-	-- * Bit 2, EI: Enable interrupts bit
-	-- * Bit 3, PEI: Previous enable interrupts bit
-	-- * Bits 23 downto 16, IM: Interrupt mask
-	-- * Bits 31 downto 24, PIM: Previous interrupt mask
+	-- MIE and MIP register bit indices:
+	constant CSR_MIE_MSIE : natural := 3;
+	constant CSR_MIE_MTIE : natural := 7;
+	constant CSR_MIP_MSIP : natural := CSR_MIE_MSIE;
+	constant CSR_MIP_MTIP : natural := CSR_MIE_MTIE;
 
-	-- Status register record:
-	type csr_status_register is
-		record
-			ei, pei : std_logic;
-			im, pim : std_logic_vector(7 downto 0);
-		end record;
-
-	-- Exception context; this record contains all state that is stored
+	-- Exception context; this record contains all state that can be manipulated
 	-- when an exception is taken.
 	type csr_exception_context is
 		record
-			status   : csr_status_register;
-			cause    : csr_exception_cause;
-			badvaddr : std_logic_vector(31 downto 0);
+			ie, ie1 : std_logic; -- Enable Interrupt bits
+			cause   : csr_exception_cause;
+			badaddr : std_logic_vector(31 downto 0);
 		end record;
 
-	-- Reset value of the status register:
-	constant CSR_SR_DEFAULT : csr_status_register := (ei => '0', pei => '0', im => x"00", pim => x"00");
-
-	-- Converts a status register record into an std_logic_vector:
-	function to_std_logic_vector(input : in csr_status_register)
-		return std_logic_vector;
-
-	-- Converts an std_logic_vector into a status register record:
-	function to_csr_status_register(input : in std_logic_vector(31 downto 0))
-		return csr_status_register;
-
-	--! Checks if a control register is writeable.
-	function csr_is_writeable(csr : in csr_address) return boolean;	
+	--! Creates the value of the mstatus registe from the EI and EI1 bits.
+	function csr_make_mstatus(ie, ie1 : in std_logic) return std_logic_vector;
 
 end package pp_csr;
 
@@ -108,37 +107,21 @@ package body pp_csr is
 	function to_std_logic_vector(input : in csr_exception_cause)
 		return std_logic_vector is
 	begin
-		return (31 downto 5 => '0') & input;
+		return (31 => input(5), 30 downto 5 => '0') & input(4 downto 0);
 	end function to_std_logic_vector;
 
-	function to_std_logic_vector(input : in csr_status_register)
-		return std_logic_vector is
+	function csr_make_mstatus(ie, ie1 : in std_logic) return std_logic_vector is
+		variable retval : std_logic_vector(31 downto 0);
 	begin
-		return input.pim & input.im & (15 downto 4 => '0') & input.pei & input.ei & '1' & '1';
-	end function to_std_logic_vector;
-
-	function to_csr_status_register(input : in std_logic_vector(31 downto 0))
-		return csr_status_register
-	is
-		variable retval : csr_status_register;
-	begin
-		retval.ei  := input(CSR_SR_EI);
-		retval.pei := input(CSR_SR_PEI);
-		retval.im  := input(23 downto 16);
-		retval.pim := input(31 downto 24);
+		retval := (
+			11 downto 10 => '1', -- PRV3
+			 8 downto  7 => '1', -- PRV2
+			 5 downto  4 => '1', -- PRV1
+			 CSR_SR_IE1 => ie1,  -- IE1
+			 2 downto  1 => '1', -- PRV
+			 CSR_SR_IE => ie,    -- IE
+			others => '0');
 		return retval;
-	end function to_csr_status_register;
-
-	function csr_is_writeable(csr : in csr_address) return boolean is
-	begin
-		case csr is
-			when CSR_FROMHOST | CSR_CYCLE | CSR_CYCLEH | CSR_HARTID
-					| CSR_TIME | CSR_TIMEH | CSR_INSTRET | CSR_INSTRETH
-					| CSR_CAUSE | CSR_BADVADDR =>
-				return false; 
-			when others =>
-				return true;
-		end case;
-	end function csr_is_writeable;
+	end function csr_make_mstatus;
 
 end package body pp_csr;
