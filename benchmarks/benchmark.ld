@@ -13,9 +13,9 @@ ENTRY(_start);
 
 SECTIONS
 {
-	.text 0x0 :
+	.text 0x100 :
 	{
-		*(.init*)
+		*(.init)
 		*(.text*)
 		__text_end = .;
 	}
