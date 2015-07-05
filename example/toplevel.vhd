@@ -131,6 +131,7 @@ begin
 	processor: entity work.pp_potato
 		port map(
 			clk => system_clk,
+			timer_clk => timer_clk,
 			reset => reset,
 			irq => irq,
 			fromhost_data => (others => '0'),

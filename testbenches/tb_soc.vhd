@@ -103,6 +103,7 @@ begin
 		) port map(
 			clk => clk,
 			reset => processor_reset,
+			timer_clk => timer_clk,
 			irq => irq,
 			fromhost_data => fromhost_data,
 			fromhost_updated => fromhost_updated,
