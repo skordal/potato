@@ -12,11 +12,12 @@ use work.pp_types.all;
 entity pp_potato is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
-		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000000"  --! Address of the first instruction to execute.
+		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"  --! Address of the first instruction to execute.
 	);
 	port(
-		clk   : in std_logic;
-		reset : in std_logic;
+		clk       : in std_logic;
+		timer_clk : in std_logic;
+		reset     : in std_logic;
 
 		-- Interrupts:
 		irq : in std_logic_vector(7 downto 0);
@@ -68,7 +69,7 @@ begin
 		) port map(
 			clk => clk,
 			reset => reset,
-			timer_clk => clk,
+			timer_clk => timer_clk,
 			imem_address => imem_address,
 			imem_data_in => imem_data,
 			imem_req => imem_req,

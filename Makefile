@@ -69,16 +69,19 @@ RISCV_TESTS += \
 	sw \
 	xor \
 	xori \
+	lui \
 	lb \
 	lbu \
 	lh \
 	lhu \
-	lw
+	lw \
+	ma_addr \
+	sbreak \
+	scall
 
 # Local tests to run:
 LOCAL_TESTS ?= \
-	scall \
-	sbreak \
+	timer \
 	sw-jal
 
 all: potato.prj run-tests

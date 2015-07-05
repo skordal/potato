@@ -14,10 +14,12 @@ use work.pp_utilities.all;
 --! @brief Testbench providing a full SoC architecture connected with a Wishbone bus.
 entity tb_soc is
 	generic(
-		IMEM_SIZE : natural := 2048; --! Size of the instruction memory in bytes.
-		DMEM_SIZE : natural := 2048; --! Size of the data memory in bytes.
-		IMEM_FILENAME : string := "imem_testfile.hex"; --! File containing the contents of instruction memory.
-		DMEM_FILENAME : string := "dmem_testfile.hex"  --! File containing the contents of data memory.
+		IMEM_SIZE : natural := 4096; --! Size of the instruction memory in bytes.
+		DMEM_SIZE : natural := 4096; --! Size of the data memory in bytes.
+		RESET_ADDRESS   : std_logic_vector := x"00000200"; --! Processor reset address
+		IMEM_START_ADDR : std_logic_vector := x"00000100"; --! Instruction memory start address
+		IMEM_FILENAME   : string := "imem_testfile.hex"; --! File containing the contents of instruction memory.
+		DMEM_FILENAME   : string := "dmem_testfile.hex"  --! File containing the contents of data memory.
 	);
 end entity tb_soc;
 
@@ -26,6 +28,9 @@ architecture testbench of tb_soc is
 	-- Clock signals:
 	signal clk : std_logic;
 	constant clk_period : time := 10 ns;
+
+	signal timer_clk : std_logic;
+	constant timer_clk_period : time := 100 ns;
 
 	-- Reset:
 	signal reset : std_logic := '1';
@@ -93,9 +98,12 @@ architecture testbench of tb_soc is
 begin
 
 	processor: entity work.pp_potato
-		port map(
+		generic map(
+			RESET_ADDRESS => RESET_ADDRESS
+		) port map(
 			clk => clk,
 			reset => processor_reset,
+			timer_clk => timer_clk,
 			irq => irq,
 			fromhost_data => fromhost_data,
 			fromhost_updated => fromhost_updated,
@@ -200,17 +208,18 @@ begin
 		variable input_value : std_logic_vector(31 downto 0);
 		variable temp : std_logic_vector(31 downto 0);
 		
-		constant DMEM_START : natural := IMEM_SIZE;
+		constant DMEM_START_ADDR : natural := IMEM_SIZE;
 	begin
 		if not initialized then
 			-- Read the instruction memory file:
-			for i in 0 to IMEM_SIZE loop
+			for i in 0 to (IMEM_SIZE / 4) - 1 loop
 				exit when endfile(imem_file);
-				
+
 				readline(imem_file, input_line);
 				hread(input_line, input_value);
 
-				init_adr_out <= std_logic_vector(to_unsigned(i * 4, init_adr_out'length));
+				init_adr_out <= std_logic_vector(to_unsigned(to_integer(unsigned(IMEM_START_ADDR)) + (i * 4),
+					init_adr_out'length));
 				init_dat_out <= input_value;
 				init_cyc_out <= '1';
 				init_stb_out <= '1';
@@ -226,12 +235,11 @@ begin
 			wait for clk_period;
 
 			-- Read the data memory file:
-			for i in 0 to DMEM_SIZE loop
+			for i in 0 to (DMEM_SIZE / 4) - 1 loop
 				exit when endfile(dmem_file);
 				
 				readline(dmem_file, input_line);
 				hread(input_line, input_value);
-
 
 				-- Swap endianness, TODO: prevent this, fix scripts/extract_hex.sh
 				temp(7 downto 0) := input_value(31 downto 24);
@@ -241,7 +249,7 @@ begin
 
 				input_value := temp;
 
-				init_adr_out <= std_logic_vector(to_unsigned(DMEM_START + (i * 4), init_adr_out'length));
+				init_adr_out <= std_logic_vector(to_unsigned(DMEM_START_ADDR + (i * 4), init_adr_out'length));
 				init_dat_out <= input_value;
 				init_cyc_out <= '1';
 				init_stb_out <= '1';
@@ -272,6 +280,18 @@ begin
 			wait;
 		end if;
 	end process clock;
+
+	timer_clock: process
+	begin
+		timer_clk <= '1';
+		wait for timer_clk_period / 2;
+		timer_clk <= '0';
+		wait for timer_clk_period / 2;
+
+		if simulation_finished then
+			wait;
+		end if;
+	end process timer_clock;
 
 	stimulus: process
 	begin

@@ -10,6 +10,20 @@
 
 .section .init
 
+.align 6
+tvec_user: // User mode is not supported by Potato
+	j tvec_machine
+.align 6
+tvec_supervisor: // Supervisor mode is not supported by Potato
+	j tvec_machine
+.align 6
+tvec_hypervisor: // Hypervisor mode is not supported by Potato
+	j tvec_machine
+.align 6
+tvec_machine:
+	j exception_handler_wrapper
+
+.align 6
 .global _start
 _start:
 
@@ -44,17 +58,11 @@ clear_bss:
 
 2:
 
-.hidden set_evec
-set_evec:
-	// Set up an exception handler:
-	la x1, exception_handler_wrapper
-	csrw evec, x1
-
 .hidden call_main
 call_main:
 	la sp, __stack_top
 	jal main
-	csrw tohost, a0
+	csrw mtohost, a0
 1:
 	j 1b
 
@@ -97,8 +105,8 @@ exception_handler_wrapper:
 	sw x30, 116(sp)
 	sw x31, 120(sp)
 
-	csrr a0, cause
-	csrr a1, epc
+	csrr a0, mcause
+	csrr a1, mepc
 	mv a2, sp
 	jal exception_handler
 
@@ -138,5 +146,5 @@ exception_return:
 	lw x31, 120(sp)
 	addi sp, sp, 124
 
-	sret
+	eret
 

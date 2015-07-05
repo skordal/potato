@@ -25,7 +25,7 @@ entity pp_control_unit is
 
 		-- Exception signals:
 		decode_exception       : out std_logic;
-		decode_exception_cause : out std_logic_vector(4 downto 0);
+		decode_exception_cause : out csr_exception_cause;
 
 		-- Control register signals:
 		csr_write : out csr_write_mode;
@@ -45,7 +45,7 @@ end entity pp_control_unit;
 
 architecture behaviour of pp_control_unit is
 	signal exception       : std_logic;
-	signal exception_cause : std_logic_vector(4 downto 0);
+	signal exception_cause : csr_exception_cause;
 	signal alu_op_temp     : alu_operation;
 begin
 
@@ -125,13 +125,13 @@ begin
 
 					if funct12 = x"000" then
 						exception <= '1';
-						exception_cause <= CSR_CAUSE_SYSCALL;
+						exception_cause <= CSR_CAUSE_ECALL;
 						branch <= BRANCH_NONE;
 					elsif funct12 = x"001" then
 						exception <= '1';
 						exception_cause <= CSR_CAUSE_BREAKPOINT;
 						branch <= BRANCH_NONE;
-					elsif funct12 = x"800" then
+					elsif funct12 = CSR_EPC_ERET then
 						exception <= '0';
 						exception_cause <= CSR_CAUSE_NONE;
 						branch <= BRANCH_SRET;

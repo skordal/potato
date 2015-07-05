@@ -19,7 +19,7 @@ use work.pp_csr.all;
 entity pp_core is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
-		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000000"  --! Address of the first instruction to execute.
+		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"  --! Address of the first instruction to execute.
 	);
 	port(
 		-- Control inputs:
@@ -67,7 +67,7 @@ architecture behaviour of pp_core is
 	-- by the instret counter:
 	signal if_count_instruction, id_count_instruction  : std_logic;
 	signal ex_count_instruction, mem_count_instruction : std_logic;
-	signal wb_count_instruction : std_logic; 
+	signal wb_count_instruction : std_logic;
 
 	-- CSR read port signals:
 	signal csr_read_data      : std_logic_vector(31 downto 0);
@@ -75,8 +75,12 @@ architecture behaviour of pp_core is
 	signal csr_read_address, csr_read_address_p : csr_address;
 
 	-- Status register outputs:
-	signal status : csr_status_register;
-	signal evec   : std_logic_vector(31 downto 0);
+	signal mtvec   : std_logic_vector(31 downto 0);
+	signal mie     : std_logic_vector(31 downto 0);
+	signal ie, ie1 : std_logic;
+
+	-- Internal interrupt signals:
+	signal software_interrupt, timer_interrupt : std_logic;
 
 	-- Load hazard detected in the execute stage:
 	signal load_hazard_detected : std_logic;
@@ -182,6 +186,7 @@ begin
 				clk => clk,
 				reset => reset,
 				timer_clk => timer_clk,
+				irq => irq,
 				count_instruction => wb_count_instruction,
 				fromhost_data => fromhost_data,
 				fromhost_updated => fromhost_write_en,
@@ -195,12 +200,15 @@ begin
 				write_mode => wb_csr_write,
 				exception_context => wb_exception_context,
 				exception_context_write => wb_exception,
-				status_out => status,
-				evec_out => evec
+				mie_out => mie,
+				mtvec_out => mtvec,
+				ie_out => ie,
+				ie1_out => ie1,
+				software_interrupt_out => software_interrupt,
+				timer_interrupt_out => timer_interrupt
 			);
 
 	csr_read_address <= id_csr_address when stall_ex = '0' else csr_read_address_p;
-
 	store_previous_csr_addr: process(clk, stall_ex)
 	begin
 		if rising_edge(clk) and stall_ex = '0' then
@@ -299,6 +307,8 @@ begin
 			stall => stall_ex,
 			flush => flush_ex,
 			irq => irq,
+			software_interrupt => software_interrupt,
+			timer_interrupt => timer_interrupt,
 			dmem_address => ex_dmem_address,
 			dmem_data_size => ex_dmem_data_size,
 			dmem_data_out => ex_dmem_data_out,
@@ -337,9 +347,11 @@ begin
 			mem_size_out => ex_mem_size,
 			count_instruction_in => id_count_instruction,
 			count_instruction_out => ex_count_instruction,
-			status_in => status,
-			evec_in => evec,
-			evec_out => exception_target,
+			ie_in => ie,
+			ie1_in => ie1,
+			mie_in => mie,
+			mtvec_in => mtvec,
+			mtvec_out => exception_target,
 			decode_exception_in => id_exception,
 			decode_exception_cause_in => id_exception_cause,
 			exception_out => exception_taken,
