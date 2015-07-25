@@ -12,10 +12,6 @@ use work.pp_utilities.all;
 use work.pp_csr.all;
 
 --! @brief The Potato Processor is a simple processor core for use in FPGAs.
---! @details
---! It implements the RV32I (RISC-V base integer subset) ISA with additional
---! instructions for manipulation of control and status registers from the
---! currently unpublished supervisor extension.
 entity pp_core is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
