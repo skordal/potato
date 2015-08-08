@@ -7,7 +7,7 @@ use ieee.std_logic_1164.all;
 
 entity toplevel is
 	port(
-		clk       : in std_logic; -- System clock, 100 MHz
+		clk       : in std_logic; -- External clock input, 100 MHz
 		reset_n   : in std_logic; -- CPU reset signal, active low
 
 		-- External interrupt input:
@@ -17,9 +17,13 @@ entity toplevel is
 		switches : inout std_logic_vector(15 downto 0);
 		leds     : inout std_logic_vector(15 downto 0);
 
-		-- UART1 (host) pins:
+		-- UART pins:
 		uart_txd : out std_logic;
-		uart_rxd : in  std_logic
+		uart_rxd : in  std_logic;
+
+		-- 7-Segment display pins:
+		seg7_anode   : out std_logic_vector(7 downto 0);
+		seg7_cathode : out std_logic_vector(6 downto 0)
 	);
 end entity toplevel;
 
@@ -60,7 +64,7 @@ architecture behaviour of toplevel is
 	signal dmem_ack_out : std_logic;
 
 	-- GPIO module I (switches) wishbone interface:
-	signal gpio1_adr_in  : std_logic_vector(1 downto 0);
+	signal gpio1_adr_in  : std_logic_vector( 1 downto 0);
 	signal gpio1_dat_in  : std_logic_vector(31 downto 0);
 	signal gpio1_dat_out : std_logic_vector(31 downto 0);
 	signal gpio1_we_in   : std_logic;
@@ -68,7 +72,7 @@ architecture behaviour of toplevel is
 	signal gpio1_ack_out : std_logic;
 
 	-- GPIO module II (LEDs) wishbone interface:
-	signal gpio2_adr_in  : std_logic_vector(1 downto 0);
+	signal gpio2_adr_in  : std_logic_vector( 1 downto 0);
 	signal gpio2_dat_in  : std_logic_vector(31 downto 0);
 	signal gpio2_dat_out : std_logic_vector(31 downto 0);
 	signal gpio2_we_in   : std_logic;
@@ -84,12 +88,20 @@ architecture behaviour of toplevel is
 	signal uart_ack_out : std_logic;
 
 	-- Timer module wishbone interface:
-	signal timer_adr_in  : std_logic_vector(1 downto 0);
+	signal timer_adr_in  : std_logic_vector( 1 downto 0);
 	signal timer_dat_in  : std_logic_vector(31 downto 0);
 	signal timer_dat_out : std_logic_vector(31 downto 0);
 	signal timer_we_in   : std_logic;
 	signal timer_cyc_in, timer_stb_in : std_logic;
 	signal timer_ack_out : std_logic;
+
+	-- 7-Segment module wishbone interface:
+	signal seg7_adr_in  : std_logic_vector( 0 downto 0);
+	signal seg7_dat_in  : std_logic_vector(31 downto 0);
+	signal seg7_dat_out : std_logic_vector(31 downto 0);
+	signal seg7_we_in   : std_logic;
+	signal seg7_cyc_in, seg7_stb_in : std_logic;
+	signal seg7_ack_out : std_logic;
 
 	-- Dummy module interface:
 	signal dummy_dat_in  : std_logic_vector(31 downto 0);
@@ -107,6 +119,7 @@ architecture behaviour of toplevel is
 			MODULE_GPIO1, MODULE_GPIO2,	-- GPIO modules
 			MODULE_UART,	-- UART module
 			MODULE_TIMER,	-- Timer module
+			MODULE_7SEG,    -- 7-Segment module
 			MODULE_DUMMY,	-- Dummy module, used for invalid addresses
 			MODULE_NONE		-- Boring no-module mode
 		);
@@ -242,6 +255,23 @@ begin
 			wb_ack_out => timer_ack_out
 		);
 
+	seg7_1: entity work.pp_soc_7seg
+		generic map(
+			SWITCH_COUNT => 50000 -- For 50 MHz
+		) port map(
+			clk => system_clk,
+			reset => reset,
+			seg7_anode => seg7_anode,
+			seg7_cathode => seg7_cathode,
+			wb_adr_in => seg7_adr_in,
+			wb_dat_in => seg7_dat_in,
+			wb_dat_out => seg7_dat_out,
+			wb_cyc_in => seg7_cyc_in,
+			wb_stb_in => seg7_stb_in,
+			wb_we_in => seg7_we_in,
+			wb_ack_out => seg7_ack_out
+		);
+
 	dummy: entity work.pp_soc_dummy
 		port map(
 			clk => system_clk,
@@ -260,6 +290,7 @@ begin
 	gpio2_cyc_in <= p_cyc_out when active_module = MODULE_GPIO2 else '0';
 	uart_cyc_in <= p_cyc_out when active_module = MODULE_UART else '0';
 	timer_cyc_in <= p_cyc_out when active_module = MODULE_TIMER else '0';
+	seg7_cyc_in <= p_cyc_out when active_module = MODULE_7SEG else '0';
 	dummy_cyc_in <= p_cyc_out when active_module = MODULE_DUMMY else '0';
 
 	imem_stb_in <= p_stb_out when active_module = MODULE_IMEM else '0';
@@ -268,6 +299,7 @@ begin
 	gpio2_stb_in <= p_stb_out when active_module = MODULE_GPIO2 else '0';
 	uart_stb_in <= p_stb_out when active_module = MODULE_UART else '0';
 	timer_stb_in <= p_stb_out when active_module = MODULE_TIMER else '0';
+	seg7_stb_in <= p_stb_out when active_module = MODULE_7SEG else '0';
 	dummy_stb_in <= p_stb_out when active_module = MODULE_DUMMY else '0';
 
 	imem_adr_in <= p_adr_out(12 downto 0);
@@ -276,12 +308,14 @@ begin
 	gpio2_adr_in <= p_adr_out(3 downto 2);
 	uart_adr_in <=  p_adr_out(3 downto 2);
 	timer_adr_in <= p_adr_out(3 downto 2);
+	seg7_adr_in <=  p_adr_out(2 downto 2);
 
 	dmem_dat_in <= p_dat_out;
 	gpio1_dat_in <= p_dat_out;
 	gpio2_dat_in <= p_dat_out;
 	uart_dat_in <= p_dat_out(7 downto 0);
 	timer_dat_in <= p_dat_out;
+	seg7_dat_in <= p_dat_out;
 	dummy_dat_in <= p_dat_out;
 
 	dmem_sel_in <= p_sel_out;
@@ -291,6 +325,7 @@ begin
 	dmem_we_in <= p_we_out;
 	uart_we_in <= p_we_out;
 	timer_we_in <= p_we_out;
+	seg7_we_in <= p_we_out;
 	dummy_we_in <= p_we_out;
 
 	address_decoder: process(system_clk)
@@ -320,6 +355,9 @@ begin
 								ad_state <= BUSY;
 							elsif p_adr_out(31 downto 11) = b"000000000000000001011" then -- 0x5800
 								active_module <= MODULE_TIMER;
+								ad_state <= BUSY;
+							elsif p_adr_out(31 downto 11) = b"000000000000000001100" then -- 0x6000
+								active_module <= MODULE_7SEG;
 								ad_state <= BUSY;
 							else
 								active_module <= MODULE_DUMMY;
@@ -361,6 +399,9 @@ begin
 			when MODULE_TIMER =>
 				p_ack_in <= timer_ack_out;
 				p_dat_in <= timer_dat_out;
+			when MODULE_7SEG =>
+				p_ack_in <= seg7_ack_out;
+				p_dat_in <= seg7_dat_out;
 			when MODULE_DUMMY =>
 				p_ack_in <= dummy_ack_out;
 				p_dat_in <= dummy_dat_out;

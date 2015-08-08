@@ -21,6 +21,7 @@
 #define GPIO2_BASE	0x00004800
 #define UART_BASE	0x00005000
 #define TIMER_BASE	0x00005800
+#define SEG7_BASE	0x00006000
 
 // IRQs:
 #define EXTERNAL_IRQ	0
@@ -44,6 +45,10 @@
 // Timer control register bits:
 #define TIMER_CTRL_RUN		0
 #define TIMER_CTRL_CLEAR	1
+
+// 7-Segment register offsets:
+#define SEG7_ENABLE	0
+#define SEG7_VALUE	4
 
 #endif
 

@@ -12,10 +12,11 @@ TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
 HEXDUMP ?= hexdump
 
 TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
-	-ffreestanding -fno-builtin -I.. -std=gnu99
+	-ffreestanding -fno-builtin -I.. -std=gnu99 \
+	-Wall -Werror=implicit-function-declaration
 TARGET_LDFLAGS += -m elf32lriscv -T../benchmark.ld
 
-OBJECTS := gpio.o main.o sha256.o start.o timer.o uart.o utilities.o
+OBJECTS := gpio.o main.o seg7.o sha256.o start.o timer.o uart.o utilities.o
 
 all: sha256.coe
 
@@ -42,7 +43,10 @@ clean:
 gpio.o: gpio.c gpio.h ../platform.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
-main.o: main.c gpio.h timer.h sha256.h ../platform.h ../potato.h
+main.o: main.c gpio.h timer.h seg7.h sha256.h ../platform.h ../potato.h
+	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
+
+seg7.o: seg7.c seg7.h ../platform.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
 sha256.o: sha256.c sha256.h

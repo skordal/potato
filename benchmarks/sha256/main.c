@@ -9,6 +9,7 @@
 #include "potato.h"
 
 #include "gpio.h"
+#include "seg7.h"
 #include "sha256.h"
 #include "timer.h"
 #include "uart.h"
@@ -29,6 +30,7 @@ void exception_handler(uint32_t cause, void * epc, void * regbase)
 		uart_puts(IO_ADDRESS(UART_BASE), "Hashes per second: ");
 		uart_puth(IO_ADDRESS(UART_BASE), hashes_per_second);
 		uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
+		seg7_set_value(IO_ADDRESS(SEG7_BASE), hashes_per_second);
 
 		if(led_status == 0)
 		{
@@ -59,6 +61,10 @@ int main(void)
 	// Configure GPIOs:
 	gpio_set_direction(IO_ADDRESS(GPIO1_BASE), 0x0000); // Switches
 	gpio_set_direction(IO_ADDRESS(GPIO2_BASE), 0xffff); // LEDs
+
+	// Configure the 7-segment displays:
+	seg7_set_enabled_displays(IO_ADDRESS(SEG7_BASE), 0xff);
+	seg7_set_value(IO_ADDRESS(SEG7_BASE), 0);
 
 	// Set up the timer:
 	timer_set(IO_ADDRESS(TIMER_BASE), SYSTEM_CLK_FREQ);
