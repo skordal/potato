@@ -378,7 +378,7 @@ begin
 
 	module_mux: process(active_module, imem_ack_out, imem_dat_out, dmem_ack_out, dmem_dat_out,
 		gpio1_ack_out, gpio1_dat_out, gpio2_ack_out, gpio2_dat_out, uart_ack_out, uart_dat_out,
-		timer_ack_out, timer_dat_out, dummy_ack_out, dummy_dat_out)
+		timer_ack_out, timer_dat_out, seg7_dat_out, seg7_ack_out, dummy_ack_out, dummy_dat_out)
 	begin
 		case active_module is
 			when MODULE_IMEM =>
