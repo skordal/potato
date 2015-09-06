@@ -6,7 +6,7 @@
 
 TARGET_PREFIX ?= riscv64-unknown-elf
 TARGET_CC := $(TARGET_PREFIX)-gcc
-TARGET_LD := $(TARGET_PREFIX)-ld
+TARGET_LD := $(TARGET_PREFIX)-gcc
 TARGET_SIZE := $(TARGET_PREFIX)-size
 TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
 HEXDUMP ?= hexdump
@@ -14,7 +14,8 @@ HEXDUMP ?= hexdump
 TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
 	-ffreestanding -fno-builtin -I.. -std=gnu99 \
 	-Wall -Werror=implicit-function-declaration
-TARGET_LDFLAGS += -m elf32lriscv -T../benchmark.ld
+TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -Wl,-m,elf32lriscv \
+	-Wl,-T../benchmark.ld
 
 OBJECTS := gpio.o main.o seg7.o sha256.o start.o timer.o uart.o utilities.o
 
