@@ -59,7 +59,7 @@ begin
 
 	-- Connect display outputs:
 	seg7_cathode <= output_array(active_display) when CATHODE_ENABLE_VALUE = '0' else not output_array(active_display);
-	seg7_anode <= anodes;
+	seg7_anode <= anodes and not ctrl_enable when ANODE_ENABLE_VALUE = '1' else anodes and ctrl_enable;
 
 	-- Create one decoder for each display:
 	generate_decoders: for i in 0 to NUM_DISPLAYS - 1
