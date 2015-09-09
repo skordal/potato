@@ -73,7 +73,7 @@ int main(void)
 	uart_puts(IO_ADDRESS(UART_BASE), "The Potato Processor SHA256 Benchmark\n\r\n\r");
 
 	// Enable interrupts:
-	potato_enable_irq(TIMER_IRQ);
+	potato_enable_irq(IRQ_TIMER);
 	potato_enable_interrupts();
 
 	struct sha256_context context;

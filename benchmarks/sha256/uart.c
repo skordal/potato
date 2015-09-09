@@ -17,8 +17,8 @@ void uart_puts(volatile uint32_t * base, const char * s)
 void uart_putc(volatile uint32_t * base, char c)
 {
 	// Wait until there is room in the transmit buffer:
-	while(base[UART_STATUS >> 2] & (1 << 3));
-	base[UART_TX >> 2] = c & 0x000000ff;
+	while(base[UART_STATUS >> 2] & (1 << UART_STATUS_TXBUF_FULL));
+	base[UART_TX >> 2] = c & 0xff;
 }
 
 void uart_puth(volatile uint32_t * base, uint32_t n)

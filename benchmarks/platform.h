@@ -24,8 +24,10 @@
 #define SEG7_BASE	0x00006000
 
 // IRQs:
-#define EXTERNAL_IRQ	0
-#define TIMER_IRQ	5
+#define IRQ_EXTERNAL	0
+#define IRQ_UART_RTS	1
+#define IRQ_UART_RECV	2
+#define IRQ_TIMER	5
 
 // GPIO register offsets:
 #define GPIO_INPUT	0
@@ -36,6 +38,12 @@
 #define UART_TX		0
 #define UART_RX		4
 #define UART_STATUS	8
+
+// UART status register bits:
+#define UART_STATUS_RXBUF_EMPTY	0
+#define UART_STATUS_TXBUF_EMPTY	1
+#define UART_STATUS_RXBUF_FULL	2
+#define UART_STATUS_TXBUF_FULL	3
 
 // Timer register offsets:
 #define TIMER_CTRL	0
