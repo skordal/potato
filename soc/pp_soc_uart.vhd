@@ -10,7 +10,7 @@ use ieee.std_logic_1164.all;
 --! 0 - Transmit data register (write-only)
 --! 1 - Receive data register (read-only)
 --! 2 - Status register; (read-only)
---!     - Bit 0: data in receive buffer
+--!     - Bit 0: no data in receive buffer
 --!     - Bit 1: no data in transmit buffer
 --!     - Bit 2: receive buffer full
 --!     - Bit 3: transmit buffer full
@@ -297,7 +297,7 @@ begin
 									recv_buffer_pop <= '1';
 									wb_state <= READ_ACK;
 								elsif wb_adr_in = b"10" then
-									wb_dat_out <= x"0" & send_buffer_full & recv_buffer_full & send_buffer_empty & not recv_buffer_empty;
+									wb_dat_out <= x"0" & send_buffer_full & recv_buffer_full & send_buffer_empty & recv_buffer_empty;
 									wb_ack <= '1';
 									wb_state <= READ_ACK;
 								else
