@@ -1,7 +1,7 @@
 /*
  * Linker Script for the Potato Processor benchmark applications
  * (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
-// Report bugs and issues on <http://opencores.org/project,potato,bugtracker>
+// Report bugs and issues on <https://github.com/skordal/potato/issues>
  */
 
 /*

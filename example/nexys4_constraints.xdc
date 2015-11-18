@@ -1,6 +1,6 @@
 # The Potato Processor - A simple processor for FPGAs
 # (c) Kristian Klomsten Skordal 2014 <kristian.skordal@wafflemail.net>
-# Report bugs and issues on <http://opencores.org/project,potato,bugtracker>
+# Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 # Set operating conditions to improve temperature estimation:
 set_operating_conditions -airflow 0

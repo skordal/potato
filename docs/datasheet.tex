@@ -1,6 +1,6 @@
 % The Potato Processor - Processor Datasheet
-% (c) Kristian Klomsten Skordal 2015 <skordal@opencores.org>
-% Report bugs and issues on <http://opencores.org/project,potato,bugtracker>
+% (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
+% Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 \documentclass[10pt,a4paper]{article}
 
@@ -25,12 +25,12 @@
 \begin{document}
 
 \begin{minipage}{0.5\textwidth}
-\raggedright
-\includegraphics[width=0.6\textwidth]{opencores.png}
+\raggedright\huge
+\textsf{The Potato Project}
 \end{minipage}
 \begin{minipage}{0.5\textwidth}
-\raggedleft\Large\bf
-\textsf{The Potato Processor\\Datasheet}
+\raggedleft\huge
+\textsf{Processor Datasheet}
 \end{minipage}
 
 \vspace{0.5em}
@@ -73,23 +73,20 @@ Sequence of data transfer & In-order \\
 
 \section{Programming}
 
-Tools for writing programmes for the RISC-V architecture are available from the
+Tools for writing applications for the RISC-V architecture are available from the
 RISC-V project, at:\\[1em]
 \url{https://github.com/riscv/riscv-tools}\\
-
-Use the \texttt{new\_privileged\_isa} branch to get tools that work with the
-current supervisor extensions.
 
 \end{minipage}\hfill
 \begin{minipage}[t]{0.48\textwidth}
 
-\section{Application}
+\section{Application Example}
 \includegraphics[width=\textwidth]{example.png}
 
 \section{Signals}
 
-The processor is provided by a VHDL module named \texttt{pp\_potato}. The signals of
-the module are all active high and are as follows:\\
+The processor is provided by a VHDL module named \texttt{pp\_potato}. All signals
+are active high and the following signals are provided:\\
 
 \begin{tabularx}{\textwidth}{|l|l|X|}
 \hline
@@ -114,12 +111,12 @@ the module are all active high and are as follows:\\
 
 Additional signals are used to implement a host-target interface used in the automatic testing
 environment. These signals have names starting with \texttt{fromhost} and \texttt{tohost} and
-should be left unconnected for normal use.\\
+should be left unconnected.\\
 
 \section{Specifications}
 
-The base RISC-V instruction set and the privileged extensions are available in the
-specifications published at:\\
+Information about the RISC-V instruction set and the privileged architecture extensions are
+available in the specifications published at:\\
 
 \url{http://riscv.org/download.html}.
 
@@ -128,8 +125,8 @@ specifications published at:\\
 \vfill
 \noindent\rule{\linewidth}{1pt}
 {\small
-Project page: \url{http://opencores.org/project,potato}\\
-Report bugs and issues on \url{http://opencores.org/project,potato,bugtracker}}
+Project page: \url{http://github.com/skordal/potato}\\
+Report bugs and issues on \url{http://github.com/skordal/potato/issues}}
 
 \end{document}
 

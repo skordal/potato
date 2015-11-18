@@ -1,6 +1,6 @@
 // The Potato Processor Benchmark Applications
 // (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
-// Report bugs and issues on <http://opencores.org/project,potato,bugtracker>
+// Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 // This file contains various platform details. The default defines in this file
 // correspond to the "official" test platform, the Potato SoC for the Nexys4 board.
