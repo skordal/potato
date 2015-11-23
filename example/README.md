@@ -1,7 +1,7 @@
 # Demo design for the Nexys 4 board
 
 This folder contains a design for a simple demo design using the Potato
-processor. It has been tested using Vivado 2014.4.
+processor. It has been tested using Vivado 2015.3.
 
 ## Quick Start
 
@@ -26,10 +26,11 @@ a frequency of 10 MHz. Rename the corresponding ports to `system_clk` and
 Add a block RAM to use as instruction ROM using the Block Memory Generator.
 Choose "Single Port ROM" as memory type, name it "instruction_rom" and set
 port A width to 32 bits and port A depth to 2048. Initialize it with your
-application binary and, optionally, fill the remaining memory locations with
-0x00000013 (no-operation opcode).
+application binary. Ensure that the "Primitives Output Register" checkbox
+is not checked.
 
 ### Test it!
 
-Now you can test it and hopefully it works :-)
+Now you can test it and hopefully it works. This design can be used as a
+basis for your own designs or just to evaluate the processor.
 
