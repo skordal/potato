@@ -8,9 +8,6 @@
 // Number of IRQs supported:
 #define POTATO_NUM_IRQS		8
 
-// Implementation-specific CSRs:
-#define CSR_PP_CACHECTRL	0x790
-
 // Exception cause values:
 #define CAUSE_INSTR_MISALIGN	0x00
 #define CAUSE_INSTR_FETCH	0x01
@@ -30,9 +27,6 @@
 // Status register bit indices:
 #define STATUS_IE	0		// Enable Interrupts
 #define STATUS_IE1	3		// Previous value of Enable Interrupts
-
-// Cache control register bit indices:
-#define CSR_PP_CACHECTRL_ICACHE_EN	0
 
 #define potato_enable_interrupts()	asm volatile("csrsi mstatus, 1 << %[ie_bit]\n" \
 		:: [ie_bit] "i" (STATUS_IE))

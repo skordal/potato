@@ -58,11 +58,6 @@ clear_bss:
 
 2:
 
-.hidden enable_caches
-enable_caches:
-	csrsi CSR_PP_CACHECTRL, 1 << CSR_PP_CACHECTRL_ICACHE_EN
-	fence.i
-
 .hidden call_main
 call_main:
 	la sp, __stack_top
