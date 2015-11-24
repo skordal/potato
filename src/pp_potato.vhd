@@ -6,13 +6,18 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 use work.pp_types.all;
+use work.pp_utilities.all;
 
 --! @brief The Potato Processor.
 --! This file provides a Wishbone-compatible interface to the Potato processor.
 entity pp_potato is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
-		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"  --! Address of the first instruction to execute.
+		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"; --! Address of the first instruction to execute.
+		ICACHE_ENABLE          : boolean                       := true;        --! Whether to enable the instruction cache.
+		ICACHE_AREAS           : std_logic_vector(31 downto 0) := x"ffffffff";  --! Bitmap of 128 Mb memory areas that can be cached.
+		ICACHE_LINE_SIZE       : natural                       := 4;            --! Number of words per instruction cache line.
+		ICACHE_NUM_LINES       : natural                       := 128           --! Number of cache lines in the instryction cache.
 	);
 	port(
 		clk       : in std_logic;
@@ -61,7 +66,12 @@ architecture behaviour of pp_potato is
 	signal icache_inputs, dmem_if_inputs   : wishbone_master_inputs;
 	signal icache_outputs, dmem_if_outputs : wishbone_master_outputs;
 
+    -- Arbiter signals:
+	signal m1_inputs, m2_inputs   : wishbone_master_inputs;
+	signal m1_outputs, m2_outputs : wishbone_master_outputs;
+
 begin
+
 	processor: entity work.pp_core
 		generic map(
 			PROCESSOR_ID => PROCESSOR_ID,
@@ -89,27 +99,61 @@ begin
 			irq => irq
 		);
 
-	icache: entity work.pp_icache
-		generic map(
-			LINE_SIZE => 4,
-			NUM_LINES => 128
-		) port map(
-			clk => clk,
-			reset => reset,
-			cache_enable => '1',
-			cache_flush => '0',
-			cached_areas => (others => '1'),
-			mem_address_in => imem_address,
-			mem_data_out => imem_data,
-			mem_data_in => (others => '0'),
-			mem_data_size => b"00",
-			mem_read_req => imem_req,
-			mem_read_ack => imem_ack,
-			mem_write_req => '0',
-			mem_write_ack => open,
-			wb_inputs => icache_inputs,
-			wb_outputs => icache_outputs
-		);
+    icache_enabled: if ICACHE_ENABLE
+    generate
+        icache: entity work.pp_icache
+                generic map(
+                    LINE_SIZE => ICACHE_LINE_SIZE,
+                    NUM_LINES => ICACHE_NUM_LINES
+                ) port map(
+                    clk => clk,
+                    reset => reset,
+                    cache_enable => '1',
+                    cache_flush => '0',
+                    cached_areas => ICACHE_AREAS,
+                    mem_address_in => imem_address,
+                    mem_data_out => imem_data,
+                    mem_data_in => (others => '0'),
+                    mem_data_size => b"00",
+                    mem_read_req => imem_req,
+                    mem_read_ack => imem_ack,
+                    mem_write_req => '0',
+                    mem_write_ack => open,
+                    wb_inputs => icache_inputs,
+                    wb_outputs => icache_outputs
+                );
+
+            icache_inputs <= m1_inputs;
+            m1_outputs <= icache_outputs;
+
+            dmem_if_inputs <= m2_inputs;
+            m2_outputs <= dmem_if_outputs;
+    end generate icache_enabled;
+
+    icache_disabled: if not ICACHE_ENABLE
+    generate
+        imem_if: entity work.pp_wb_adapter
+            port map(
+                clk => clk,
+                reset => reset,
+                dmem_address => imem_address,
+                dmem_data_in => (others => '0'),
+                dmem_data_out => imem_data,
+                dmem_data_size => b"00",
+                dmem_read_req => imem_req,
+                dmem_read_ack => imem_ack,
+                dmem_write_req => '0',
+                dmem_write_ack => open,
+                wb_inputs => icache_inputs,
+                wb_outputs => icache_outputs
+            );
+
+            dmem_if_inputs <= m1_inputs;
+            m1_outputs <= dmem_if_outputs;
+
+            icache_inputs <= m2_inputs;
+            m2_outputs <= icache_outputs;
+    end generate icache_disabled;
 
 	dmem_if: entity work.pp_wb_adapter
 		port map(
@@ -131,12 +175,10 @@ begin
 		port map(
 			clk => clk,
 			reset => reset,
-			--m1_inputs => dmem_if_inputs,
-			--m1_outputs => dmem_if_outputs,
-			m1_inputs => icache_inputs,
-			m1_outputs => icache_outputs,
-			m2_inputs => dmem_if_inputs,
-			m2_outputs => dmem_if_outputs,
+			m1_inputs => m1_inputs,
+			m1_outputs => m1_outputs,
+			m2_inputs => m2_inputs,
+			m2_outputs => m2_outputs,
 			wb_adr_out => wb_adr_out,
 			wb_sel_out => wb_sel_out,
 			wb_cyc_out => wb_cyc_out,
