@@ -1,5 +1,7 @@
 # The Potato Processor
 
+![Processor architecture overview diagramme](https://github.com/skordal/potato/blob/master/docs/diagram.png?raw=true)
+
 The Potato Processor is a simple RISC-V processor for use in FPGAs. It implements the 32-bit integer subset
 of the RISC-V specification version 2.0 and supports the machine mode and the Mbare addressing environment of
 the RISC-V privileged architecture, version 1.7.
