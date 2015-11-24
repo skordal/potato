@@ -73,11 +73,6 @@ package pp_csr is
 	-- Offset into the exception vector for handling machine-mode exceptions:
 	constant CSR_MTVEC_M_OFFSET : natural := 192;
 
-	-- Additional CSRs from supervisor mode that aliases machine mode registers
-	-- in this implementation:
-	--constant CSR_STVEC : csr_address := x"101";
-	--constant CSR_SEPC  : csr_address := x"141";
-
 	-- Status register bit indices:
 	constant CSR_SR_IE  : natural := 0;
 	constant CSR_SR_IE1 : natural := 3;
