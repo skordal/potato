@@ -16,14 +16,14 @@ entity pp_wb_adapter is
 		reset : in std_logic;
 
 		-- Processor data memory signals:
-		signal dmem_address   : in  std_logic_vector(31 downto 0);
-		signal dmem_data_in   : in  std_logic_vector(31 downto 0); -- Data in to the bus
-		signal dmem_data_out  : out std_logic_vector(31 downto 0); -- Data out to the bus
-		signal dmem_data_size : in  std_logic_vector( 1 downto 0);
-		signal dmem_read_req  : in  std_logic;
-		signal dmem_read_ack  : out std_logic;
-		signal dmem_write_req : in  std_logic;
-		signal dmem_write_ack : out std_logic;
+		signal mem_address   : in  std_logic_vector(31 downto 0);
+		signal mem_data_in   : in  std_logic_vector(31 downto 0); -- Data in to the bus
+		signal mem_data_out  : out std_logic_vector(31 downto 0); -- Data out to the bus
+		signal mem_data_size : in  std_logic_vector( 1 downto 0);
+		signal mem_read_req  : in  std_logic;
+		signal mem_read_ack  : out std_logic;
+		signal mem_write_req : in  std_logic;
+		signal mem_write_ack : out std_logic;
 
 		-- Wishbone interface:
 		wb_inputs  : in wishbone_master_inputs;
@@ -36,7 +36,7 @@ architecture behaviour of pp_wb_adapter is
 	type states is (IDLE, READ_WAIT_ACK, WRITE_WAIT_ACK);
 	signal state : states;
 
-	signal dmem_r_ack : std_logic;
+	signal mem_r_ack : std_logic;
 
 	function get_data_shift(size : in std_logic_vector(1 downto 0); address : in std_logic_vector)
 		return natural is
@@ -68,8 +68,8 @@ architecture behaviour of pp_wb_adapter is
 
 begin
 
-	dmem_write_ack <= '1' when state = WRITE_WAIT_ACK and wb_inputs.ack = '1' else '0';
-	dmem_read_ack <= dmem_r_ack;
+	mem_write_ack <= '1' when state = WRITE_WAIT_ACK and wb_inputs.ack = '1' else '0';
+	mem_read_ack <= mem_r_ack;
 
 	wishbone: process(clk)
 	begin
@@ -78,25 +78,25 @@ begin
 				state <= IDLE;
 				wb_outputs.cyc <= '0';
 				wb_outputs.stb <= '0';
-				dmem_r_ack <= '0';
+				mem_r_ack <= '0';
 			else
 				case state is
 					when IDLE =>
-						dmem_r_ack <= '0';
+						mem_r_ack <= '0';
 
 						-- Prioritize requests from the data memory:
-						if dmem_write_req = '1' then
-							wb_outputs.adr <= dmem_address;
-							wb_outputs.dat <= std_logic_vector(shift_left(unsigned(dmem_data_in),
-								get_data_shift(dmem_data_size, dmem_address)));
-							wb_outputs.sel <= wb_get_data_sel(dmem_data_size, dmem_address);
+						if mem_write_req = '1' then
+							wb_outputs.adr <= mem_address;
+							wb_outputs.dat <= std_logic_vector(shift_left(unsigned(mem_data_in),
+								get_data_shift(mem_data_size, mem_address)));
+							wb_outputs.sel <= wb_get_data_sel(mem_data_size, mem_address);
 							wb_outputs.cyc <= '1';
 							wb_outputs.stb <= '1';
 							wb_outputs.we <= '1';
 							state <= WRITE_WAIT_ACK;
-						elsif dmem_read_req = '1' then
-							wb_outputs.adr <= dmem_address;
-							wb_outputs.sel <= wb_get_data_sel(dmem_data_size, dmem_address);
+						elsif mem_read_req = '1' then
+							wb_outputs.adr <= mem_address;
+							wb_outputs.sel <= wb_get_data_sel(mem_data_size, mem_address);
 							wb_outputs.cyc <= '1';
 							wb_outputs.stb <= '1';
 							wb_outputs.we <= '0';
@@ -104,11 +104,11 @@ begin
 						end if;
 					when READ_WAIT_ACK =>
 						if wb_inputs.ack = '1' then
-							dmem_data_out <= std_logic_vector(shift_right(unsigned(wb_inputs.dat),
-								get_data_shift(dmem_data_size, dmem_address)));
+							mem_data_out <= std_logic_vector(shift_right(unsigned(wb_inputs.dat),
+								get_data_shift(mem_data_size, mem_address)));
 							wb_outputs.cyc <= '0';
 							wb_outputs.stb <= '0';
-							dmem_r_ack <= '1';
+							mem_r_ack <= '1';
 							state <= IDLE;
 						end if;
 					when WRITE_WAIT_ACK =>
