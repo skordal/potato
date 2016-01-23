@@ -10,7 +10,7 @@ use ieee.std_logic_1164.all;
 entity pp_fifo is
 	generic(
 		DEPTH : natural := 64;
-		WIDTH : natural := 31
+		WIDTH : natural := 32
 	);
 	port(
 		-- Control lines:
