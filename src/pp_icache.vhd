@@ -139,8 +139,8 @@ architecture behaviour of pp_icache is
 
 begin
 
-	--assert is_pow2(LINE_SIZE) report "Cache line size must be a power of 2!" severity FAILURE;
-	--assert is_pow2(NUM_LINES) report "Number of cache lines must be a power of 2!" severity FAILURE;
+	assert is_pow2(LINE_SIZE) report "Cache line size must be a power of 2!" severity FAILURE;
+	assert is_pow2(NUM_LINES) report "Number of cache lines must be a power of 2!" severity FAILURE;
 
 	-- Check if the current input address should be/is in the cache:
 	input_address_cached <= cached_areas(to_integer(unsigned(mem_address_in(31 downto 27)))) = '1'; 
