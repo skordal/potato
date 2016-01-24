@@ -239,7 +239,7 @@ begin
 						read_data_out <= mbadaddr;
 					when CSR_MCAUSE => -- Exception cause
 						read_data_out <= mcause(5) & (30 downto 5 => '0') & mcause(4 downto 0); --to_std_logic_vector(mcause);
-	
+
 					-- Timers and counters:
 					when CSR_MTIME => -- Machine time counter register
 						read_data_out <= counter_mtime;
@@ -258,7 +258,7 @@ begin
 						read_data_out <= counter_instret(31 downto 0);
 					when CSR_INSTRETH =>
 						read_data_out <= counter_instret(63 downto 32);
-	
+
 					-- Return zero from write-only registers and invalid register addresses:
 					when others =>
 						read_data_out <= (others => '0');
