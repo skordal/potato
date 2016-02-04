@@ -11,11 +11,13 @@ use work.pp_utilities.all;
 
 entity pp_csr_unit is
 	generic(
-		PROCESSOR_ID : std_logic_vector(31 downto 0)
+		PROCESSOR_ID  : std_logic_vector(31 downto 0);
+		MTIME_DIVIDER : positive := 5 --! Divider for the clock driving the MTIME counter.
 	);
 	port(
-		clk, timer_clk : in std_logic;
-		reset : in std_logic;
+		clk       : in std_logic;
+		timer_clk : in std_logic;
+		reset     : in std_logic;
 
 		-- IRQ signals:
 		irq : in std_logic_vector(7 downto 0);
@@ -62,8 +64,9 @@ architecture behaviour of pp_csr_unit is
 	signal counter_instret : std_logic_vector(63 downto 0);
 
 	-- Machine time counter:
-	signal counter_mtime : std_logic_vector(31 downto 0);
-	signal mtime_compare : std_logic_vector(31 downto 0);
+	signal mtime_clock_counter : natural := 0;
+	signal counter_mtime       : std_logic_vector(31 downto 0);
+	signal mtime_compare       : std_logic_vector(31 downto 0);
 
 	-- Machine-mode registers:
 	signal mcause   : csr_exception_cause;
@@ -123,12 +126,20 @@ begin
 		end if;
 	end process htif_tohost;
 
-	mtime_counter: process(timer_clk, reset)
+	mtime_counter: process(clk)
 	begin
-		if reset = '1' then -- Asynchronous reset because timer_clk is slower than clk
-			counter_mtime <= (others => '0');
-		elsif rising_edge(timer_clk) then
-			counter_mtime <= std_logic_vector(unsigned(counter_mtime) + 1);
+		if rising_edge(clk) then
+			if reset = '1' then
+				mtime_clock_counter <= 0;
+				counter_mtime <= (others => '0');
+			else
+				if mtime_clock_counter = MTIME_DIVIDER - 1 then
+					mtime_clock_counter <= 0;
+					counter_mtime <= std_logic_vector(unsigned(counter_mtime) + 1);
+				else
+					mtime_clock_counter <= mtime_clock_counter + 1;
+				end if;
+			end if;
 		end if;
 	end process mtime_counter;
 

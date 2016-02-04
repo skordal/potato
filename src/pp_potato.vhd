@@ -14,10 +14,11 @@ entity pp_potato is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
 		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"; --! Address of the first instruction to execute.
+		MTIME_DIVIDER          : positive                      := 5;           --! Divider for the clock driving the MTIME counter.
 		ICACHE_ENABLE          : boolean                       := true;        --! Whether to enable the instruction cache.
-		ICACHE_AREAS           : std_logic_vector(31 downto 0) := x"ffffffff";  --! Bitmap of 128 Mb memory areas that can be cached.
-		ICACHE_LINE_SIZE       : natural                       := 4;            --! Number of words per instruction cache line.
-		ICACHE_NUM_LINES       : natural                       := 128           --! Number of cache lines in the instryction cache.
+		ICACHE_AREAS           : std_logic_vector(31 downto 0) := x"ffffffff"; --! Bitmap of 128 Mb memory areas that can be cached.
+		ICACHE_LINE_SIZE       : natural                       := 4;           --! Number of words per instruction cache line.
+		ICACHE_NUM_LINES       : natural                       := 128          --! Number of cache lines in the instryction cache.
 	);
 	port(
 		clk       : in std_logic;

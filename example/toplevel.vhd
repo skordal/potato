@@ -142,6 +142,9 @@ begin
 		);
 
 	processor: entity work.pp_potato
+		generic map(
+			MTIME_DIVIDER => 5 -- Provides a 10 MHz clock from a 50 MHz system clock.
+		)
 		port map(
 			clk => system_clk,
 			timer_clk => timer_clk,
