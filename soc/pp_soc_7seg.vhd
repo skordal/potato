@@ -8,7 +8,7 @@ use ieee.numeric_std.all;
 
 entity pp_soc_7seg is
 	generic(
-		NUM_DISPLAYS : natural := 8;             -- Number of 7-segment displays connected to the module.
+		NUM_DISPLAYS         : natural := 8;     -- Number of 7-segment displays connected to the module.
 		SWITCH_COUNT         : natural;          -- How many ticks of the input clock to count before switching displays.
 		CATHODE_ENABLE_VALUE : std_logic := '0'; -- Value of the cathode output when enabled.
 		ANODE_ENABLE_VALUE   : std_logic := '0'  -- Value of the anode output when enabled.
