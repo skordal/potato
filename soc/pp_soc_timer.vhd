@@ -1,5 +1,5 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014 - 2016 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -7,12 +7,19 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 --! @brief Simple timer module for generating periodic interrupts.
+--!
 --! The following registers are defined:
---! * 0: Control register. The bits are:
---!      - 0: Run - set to '1' to enable the counter
---!      - 1: Clear - set to '1' to clear the counter after a comparison match or just to reset it
---! * 1: Compare register, set this to the value where an interrupt should be generated.
---! * 2: Counter register, should only be read, but can be written if you want to.
+--! |---------------|------------|
+--! | Address | Description      |
+--! |---------|------------------|
+--! | 0x00    | Control register |
+--! | 0x04    | Compare register |
+--! | 0x08    | Counter register |
+--! |---------|------------------|
+--!
+--! The bits for the control register are:
+--! - 0: Run - set to '1' to enable the counter.
+--! - 1: Clear - set to '1' to clear the counter after a compare interrupt or to reset it.
 entity pp_soc_timer is
 	port(
 		clk   : in std_logic;
@@ -22,7 +29,7 @@ entity pp_soc_timer is
 		irq : out std_logic;
 
 		-- Wishbone interface:
-		wb_adr_in  : in  std_logic_vector( 1 downto 0);
+		wb_adr_in  : in  std_logic_vector(11 downto 0);
 		wb_dat_in  : in  std_logic_vector(31 downto 0);
 		wb_dat_out : out std_logic_vector(31 downto 0);
 		wb_cyc_in  : in  std_logic;
@@ -63,29 +70,28 @@ begin
 				if wb_cyc_in = '1' and wb_stb_in = '1' and ack = '0' then
 					if wb_we_in = '1' then
 						case wb_adr_in is
-							when b"00" => -- Write control register
+							when x"000" => -- Write control register
 								ctrl_run <= wb_dat_in(0);
 								if wb_dat_in(1) = '1' then
 									counter <= (others => '0');
 								end if;
-							when b"01" => -- Write compare register
+							when x"004" => -- Write compare register
 								compare <= wb_dat_in;
-							when b"10" => -- Write count register
+							when x"008" => -- Write count register
 								counter <= wb_dat_in;
-							when b"11" => -- Unused register
 							when others =>
 						end case;
 						ack <= '1';
 					else
 						case wb_adr_in is
-							when b"00" => -- Read control register
+							when x"000" => -- Read control register
 								wb_dat_out <= (0 => ctrl_run, others => '0');
-							when b"01" => -- Read compare register
+							when x"004" => -- Read compare register
 								wb_dat_out <= compare;
-							when b"10" => -- Read count register
+							when x"008" => -- Read count register
 								wb_dat_out <= counter;
-							when b"11" => -- Unused register
 							when others =>
+								wb_dat_out <= (others => '0');
 						end case;
 						ack <= '1';
 					end if;

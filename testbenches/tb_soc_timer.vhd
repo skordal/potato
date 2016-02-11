@@ -1,5 +1,5 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014 - 2016 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -21,7 +21,7 @@ architecture behaviour of tb_soc_timer is
 	signal irq : std_logic;
 
 	-- Wishbone interface:
-	signal wb_adr_in  : std_logic_vector(1 downto 0) := (others => '0');
+	signal wb_adr_in  : std_logic_vector(11 downto 0) := (others => '0');
 	signal wb_dat_in  : std_logic_vector(31 downto 0) := (others => '0');
 	signal wb_dat_out : std_logic_vector(31 downto 0);
 	signal wb_cyc_in  : std_logic := '0';
@@ -63,7 +63,7 @@ begin
 		-- Set the compare register to 50:
 		wb_cyc_in <= '1';
 		wb_stb_in <= '1';
-		wb_adr_in <= b"01";
+		wb_adr_in <= x"004";
 		wb_dat_in <= x"00000032";
 		wb_we_in <= '1';
 		wait until wb_ack_out = '1';
@@ -74,7 +74,7 @@ begin
 
 		-- Start the timer:
 		wb_stb_in <= '1';
-		wb_adr_in <= b"00";
+		wb_adr_in <= x"000";
 		wb_dat_in <= x"00000003";
 		wait until wb_ack_out = '1';
 		wait for clk_period;
@@ -92,7 +92,7 @@ begin
 		wb_cyc_in <= '1';
 		wb_stb_in <= '1';
 		wb_we_in <= '1';
-		wb_adr_in <= b"00";
+		wb_adr_in <= x"000";
 		wb_dat_in <= x"00000003";
 		wait until wb_ack_out = '1';
 		wait for clk_period;
