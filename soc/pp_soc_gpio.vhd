@@ -1,5 +1,5 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014 - 2016 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -7,10 +7,17 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 --! @brief Generic Wishbone GPIO Module.
+--!
 --! The following registers are defined:
---! * 0: Input values, one bit per GPIO (read-only)
---! * 1: Output values, one bit per GPIO (read/write)
---! * 2: Direction register, 0 means input, 1 means output.
+--! |---------|---------------------------------------------------------------|
+--! | Address | Description                                                   |
+--! |---------|---------------------------------------------------------------|
+--! | 0x00    | Input values, one bit per pin (read-only)                     |
+--! | 0x04    | Output values, one bit per pin (read/write)                   |
+--! | 0x08    | Direction register, one bit per pin. 0 is input, 1 is output. |
+--! |---------|---------------------------------------------------------------|
+--!
+--! Writes to the output register for input pins are ignored.
 entity pp_soc_gpio is
 	generic(
 		NUM_GPIOS : natural := 32
@@ -23,7 +30,7 @@ entity pp_soc_gpio is
 		gpio : inout std_logic_vector(NUM_GPIOS - 1 downto 0);
 
 		-- Wishbone interface:
-		wb_adr_in  : in  std_logic_vector( 1 downto 0);
+		wb_adr_in  : in  std_logic_vector(11 downto 0);
 		wb_dat_in  : in  std_logic_vector(31 downto 0);
 		wb_dat_out : out std_logic_vector(31 downto 0);
 		wb_cyc_in  : in  std_logic;
@@ -66,20 +73,20 @@ begin
 				if wb_cyc_in = '1' and wb_stb_in = '1' and ack = '0' then
 					if wb_we_in = '1' then
 						case wb_adr_in is
-							when b"01" =>
+							when x"004" =>
 								output_register <= wb_dat_in(NUM_GPIOS - 1 downto 0);
-							when b"10" =>
+							when x"008" =>
 								direction_register <= wb_dat_in(NUM_GPIOS - 1 downto 0);
 							when others =>
 						end case;
 						ack <= '1';
 					else
 						case wb_adr_in is
-							when b"00" =>
+							when x"000" =>
 								wb_dat_out <= std_logic_vector(resize(unsigned(input_register), wb_dat_out'length));
-							when b"01" =>
+							when x"004" =>
 								wb_dat_out <= std_logic_vector(resize(unsigned(output_register), wb_dat_out'length));
-							when b"10" =>
+							when x"008" =>
 								wb_dat_out <= std_logic_vector(resize(unsigned(direction_register), wb_dat_out'length)); 
 							when others =>
 						end case;

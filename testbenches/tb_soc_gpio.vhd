@@ -1,5 +1,5 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014 - 2016 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -21,7 +21,7 @@ architecture testbench of tb_soc_gpio is
 	signal gpio : std_logic_vector(31 downto 0);
 
 	-- Wishbone bus:
-	signal wb_adr_in  : std_logic_vector( 1 downto 0) := (others => '0');
+	signal wb_adr_in  : std_logic_vector(11 downto 0) := (others => '0');
 	signal wb_dat_in  : std_logic_vector(31 downto 0) := (others => '0');
 	signal wb_dat_out : std_logic_vector(31 downto 0);
 	signal wb_cyc_in  : std_logic := '0';
@@ -61,7 +61,7 @@ begin
 
 		-- Set the upper half of the GPIOs as inputs, the rest as outputs:
 		wb_dat_in <= x"0000ffff";
-		wb_adr_in <= b"10";
+		wb_adr_in <= x"008";
 		wb_we_in <= '1';
 		wb_cyc_in <= '1';
 		wb_stb_in <= '1';
@@ -74,7 +74,7 @@ begin
 
 		-- Set the outputs to aa, see if the upper half gets ignored correctly:
 		wb_dat_in <= x"aaaaaaaa";
-		wb_adr_in <= b"01";
+		wb_adr_in <= x"004";
 		wb_we_in <= '1';
 		wb_cyc_in <= '1';
 		wb_stb_in <= '1';
