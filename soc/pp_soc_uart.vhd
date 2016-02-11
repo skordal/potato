@@ -1,24 +1,33 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014 - 2016 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 --! @brief Simple UART module.
 --! The following registers are defined:
---! 0 - Transmit data register (write-only)
---! 1 - Receive data register (read-only)
---! 2 - Status register; (read-only)
---!     - Bit 0: no data in receive buffer
---!     - Bit 1: no data in transmit buffer
---!     - Bit 2: receive buffer full
---!     - Bit 3: transmit buffer full
---! 3 - Control register, currently unused.
+--! |--------------------|--------------------------------------------|
+--! | Address            | Description                                |
+--! |--------------------|--------------------------------------------|
+--! | 0x00               | Transmit register (write-only)             |
+--! | 0x04               | Receive register (read-only)               |
+--! | 0x08               | Status register (read-only)                |
+--! | 0x0c               | Sample clock divisor register (read/write) |
+--! |--------------------|--------------------------------------------|
+--!
+--! The status register contains the following bits:
+--! - Bit 0: receive buffer empty
+--! - Bit 1: transmit buffer empty
+--! - Bit 2: receive buffer full
+--! - Bit 3: transmit buffer full
+--!
+--! The sample clock divisor should be set according to the formula:
+--! sample_clk = (f_clk / (baudrate * 16))
 entity pp_soc_uart is
 	generic(
-		FIFO_DEPTH : natural := 64;        --! Depth of the input and output FIFOs.
-		SAMPLE_CLK_DIVISOR : natural := 54 --! Divisor used to obtain the sample clock, f_clk / (16 * baudrate).
+		FIFO_DEPTH : natural := 64 --! Depth of the input and output FIFOs.
 	);
 	port(
 		clk : in std_logic;
@@ -33,9 +42,9 @@ entity pp_soc_uart is
 		irq_data_received     : out std_logic;
 
 		-- Wishbone ports:
-		wb_adr_in  : in  std_logic_vector(1 downto 0);
-		wb_dat_in  : in  std_logic_vector(7 downto 0);
-		wb_dat_out : out std_logic_vector(7 downto 0);
+		wb_adr_in  : in  std_logic_vector(11 downto 0);
+		wb_dat_in  : in  std_logic_vector( 7 downto 0);
+		wb_dat_out : out std_logic_vector( 7 downto 0);
 		wb_we_in   : in  std_logic;
 		wb_cyc_in  : in  std_logic;
 		wb_stb_in  : in  std_logic;
@@ -48,10 +57,9 @@ architecture behaviour of pp_soc_uart is
 	subtype bitnumber is natural range 0 to 7;
 
 	-- UART sample clock signals:
-	signal sample_clk : std_logic;
-
-	subtype sample_clk_counter_type is natural range 0 to SAMPLE_CLK_DIVISOR - 1;
-	signal sample_clk_counter : sample_clk_counter_type := 0;
+	signal sample_clk         : std_logic;
+	signal sample_clk_divisor : std_logic_vector(7 downto 0);
+	signal sample_clk_counter : std_logic_vector(sample_clk_divisor'range);
 
 	-- UART receive process signals:
 	type rx_state_type is (IDLE, RECEIVE, STOPBIT);
@@ -221,14 +229,14 @@ begin
 	begin
 		if rising_edge(clk) then
 			if reset = '1' then
-				sample_clk_counter <= 0;
+				sample_clk_counter <= (others => '0');
 				sample_clk <= '0';
 			else
-				if sample_clk_counter = SAMPLE_CLK_DIVISOR - 1 then
-					sample_clk_counter <= 0;
+				if sample_clk_counter = sample_clk_divisor then
+					sample_clk_counter <= (others => '0');
 					sample_clk <= '1';
 				else
-					sample_clk_counter <= sample_clk_counter + 1;
+					sample_clk_counter <= std_logic_vector(unsigned(sample_clk_counter) + 1);
 					sample_clk <= '0';
 				end if;
 			end if;
@@ -278,33 +286,37 @@ begin
 				wb_ack <= '0';
 				wb_state <= IDLE;
 				send_buffer_push <= '0';
+				sample_clk_divisor <= (others => '0');
 			else
 				case wb_state is
 					when IDLE =>
 						if wb_cyc_in = '1' and wb_stb_in = '1' then
 							if wb_we_in = '1' then -- Write to register
-								if wb_adr_in = b"00" then
+								if wb_adr_in = x"000" then
 									send_buffer_input <= wb_dat_in;
 									send_buffer_push <= '1';
-									wb_ack <= '1';
-									wb_state <= WRITE_ACK;
-								else -- Invalid write, just ack and ignore
-									wb_ack <= '1';
-									wb_state <= WRITE_ACK;
+								elsif wb_adr_in = x"000c" then
+									sample_clk_divisor <= wb_dat_in;
 								end if;
+
+								-- Invalid writes are acked and ignored.
+
+								wb_ack <= '1';
+								wb_state <= WRITE_ACK;
 							else -- Read from register
-								if wb_adr_in = b"01" then
+								if wb_adr_in = x"004" then
 									recv_buffer_pop <= '1';
-									wb_state <= READ_ACK;
-								elsif wb_adr_in = b"10" then
+								elsif wb_adr_in = x"008" then
 									wb_dat_out <= x"0" & send_buffer_full & recv_buffer_full & send_buffer_empty & recv_buffer_empty;
 									wb_ack <= '1';
-									wb_state <= READ_ACK;
+								elsif wb_adr_in = x"000c" then
+									wb_dat_out <= sample_clk_divisor;
+									wb_ack <= '1';
 								else
 									wb_dat_out <= (others => '0');
 									wb_ack <= '1';
-									wb_state <= READ_ACK;
 								end if;
+								wb_state <= READ_ACK;
 							end if;
 						end if;
 					when WRITE_ACK =>

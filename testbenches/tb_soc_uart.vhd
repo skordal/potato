@@ -1,5 +1,5 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014 - 2016 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -26,9 +26,9 @@ architecture testbench of tb_soc_uart is
 	signal irq_data_received : std_logic;
 
 	-- Wishbone ports:
-	signal wb_adr_in  : std_logic_vector(1 downto 0) := (others => '0');
-	signal wb_dat_in  : std_logic_vector(7 downto 0) := (others => '0');
-	signal wb_dat_out : std_logic_vector(7 downto 0);
+	signal wb_adr_in  : std_logic_vector(11 downto 0) := (others => '0');
+	signal wb_dat_in  : std_logic_vector( 7 downto 0) := (others => '0');
+	signal wb_dat_out : std_logic_vector( 7 downto 0);
 	signal wb_we_in   : std_logic := '0';
 	signal wb_cyc_in  : std_logic := '0';
 	signal wb_stb_in  : std_logic := '0';
@@ -69,8 +69,20 @@ begin
 		wait for clk_period * 2;
 		reset <= '0';
 
-		-- Write a 'P' (for Potato the Processor) to the UART:
-		wb_adr_in <= b"00";
+		-- Set the sample clock to obtain a 1 Mbps transfer rate:
+		wb_adr_in <= x"00c";
+		wb_dat_in <= x"06";
+		wb_we_in <= '1';
+		wb_cyc_in <= '1';
+		wb_stb_in <= '1';
+
+		wait until wb_ack_out = '1';
+		wait for clk_period;
+		wb_stb_in <= '0';
+		wait for clk_period;
+
+		-- Write a 'P' (for the Potato Processor) to the UART:
+		wb_adr_in <= x"000";
 		wb_dat_in <= x"50";
 		wb_we_in <= '1';
 		wb_cyc_in <= '1';
