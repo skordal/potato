@@ -9,7 +9,7 @@ of the RISC-V specification version 2.0 and supports the machine mode and the Mb
 the RISC-V privileged architecture, version 1.7.
 
 The processor has been tested on a Nexys 4 board using the example design provided in the `example/` directory
-and the SHA-256 application from the `benchmarks/` directory.
+and the SHA-256 application from the `software/` directory.
 
 ## Features
 

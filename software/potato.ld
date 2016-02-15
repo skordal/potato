@@ -1,6 +1,6 @@
 /*
- * Linker Script for the Potato Processor benchmark applications
- * (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
+ * Linker Script for the Potato Processor software applications
+ * (c) Kristian Klomsten Skordal 2014 - 2016 <kristian.skordal@wafflemail.net>
 // Report bugs and issues on <https://github.com/skordal/potato/issues>
  */
 

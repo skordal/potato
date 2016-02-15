@@ -2,8 +2,8 @@
 // (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
 // Report bugs and issues on <https://github.com/skordal/potato/issues>
 
-// This file contains startup and initialization code for the Potato benchmark
-// applications.
+// This file contains startup and initialization code for the Potato
+// software components.
 
 #include "platform.h"
 #include "potato.h"

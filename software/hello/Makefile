@@ -1,4 +1,4 @@
-# The Potato Processor Benchmark Applications
+# The Potato Processor Software Components
 # (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
 # Report bugs and issues on <https://github.com/skordal/potato/issues>
 
@@ -15,7 +15,7 @@ TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
 	-ffreestanding -fno-builtin -I.. -std=gnu99 \
 	-Wall -Werror=implicit-function-declaration
 TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -Wl,-m,elf32lriscv \
-	-Wl,-T../benchmark.ld
+	-Wl,-T../potato.ld
 
 OBJECTS := main.o start.o
 
