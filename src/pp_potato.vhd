@@ -100,61 +100,61 @@ begin
 			irq => irq
 		);
 
-    icache_enabled: if ICACHE_ENABLE
-    generate
-        icache: entity work.pp_icache
-                generic map(
-                    LINE_SIZE => ICACHE_LINE_SIZE,
-                    NUM_LINES => ICACHE_NUM_LINES
-                ) port map(
-                    clk => clk,
-                    reset => reset,
-                    cache_enable => '1',
-                    cache_flush => '0',
-                    cached_areas => ICACHE_AREAS,
-                    mem_address_in => imem_address,
-                    mem_data_out => imem_data,
-                    mem_data_in => (others => '0'),
-                    mem_data_size => b"00",
-                    mem_read_req => imem_req,
-                    mem_read_ack => imem_ack,
-                    mem_write_req => '0',
-                    mem_write_ack => open,
-                    wb_inputs => icache_inputs,
-                    wb_outputs => icache_outputs
-                );
+	icache_enabled: if ICACHE_ENABLE
+	generate
+		icache: entity work.pp_icache
+			generic map(
+				LINE_SIZE => ICACHE_LINE_SIZE,
+				NUM_LINES => ICACHE_NUM_LINES
+			) port map(
+				clk => clk,
+				reset => reset,
+				cache_enable => to_std_logic(ICACHE_ENABLE),
+				cache_flush => '0',
+				cached_areas => ICACHE_AREAS,
+				mem_address_in => imem_address,
+				mem_data_out => imem_data,
+				mem_data_in => (others => '0'),
+				mem_data_size => (others => '0'),
+				mem_read_req => imem_req,
+				mem_read_ack => imem_ack,
+				mem_write_req => '0',
+				mem_write_ack => open,
+				wb_inputs => icache_inputs,
+				wb_outputs => icache_outputs
+			);
 
-            icache_inputs <= m1_inputs;
-            m1_outputs <= icache_outputs;
+		icache_inputs <= m1_inputs;
+		m1_outputs <= icache_outputs;
 
-            dmem_if_inputs <= m2_inputs;
-            m2_outputs <= dmem_if_outputs;
-    end generate icache_enabled;
+		dmem_if_inputs <= m2_inputs;
+		m2_outputs <= dmem_if_outputs;
+	end generate icache_enabled;
 
-    icache_disabled: if not ICACHE_ENABLE
-    generate
-        imem_if: entity work.pp_wb_adapter
-            port map(
-                clk => clk,
-                reset => reset,
-                mem_address => imem_address,
-                mem_data_in => (others => '0'),
-                mem_data_out => imem_data,
-                mem_data_size => b"00",
-                mem_read_req => imem_req,
-                mem_read_ack => imem_ack,
-                mem_write_req => '0',
-                mem_write_ack => open,
-                wb_inputs => icache_inputs,
-                wb_outputs => icache_outputs
-            );
+	icache_disabled: if not ICACHE_ENABLE
+	generate
+		imem_if: entity work.pp_wb_adapter
+			port map(
+				clk => clk,
+				reset => reset,
+				mem_address => imem_address,
+				mem_data_in => (others => '0'),
+				mem_data_out => imem_data,
+				mem_data_size => (others => '0'),
+				mem_read_req => imem_req,
+				mem_read_ack => imem_ack,
+				mem_write_req => '0',
+				mem_write_ack => open,
+				wb_inputs => icache_inputs,
+				wb_outputs => icache_outputs
+			);
 
-            dmem_if_inputs <= m1_inputs;
-            m1_outputs <= dmem_if_outputs;
+		dmem_if_inputs <= m1_inputs;
+		m1_outputs <= dmem_if_outputs;
 
-            icache_inputs <= m2_inputs;
-            m2_outputs <= icache_outputs;
-    end generate icache_disabled;
+		icache_inputs <= m2_inputs;
+		m2_outputs <= icache_outputs;
+	end generate icache_disabled;
 
 	dmem_if: entity work.pp_wb_adapter
 		port map(
