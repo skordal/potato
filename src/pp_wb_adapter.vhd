@@ -17,7 +17,7 @@ entity pp_wb_adapter is
 
 		-- Processor data memory signals:
 		signal mem_address   : in  std_logic_vector(31 downto 0);
-		signal mem_data_in   : in  std_logic_vector(31 downto 0); -- Data in to the bus
+		signal mem_data_in   : in  std_logic_vector(31 downto 0); -- Data in from the bus
 		signal mem_data_out  : out std_logic_vector(31 downto 0); -- Data out to the bus
 		signal mem_data_size : in  std_logic_vector( 1 downto 0);
 		signal mem_read_req  : in  std_logic;
