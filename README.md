@@ -1,5 +1,7 @@
 # The Potato Processor
 
+**Note that the master branch may be in an unstable state. Use one of the releases to avoid problems when compiling the code.**
+
 ![Processor architecture overview diagramme](https://github.com/skordal/potato/blob/master/docs/diagram.png?raw=true)
 
 The Potato Processor is a simple RISC-V processor for use in FPGAs. It implements the 32-bit integer subset
