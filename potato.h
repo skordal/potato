@@ -60,11 +60,11 @@
 
 #define potato_get_badaddr(n) \
 	do { \
-		register uint32_t __temp = 0; \
+		register uint32_t temp = 0; \
 		asm volatile ( \
 			"csrr %[temp], mbadaddr\n" \
-			: [temp] "=r" (__temp)); \
-		n = __temp; \
+			: [temp] "=r" (temp)); \
+		n = temp; \
 	} while(0)
 
 #endif

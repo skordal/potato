@@ -12,7 +12,7 @@ TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
 HEXDUMP ?= hexdump
 
 TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
-	-ffreestanding -fno-builtin -I.. -std=gnu99 \
+	-ffreestanding -fno-builtin -I.. -I../.. -std=gnu99 \
 	-Wall -Werror=implicit-function-declaration
 TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -Wl,-m,elf32lriscv \
 	-Wl,-T../potato.ld
@@ -40,7 +40,7 @@ clean:
 
 # Object file rules:
 
-main.o: main.c ../platform.h ../potato.h
+main.o: main.c ../platform.h ../../potato.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
 start.o: ../start.S ../platform.h
