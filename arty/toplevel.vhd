@@ -153,7 +153,8 @@ architecture behaviour of toplevel is
 	signal aee_ram_ack_out : std_logic;
 
 	-- Selected peripheral on the interconnect:
-	type intercon_peripheral_type is (PERIPHERAL_TIMER0, PERIPHERAL_TIMER1,
+	type intercon_peripheral_type is (
+		PERIPHERAL_TIMER0, PERIPHERAL_TIMER1,
 		PERIPHERAL_UART0, PERIPHERAL_UART1, PERIPHERAL_GPIO,
 		PERIPHERAL_AEE_ROM, PERIPHERAL_AEE_RAM, PERIPHERAL_INTERCON,
 		PERIPHERAL_ERROR, PERIPHERAL_NONE);
@@ -201,7 +202,7 @@ begin
 									intercon_peripheral <= PERIPHERAL_GPIO;
 								when x"5" =>
 									intercon_peripheral <= PERIPHERAL_INTERCON;
-								when others => -- Invalid address - delegated to the NULL peripheral
+								when others => -- Invalid address - delegated to the error peripheral
 									intercon_peripheral <= PERIPHERAL_ERROR;
 							end case;
 						elsif processor_adr_out(31 downto 14) & b"00" = x"ffff8" then -- AEE ROM
