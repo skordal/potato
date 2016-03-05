@@ -24,7 +24,7 @@ use ieee.numeric_std.all;
 --! - Bit 3: transmit buffer full
 --!
 --! The sample clock divisor should be set according to the formula:
---! sample_clk = (f_clk / (baudrate * 16))
+--! sample_clk = (f_clk / (baudrate * 16)) - 1
 --!
 --! If the sample clock divisor register is set to 0, the sample clock
 --! is stopped.
@@ -238,9 +238,10 @@ begin
 				if sample_clk_divisor /= x"00" then
 					if sample_clk_counter = sample_clk_divisor then
 						sample_clk_counter <= (others => '0');
-						sample_clk <= not sample_clk;
+						sample_clk <= '1';
 					else
 						sample_clk_counter <= std_logic_vector(unsigned(sample_clk_counter) + 1);
+						sample_clk <= '0';
 					end if;
 				end if;
 			end if;
