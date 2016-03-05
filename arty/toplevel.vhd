@@ -206,10 +206,12 @@ begin
 								when others => -- Invalid address - delegated to the error peripheral
 									intercon_peripheral <= PERIPHERAL_ERROR;
 							end case;
-						elsif processor_adr_out(31 downto 14) & b"00" = x"ffff8" then -- AEE ROM
-							intercon_peripheral <= PERIPHERAL_AEE_ROM;
-						elsif processor_adr_out(31 downto 15) & b"000" = x"ffffc" then -- AEE RAM
-							intercon_peripheral <= PERIPHERAL_AEE_RAM;
+						elsif processor_adr_out(31 downto 16) = x"ffff" then -- Firmware memory space
+							if processor_adr_out(15 downto 14) = b"10" then    -- AEE ROM
+								intercon_peripheral <= PERIPHERAL_AEE_ROM;
+							elsif processor_adr_out(15 downto 14) = b"11" then -- AEE RAM
+								intercon_peripheral <= PERIPHERAL_AEE_RAM;
+							end if;
 						else
 							intercon_peripheral <= PERIPHERAL_ERROR;
 						end if;
