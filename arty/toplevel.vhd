@@ -22,9 +22,9 @@ entity toplevel is
 		reset_n : in  std_logic;
 
 		-- GPIOs:
-		-- 4x Switches (bits  3 downto 0)
-		-- 4x Buttons  (bits  7 downto 4)
-		-- 4x LEDs     (bits 11 downto 8)
+		-- 4x Buttons     (bits  3 downto 0)
+		-- 4x Switches    (bits  7 downto 4)
+		-- 4x LEDs        (bits 11 downto 8)
 		gpio_pins : inout std_logic_vector(11 downto 0);
 
 		-- UART0 signals:
@@ -38,12 +38,14 @@ entity toplevel is
 end entity toplevel;
 
 architecture behaviour of toplevel is
-	-- Active-high reset signal:
+
+	-- Reset signals:
 	signal reset : std_logic;
 
 	-- Internal clock signals:
 	signal system_clk : std_logic;
 	signal timer_clk  : std_logic;
+	signal system_clk_locked : std_logic;
 
 	-- Interrupt indices:
 	constant IRQ_TIMER0_INDEX         : natural := 0;
@@ -164,7 +166,6 @@ architecture behaviour of toplevel is
 	signal intercon_busy : boolean := false;
 
 begin
-	reset <= not reset_n;
 
 	irq_array <= (
 			IRQ_TIMER0_INDEX => timer0_irq,
@@ -271,8 +272,10 @@ begin
 			clk => clk,
 			reset_n => reset_n,
 			system_clk => system_clk,
-			timer_clk => timer_clk
+			timer_clk => timer_clk,
+			locked => system_clk_locked
 		);
+	reset <= (not reset_n) or (not system_clk_locked);
 
 	processor: entity work.pp_potato
 		generic map(
