@@ -295,7 +295,7 @@ begin
 								if wb_adr_in = x"000" then
 									send_buffer_input <= wb_dat_in;
 									send_buffer_push <= '1';
-								elsif wb_adr_in = x"000c" then
+								elsif wb_adr_in = x"00c" then
 									sample_clk_divisor <= wb_dat_in;
 								end if;
 
@@ -309,7 +309,7 @@ begin
 								elsif wb_adr_in = x"008" then
 									wb_dat_out <= x"0" & send_buffer_full & recv_buffer_full & send_buffer_empty & recv_buffer_empty;
 									wb_ack <= '1';
-								elsif wb_adr_in = x"000c" then
+								elsif wb_adr_in = x"00c" then
 									wb_dat_out <= sample_clk_divisor;
 									wb_ack <= '1';
 								else
