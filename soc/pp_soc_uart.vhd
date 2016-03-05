@@ -25,6 +25,9 @@ use ieee.numeric_std.all;
 --!
 --! The sample clock divisor should be set according to the formula:
 --! sample_clk = (f_clk / (baudrate * 16))
+--!
+--! If the sample clock divisor register is set to 0, the sample clock
+--! is stopped.
 entity pp_soc_uart is
 	generic(
 		FIFO_DEPTH : natural := 64 --! Depth of the input and output FIFOs.
@@ -232,12 +235,13 @@ begin
 				sample_clk_counter <= (others => '0');
 				sample_clk <= '0';
 			else
-				if sample_clk_counter = sample_clk_divisor then
-					sample_clk_counter <= (others => '0');
-					sample_clk <= '1';
-				else
-					sample_clk_counter <= std_logic_vector(unsigned(sample_clk_counter) + 1);
-					sample_clk <= '0';
+				if sample_clk_divisor /= x"00" then
+					if sample_clk_counter = sample_clk_divisor then
+						sample_clk_counter <= (others => '0');
+						sample_clk <= not sample_clk;
+					else
+						sample_clk_counter <= std_logic_vector(unsigned(sample_clk_counter) + 1);
+					end if;
 				end if;
 			end if;
 		end if;
