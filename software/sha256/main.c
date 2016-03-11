@@ -25,7 +25,7 @@ static volatile int hashes_per_second = 0;
 //            registers with regbase[0] = x1 and upwards.
 void exception_handler(uint32_t cause, void * epc, void * regbase)
 {
-	if(cause == ((1 << CAUSE_INTERRUPT_BIT) | (CAUSE_IRQ_BASE + 5))) // Timer interrupt
+	if(cause == ((1 << POTATO_MCAUSE_INTERRUPT_BIT) | (POTATO_MCAUSE_IRQ_BASE + 5))) // Timer interrupt
 	{
 		uart_puts(IO_ADDRESS(UART_BASE), "Hashes per second: ");
 		uart_puth(IO_ADDRESS(UART_BASE), hashes_per_second);

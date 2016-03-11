@@ -5,24 +5,26 @@
 #ifndef POTATO_H
 #define POTATO_H
 
+#include <stdint.h>
+
 // Number of IRQs supported:
 #define POTATO_NUM_IRQS		8
 
 // Exception cause values:
-#define CAUSE_INSTR_MISALIGN	0x00
-#define CAUSE_INSTR_FETCH	0x01
-#define CAUSE_INVALID_INSTR	0x02
-#define CAUSE_BREAKPOINT	0x03
-#define CAUSE_LOAD_MISALIGN	0x04
-#define CAUSE_LOAD_ERROR	0x05
-#define CAUSE_STORE_MISALIGN	0x06
-#define CAUSE_STORE_ERROR	0x07
-#define CAUSE_ECALL		0x0b
+#define POTATO_MCAUSE_INSTR_MISALIGN	0x00
+#define POTATO_MCAUSE_INSTR_FETCH	0x01
+#define POTATO_MCAUSE_INVALID_INSTR	0x02
+#define POTATO_MCAUSE_BREAKPOINT	0x03
+#define POTATO_MCAUSE_LOAD_MISALIGN	0x04
+#define POTATO_MCAUSE_LOAD_ERROR	0x05
+#define POTATO_MCAUSE_STORE_MISALIGN	0x06
+#define POTATO_MCAUSE_STORE_ERROR	0x07
+#define POTATO_MCAUSE_ECALL		0x0b
 
-#define CAUSE_IRQ_BASE		0x10
+#define POTATO_MCAUSE_IRQ_BASE		0x30
 
 // Interrupt bit in the cause register:
-#define CAUSE_INTERRUPT_BIT	31
+#define POTATO_MCAUSE_INTERRUPT_BIT	31
 
 // Status register bit indices:
 #define STATUS_IE	0		// Enable Interrupts
@@ -40,23 +42,23 @@
 			:: [temp] "r" (temp)); \
 	} while(0);
 
-#define potato_enable_irq(n) \
-	do { \
-		register uint32_t temp = 0; \
-		asm volatile( \
-			"li %[temp], 1 << %[shift]\n" \
-			"csrs mie, %[temp]\n" \
-			:: [temp] "r" (temp), [shift] "i" (n + 24)); \
-	} while(0)
+static inline void potato_enable_irq(uint8_t n)
+{
+	register uint32_t temp = 1 << (n + 24);
+	asm volatile(
+		"csrs mie, %[temp]\n"
+		:: [temp] "r" (temp)
+	);
+}
 
-#define potato_disable_irq(n) \
-	do { \
-		register uint32_t temp = 0; \
-		asm volatile( \
-			"li %[temp], 1 << %[shift]\n" \
-			"csrc mie, %[temp]\n" \
-			:: [temp] "r" (temp), [shift] "i" (n + 24);) \
-	} while(0)
+static inline void potato_disable_irq(uint8_t n)
+{
+	register uint32_t temp = 1 << (n + 24);
+	asm volatile(
+		"csrc mie, %[temp]\n"
+		:: [temp] "r" (temp)
+	);
+}
 
 #define potato_get_badaddr(n) \
 	do { \

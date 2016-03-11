@@ -6,7 +6,6 @@
 // software components.
 
 #include "platform.h"
-#include "potato.h"
 
 .section .init
 
