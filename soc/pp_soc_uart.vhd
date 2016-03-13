@@ -116,6 +116,10 @@ begin
 			else
 				case rx_state is
 					when IDLE =>
+						if recv_buffer_push = '1' then
+							recv_buffer_push <= '0';
+						end if;
+
 						if sample_clk = '1' and rxd = '0' then
 							rx_sample_value <= rx_sample_counter;
 							rx_current_bit <= 0;
@@ -129,17 +133,15 @@ begin
 							else
 								rx_byte(rx_current_bit) <= rxd;
 								rx_state <= STOPBIT;
-
-								if recv_buffer_full = '0' then
-									recv_buffer_push <= '1';
-								end if;
 							end if;
 						end if;
 					when STOPBIT =>
-						recv_buffer_push <= '0';
-
 						if sample_clk = '1' and rx_sample_counter = rx_sample_value then
 							rx_state <= IDLE;
+
+							if recv_buffer_full = '0' then
+								recv_buffer_push <= '1';
+							end if;
 						end if;
 				end case;
 			end if;
@@ -291,6 +293,7 @@ begin
 				wb_ack <= '0';
 				wb_state <= IDLE;
 				send_buffer_push <= '0';
+				recv_buffer_pop <= '0';
 				sample_clk_divisor <= (others => '0');
 			else
 				case wb_state is
@@ -333,9 +336,10 @@ begin
 						end if;
 					when READ_ACK =>
 						if recv_buffer_pop = '1' then
-							wb_ack <= '1';
 							recv_buffer_pop <= '0';
+						else
 							wb_dat_out <= recv_buffer_output;
+							wb_ack <= '1';
 						end if;
 
 						if wb_stb_in = '0' then
