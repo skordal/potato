@@ -65,12 +65,14 @@ architecture behaviour of pp_soc_uart is
 	signal sample_clk_counter : std_logic_vector(sample_clk_divisor'range);
 
 	-- UART receive process signals:
-	type rx_state_type is (IDLE, RECEIVE, STOPBIT);
+	type rx_state_type is (IDLE, RECEIVE, STARTBIT, STOPBIT);
 	signal rx_state : rx_state_type;
 	signal rx_byte : std_logic_vector(7 downto 0);
 	signal rx_current_bit : bitnumber;
 
 	subtype rx_sample_counter_type is natural range 0 to 15;
+	subtype rx_sample_delay_type is natural range 0 to 7;
+	signal rx_sample_delay   : rx_sample_counter_type;
 	signal rx_sample_counter : rx_sample_counter_type;
 	signal rx_sample_value   : rx_sample_counter_type;
 
@@ -113,6 +115,7 @@ begin
 		if rising_edge(clk) then
 			if reset = '1' then
 				rx_state <= IDLE;
+				recv_buffer_push <= '0';
 			else
 				case rx_state is
 					when IDLE =>
@@ -122,8 +125,19 @@ begin
 
 						if sample_clk = '1' and rxd = '0' then
 							rx_sample_value <= rx_sample_counter;
+							rx_sample_delay <= 0;
 							rx_current_bit <= 0;
-							rx_state <= RECEIVE;
+							rx_state <= STARTBIT;
+						end if;
+					when STARTBIT =>
+						if sample_clk = '1' then
+							if rx_sample_delay = 7 then
+								rx_state <= RECEIVE;
+								rx_sample_value <= rx_sample_counter;
+								rx_sample_delay <= 0;
+							else
+								rx_sample_delay <= rx_sample_delay + 1;
+							end if;
 						end if;
 					when RECEIVE =>
 						if sample_clk = '1' and rx_sample_counter = rx_sample_value then
