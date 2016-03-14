@@ -21,7 +21,8 @@
 #define POTATO_MCAUSE_STORE_ERROR	0x07
 #define POTATO_MCAUSE_ECALL		0x0b
 
-#define POTATO_MCAUSE_IRQ_BASE		0x30
+// IRQ base value
+#define POTATO_MCAUSE_IRQ_BASE		0x80000010
 
 // Interrupt bit in the cause register:
 #define POTATO_MCAUSE_INTERRUPT_BIT	31
