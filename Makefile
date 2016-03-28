@@ -2,7 +2,7 @@
 # (c) Kristian Klomsten Skordal 2014 - 2015 <kristian.skordal@wafflemail.net>
 # Report bugs and issues on <https://github.com/skordal/potato/issues>
 
-.PHONY: all clean checkout-riscv-tests potato.prj
+.PHONY: all clean potato.prj
 
 SOURCE_FILES := \
 	src/pp_alu.vhd \
