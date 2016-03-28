@@ -24,6 +24,9 @@
 // IRQ base value
 #define POTATO_MCAUSE_IRQ_BASE		0x80000010
 
+// IRQ number mask
+#define POTATO_MCAUSE_IRQ_MASK		0x0f
+
 // Interrupt bit in the cause register:
 #define POTATO_MCAUSE_INTERRUPT_BIT	31
 
@@ -43,6 +46,26 @@
 			:: [temp] "r" (temp)); \
 	} while(0);
 
+#define potato_wfi() asm volatile("nop\n") /* The WFI instruction is not yet supported on Potato. */
+
+/**
+ * Gets the value of the MCAUSE register.
+ */
+static inline uint32_t potato_get_mcause(void)
+{
+	register uint32_t retval = 0;
+	asm volatile(
+		"csrr %[retval], mcause\n"
+		: [retval] "=r" (retval)
+	);
+
+	return retval;
+}
+
+/**
+ * Enables a specific IRQ.
+ * @note To globally enable IRQs, use the @ref potato_enable_interrupts() function.
+ */
 static inline void potato_enable_irq(uint8_t n)
 {
 	register uint32_t temp = 1 << (n + 24);
@@ -52,6 +75,9 @@ static inline void potato_enable_irq(uint8_t n)
 	);
 }
 
+/**
+ * Disables a specific IRQ.
+ */
 static inline void potato_disable_irq(uint8_t n)
 {
 	register uint32_t temp = 1 << (n + 24);
