@@ -1,0 +1,55 @@
+# The Potato Project
+# (c) Kristian Klomsten Skordal <kristian.skordal@wafflemail.net>
+# Report bugs and issues on <https://github.com/skordal/potato/issues>
+
+DOXYFILE_ENCODING      = UTF-8
+INPUT_ENCODING         = UTF-8
+
+TAB_SIZE               = 8
+OPTIMIZE_OUTPUT_VHDL   = YES
+
+PROJECT_NAME           = "The Potato Processor"
+PROJECT_BRIEF          = "A 32-bit RISC-V implementation"
+
+OUTPUT_DIRECTORY       = "manual/"
+
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = NO
+MULTILINE_CPP_IS_BRIEF = NO
+
+ALIASES                =
+
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+
+EXTRACT_ALL            = NO
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_SCOPE_NAMES       = YES
+SHOW_INCLUDE_FILES     = NO
+SORT_MEMBER_DOCS       = YES
+
+GENERATE_TODOLIST      = YES
+GENERATE_BUGLIST       = YES
+
+SHOW_FILES             = NO
+
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = YES
+
+INPUT                  = ../src/
+FILE_PATTERNS          = *.vhd
+USE_MDFILE_AS_MAINPAGE = ../README.md
+
+ALPHABETICAL_INDEX     = YES
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = .
+HTML_FILE_EXTENSION    = .html
+GENERATE_TREEVIEW      = YES
+
+GENERATE_LATEX         = NO
+
