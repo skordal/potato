@@ -1,36 +1,90 @@
-# Demo design for the Nexys 4 board
+# System-On-Chip Design using the Potato Processor
 
-This folder contains a design for a simple demo design using the Potato
-processor. It has been tested using Vivado 2015.3.
+This folder contains an SoC design using the Potato processor. The design
+has been synthesized using Vivado 2015.4 and tested on an Arty board from
+Digilent.
 
 ## Quick Start
 
-In order to use the design, first import all source files from the folders
-`src/`, `soc/` and `example/` into your project. Make sure the testbench files
-(the files starting with "tb_") is added as simulation-only files.
+In order to test the design yourself, first import all source files from the
+`src/`, `soc/` and `example/` directories into your project. Some of the added
+files may not be used by the design; in the hierarchy view in Vivado you can
+remove any file that is not included under the `toplevel` entity.
 
-### Clocking
+In addition to the source files, a couple of IP modules are needed to take
+advantage of the FPGAs builtin resources - the following sections deal with
+adding and configuring these.
 
-Add a clock generator using the Clocking Wizard. To seamlessly integrate
-it into the design, name it "clock_generator". Choose the following options:
+### Clock Generator
 
-* Frequency Synthesis
-* Safe Clock Startup
+The processor cannot (currently) run on the native 100 MHz clock signal provided
+by the development board. Therefore it is necessary to use a clock management
+tile to synthesize the necessary system clock as well as other necessary clocks.
 
-Set up two output clocks, `clk_out1` with frequency 50 MHz, and `clk_out2` with
-a frequency of 10 MHz. Rename the corresponding ports to `system_clk` and
-`timer_clk` respectively. Name the input clock `clk`.
+Add a clock generator to the design using the Clocking Wizard. Name the generated
+component "clock_generator". Make sure the following options are selected in the
+"Clocking Options" tab:
 
-### Instruction memory
+* Frequency synthesis - Enables synthesis of clock frequencies we need.
+* Safe clock startup - Waits with starting the output clocks until the clock is stable.
 
-Add a block RAM to use as instruction ROM using the Block Memory Generator.
-Choose "Single Port ROM" as memory type, name it "instruction_rom" and set
-port A width to 32 bits and port A depth to 2048. Initialize it with your
-application binary. Ensure that the "Primitives Output Register" checkbox
-is not checked.
+Go to the "Output Clocks" tab and enable `clk_out1` and `clk_out2`. Set the frequency
+of `clk_out1` to 50 MHz. This will be the main system clock. Set the frequency of
+`clk_out2` to 10 MHz - this clock will be used to run the 10 MHz system timer.
+
+If you have peripherals that require additional clocks, you can enable more clock
+outputs here.
+
+At the bottom of the "Output Clocks" tab, find the "Enable Optional Inputs/Outputs"
+section and select `reset` and `locked` signals. The `locked` signal is used to
+release the system reset signal when the clock signal is stable.
+
+Set the "Reset Type" to "Active low" - this makes it possible to connect the reset
+signal for the clock generator directly to the processor reset button on the development
+board.
+
+To make the names of the outputs on the clock generator match the names expected by
+the toplevel entity, go to the "Port Renaming" tab and input the following settings:
+
+* Rename the primary input clock to `clk`.
+* Rename `clk_out1` to `system_clk`.
+* Rename `clk_out2` to `timer_clk`.
+* Rename `resetn` to `reset_n`.
+
+
+### PAEE ROM
+
+** Note that the PAEE is not yet released, and you will therefore have to make your own test application. **
+
+The PAEE ROM is a read-only memory intended to store the Potato Application Execution
+Environment, a BIOS-like firmware providing a simple boot-loader and hardware abstraction
+layer. However, since the PAEE is still in development and not particularily useful yet,
+this ROM is where you can put your application.
+
+Add a block RAM IP to use as the ROM using the Block Memory Generator. Name the component
+"aee_rom". In the "Basic" tab choose a "Native" interface type and set "Memory Type" to
+"Single-Port ROM".
+
+Go to the "Port A Options" tab and set the following settings:
+
+* Port A Width: 32
+* Port A depth: 4096
+
+This will generate a 16 kb large ROM for storing application code. Set the
+"Enablee Port Type" to "Use ENA Pin" - this allows us to disable the ROM module
+when it is not in use, possibly saving a tiny bit of power. Also select
+the "RSTA Pin" option under "Port A Output Reset Options" and set the "Output
+Reset Value" to `00000013`. This value is the RISC-V no-operation opcode.
+
+Under "Other Options", check the "Load Init File" option and give the location
+of the coefficient file for the application to store in the ROM. In the case of
+the PAEE, this is the `paee.coe` file generated when running `make` in the `paee/`
+directory.
+
+Fill the remaining memory locations with no-ops by entering `00000013` in the
+correct field.
 
 ### Test it!
 
-Now you can test it and hopefully it works. This design can be used as a
-basis for your own designs or just to evaluate the processor.
+You should now be able to synthesize and test the design. Hopefully it works :-)
 

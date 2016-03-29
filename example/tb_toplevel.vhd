@@ -1,5 +1,5 @@
--- Practical Test Application for the Potato Processor
--- (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
+-- The Potato Processor - SoC design for the Arty FPGA board
+-- (c) Kristian Klomsten Skordal 2016 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -10,31 +10,30 @@ end entity tb_toplevel;
 
 architecture testbench of tb_toplevel is
 
-	signal clk : std_logic;
+	signal clk : std_logic := '0';
 	constant clk_period : time := 10 ns;
-	
-	signal reset_n            : std_logic := '0';
-	signal external_interrupt : std_logic := '0';
-	
-	signal switches : std_logic_vector(15 downto 0);
-	signal leds : std_logic_vector(15 downto 0);
 
-	signal uart_rxd : std_logic := '1';
-	signal uart_txd : std_logic;
+	signal reset_n : std_logic := '0';
+
+	signal gpio_pins : std_logic_vector(11 downto 0);
+
+	signal uart0_txd : std_logic;
+	signal uart0_rxd : std_logic := '1';
+
+	signal uart1_txd : std_logic;
+	signal uart1_rxd : std_logic := '1';
 
 begin
-
-	switches <= x"a0a0";
 
 	uut: entity work.toplevel
 		port map(
 			clk => clk,
 			reset_n => reset_n,
-			external_interrupt => external_interrupt,
-			switches => switches,
-			leds => leds,
-			uart_rxd => uart_rxd,
-			uart_txd => uart_txd
+			gpio_pins => gpio_pins,
+			uart0_txd => uart0_txd,
+			uart0_rxd => uart0_rxd,
+			uart1_txd => uart1_txd,
+			uart1_rxd => uart1_rxd
 		);
 
 	clock: process
@@ -47,9 +46,8 @@ begin
 
 	stimulus: process
 	begin
-		wait for clk_period * 125;
 		reset_n <= '0';
-		wait for clk_period * 3;
+		wait for clk_period * 4;
 		reset_n <= '1';
 
 		wait;
