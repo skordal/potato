@@ -15,6 +15,7 @@ use ieee.numeric_std.all;
 --! | 0x04               | Receive register (read-only)               |
 --! | 0x08               | Status register (read-only)                |
 --! | 0x0c               | Sample clock divisor register (read/write) |
+--! | 0x10               | Interrupt enable register (read/write)     |
 --! |--------------------|--------------------------------------------|
 --!
 --! The status register contains the following bits:
@@ -28,6 +29,11 @@ use ieee.numeric_std.all;
 --!
 --! If the sample clock divisor register is set to 0, the sample clock
 --! is stopped.
+--!
+--! Interrupts are enabled by setting the corresponding bit in the interrupt
+--! enable register. The following bits are available:
+--! - Bit 0: data received (receive buffer not empty)
+--! - Bit 1: ready to send data (transmit buffer empty)
 entity pp_soc_uart is
 	generic(
 		FIFO_DEPTH : natural := 64 --! Depth of the input and output FIFOs.
@@ -40,9 +46,8 @@ entity pp_soc_uart is
 		txd : out std_logic;
 		rxd : in  std_logic;
 
-		-- Interrupt signals:
-		irq_send_buffer_empty : out std_logic;
-		irq_data_received     : out std_logic;
+		-- Interrupt signal:
+		irq : out std_logic;
 
 		-- Wishbone ports:
 		wb_adr_in  : in  std_logic_vector(11 downto 0);
@@ -57,7 +62,7 @@ end entity pp_soc_uart;
 
 architecture behaviour of pp_soc_uart is
 
-	subtype bitnumber is natural range 0 to 7;
+	subtype bitnumber is natural range 0 to 7; --! Type representing the index of a bit.
 
 	-- UART sample clock signals:
 	signal sample_clk         : std_logic;
@@ -95,6 +100,9 @@ architecture behaviour of pp_soc_uart is
 	signal send_buffer_push, send_buffer_pop     : std_logic := '0';
 	signal recv_buffer_push, recv_buffer_pop     : std_logic := '0';
 
+	-- IRQ enable signals:
+	signal irq_recv_enable, irq_tx_ready_enable : std_logic := '0';
+
 	-- Wishbone signals:
 	type wb_state_type is (IDLE, WRITE_ACK, READ_ACK);
 	signal wb_state : wb_state_type;
@@ -103,8 +111,8 @@ architecture behaviour of pp_soc_uart is
 
 begin
 
-	irq_send_buffer_empty <= send_buffer_empty;
-	irq_data_received <= not recv_buffer_empty;
+	irq <= (irq_recv_enable and (not recv_buffer_empty))
+		or (irq_tx_ready_enable and send_buffer_empty);
 
 	---------- UART receive ----------
 
@@ -309,6 +317,8 @@ begin
 				send_buffer_push <= '0';
 				recv_buffer_pop <= '0';
 				sample_clk_divisor <= (others => '0');
+				irq_recv_enable <= '0';
+				irq_tx_ready_enable <= '0';
 			else
 				case wb_state is
 					when IDLE =>
@@ -319,6 +329,9 @@ begin
 									send_buffer_push <= '1';
 								elsif wb_adr_in = x"00c" then
 									sample_clk_divisor <= wb_dat_in;
+								elsif wb_adr_in = x"010" then
+									irq_recv_enable <= wb_dat_in(0);
+									irq_tx_ready_enable <= wb_dat_in(1);
 								end if;
 
 								-- Invalid writes are acked and ignored.
@@ -333,6 +346,9 @@ begin
 									wb_ack <= '1';
 								elsif wb_adr_in = x"00c" then
 									wb_dat_out <= sample_clk_divisor;
+									wb_ack <= '1';
+								elsif wb_adr_in = x"010" then
+									wb_dat_out <= (0 => irq_recv_enable, 1 => irq_tx_ready_enable, others => '0');
 									wb_ack <= '1';
 								else
 									wb_dat_out <= (others => '0');

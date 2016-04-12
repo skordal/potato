@@ -48,20 +48,17 @@ architecture behaviour of toplevel is
 	signal system_clk_locked : std_logic;
 
 	-- Interrupt indices:
-	constant IRQ_TIMER0_INDEX         : natural := 0;
-	constant IRQ_TIMER1_INDEX         : natural := 1;
-	constant IRQ_UART0_TX_EMPTY_INDEX : natural := 2;
-	constant IRQ_UART0_RX_INDEX       : natural := 3;
-	constant IRQ_UART1_TX_EMPTY_INDEX : natural := 4;
-	constant IRQ_UART1_RX_INDEX       : natural := 5;
-	constant IRQ_BUS_ERROR_INDEX      : natural := 6;
+	constant IRQ_TIMER0_INDEX    : natural := 0;
+	constant IRQ_TIMER1_INDEX    : natural := 1;
+	constant IRQ_UART0_INDEX     : natural := 2;
+	constant IRQ_UART1_INDEX     : natural := 3;
+	constant IRQ_BUS_ERROR_INDEX : natural := 4;
 
 	-- Interrupt signals:
 	signal irq_array : std_logic_vector(7 downto 0);
-	signal timer0_irq, timer1_irq                 : std_logic;
-	signal uart0_irq_rx, uart1_irq_rx             : std_logic;
-	signal uart0_irq_tx_empty, uart1_irq_tx_empty : std_logic;
-	signal intercon_irq_bus_error                 : std_logic;
+	signal timer0_irq, timer1_irq : std_logic;
+	signal uart0_irq, uart1_irq   : std_logic;
+	signal intercon_irq_bus_error : std_logic;
 
 	-- Processor signals:
 	signal processor_adr_out : std_logic_vector(31 downto 0);
@@ -170,10 +167,8 @@ begin
 	irq_array <= (
 			IRQ_TIMER0_INDEX => timer0_irq,
 			IRQ_TIMER1_INDEX => timer1_irq,
-			IRQ_UART0_RX_INDEX => uart0_irq_rx,
-			IRQ_UART0_TX_EMPTY_INDEX => uart0_irq_tx_empty,
-			IRQ_UART1_RX_INDEX => uart1_irq_rx,
-			IRQ_UART1_TX_EMPTY_INDEX => uart1_irq_tx_empty,
+			IRQ_UART0_INDEX => uart0_irq,
+			IRQ_UART1_INDEX => uart1_irq,
 			IRQ_BUS_ERROR_INDEX => intercon_irq_bus_error,
 			others => '0'
 		);
@@ -370,8 +365,7 @@ begin
 			reset => reset,
 			txd => uart0_txd,
 			rxd => uart0_rxd,
-			irq_send_buffer_empty => uart0_irq_tx_empty,
-			irq_data_received => uart0_irq_rx,
+			irq => uart0_irq,
 			wb_adr_in => uart0_adr_in,
 			wb_dat_in => uart0_dat_in,
 			wb_dat_out => uart0_dat_out,
@@ -394,8 +388,7 @@ begin
 			reset => reset,
 			txd => uart1_txd,
 			rxd => uart1_rxd,
-			irq_send_buffer_empty => uart1_irq_tx_empty,
-			irq_data_received => uart1_irq_rx,
+			irq => uart1_irq,
 			wb_adr_in => uart1_adr_in,
 			wb_dat_in => uart1_dat_in,
 			wb_dat_out => uart1_dat_out,

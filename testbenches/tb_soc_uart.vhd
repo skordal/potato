@@ -22,8 +22,7 @@ architecture testbench of tb_soc_uart is
 	signal rxd : std_logic := '1';
 
 	-- interrupt signals:
-	signal irq_send_buffer_empty : std_logic;
-	signal irq_data_received : std_logic;
+	signal irq : std_logic;
 
 	-- Wishbone ports:
 	signal wb_adr_in  : std_logic_vector(11 downto 0) := (others => '0');
@@ -42,8 +41,7 @@ begin
 			reset => reset,
 			txd => txd,
 			rxd => rxd,
-			irq_send_buffer_empty => irq_send_buffer_empty,
-			irq_data_received => irq_data_received,
+			irq => irq,
 			wb_adr_in => wb_adr_in,
 			wb_dat_in => wb_dat_in,
 			wb_dat_out => wb_dat_out,
@@ -52,9 +50,6 @@ begin
 			wb_stb_in => wb_stb_in,
 			wb_ack_out => wb_ack_out
 		);
-
-	-- Set up an internal loopback:
-	rxd <= txd;
 
 	clock: process
 	begin
@@ -65,41 +60,67 @@ begin
 	end process clock;
 
 	stimulus: process
+
+		procedure uart_write(address : in std_logic_vector(11 downto 0); data : in std_logic_vector(7 downto 0)) is
+		begin
+			wb_adr_in <= address;
+			wb_dat_in <= data;
+			wb_we_in <= '1';
+			wb_cyc_in <= '1';
+			wb_stb_in <= '1';
+
+			wait until wb_ack_out = '1';
+			wait for clk_period;
+			wb_stb_in <= '0';
+			wb_cyc_in <= '0';
+			wait for clk_period;
+		end procedure uart_write;
+
 	begin
 		wait for clk_period * 2;
 		reset <= '0';
 
 		-- Set the sample clock to obtain a 1 Mbps transfer rate:
-		wb_adr_in <= x"00c";
-		wb_dat_in <= x"06";
-		wb_we_in <= '1';
-		wb_cyc_in <= '1';
-		wb_stb_in <= '1';
+		uart_write(x"00c", x"06");
 
-		wait until wb_ack_out = '1';
-		wait for clk_period;
-		wb_stb_in <= '0';
-		wait for clk_period;
+		-- Enable the data received interrupt:
+		uart_write(x"010", x"01");
 
-		-- Write a 'P' (for the Potato Processor) to the UART:
-		wb_adr_in <= x"000";
-		wb_dat_in <= x"50";
-		wb_we_in <= '1';
-		wb_cyc_in <= '1';
-		wb_stb_in <= '1';
+		-- Send a byte on the UART:
+		rxd <= '0'; -- Start bit
+		wait for 1 us;
+		rxd <= '0';
+		wait for 1 us;
+		rxd <= '1';
+		wait for 1 us;
+		rxd <= '0';
+		wait for 1 us;
+		rxd <= '1';
+		wait for 1 us;
+		rxd <= '0';
+		wait for 1 us;
+		rxd <= '0';
+		wait for 1 us;
+		rxd <= '0';
+		wait for 1 us;
+		rxd <= '0';
+		wait for 1 us;
+		rxd <= '1'; -- Stop bit
+		wait for 1 us;
 
-		wait until wb_ack_out = '1';
-		wait for clk_period;
-		wb_stb_in <= '0';
-		wait for clk_period;
+		wait until irq = '1';
 
-		-- Write an 'o':
-		wb_dat_in <= x"6f";
-		wb_stb_in <= '1';
-		wait until wb_ack_out = '1';
-		wait for clk_period;
-		wb_stb_in <= '0';
-		wait for clk_period;
+		-- Disable the IRQ:
+		uart_write(x"010", x"00");
+		wait until irq = '0';
+
+		-- Output a "Potato" on the UART:
+		uart_write(x"000", x"50");
+		uart_write(x"000", x"6f");
+		uart_write(x"000", x"74");
+		uart_write(x"000", x"61");
+		uart_write(x"000", x"74");
+		uart_write(x"000", x"6f");
 
 		wait;
 	end process stimulus;
