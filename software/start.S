@@ -1,11 +1,6 @@
-// The Potato Processor Benchmark Applications
-// (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
-// Report bugs and issues on <https://github.com/skordal/potato/issues>
-
-// This file contains startup and initialization code for the Potato
-// software components.
-
-#include "platform.h"
+# The Potato Application Execution Environment (PAEE)
+# (c) Kristian Klomsten Skordal 2016 <kristian.skordal@wafflemail.net>
+# Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 .section .init
 
@@ -20,11 +15,17 @@ tvec_hypervisor: // Hypervisor mode is not supported by Potato
 	j tvec_machine
 .align 6
 tvec_machine:
-	j exception_handler_wrapper
+	j _machine_exception_handler
 
 .align 6
 .global _start
 _start:
+
+// Sets the exception handler address:
+.hidden init_mtvec
+init_mtvec:
+	la x1, tvec_user
+	csrw mtvec, x1
 
 // Copies the .data section into the data memory section:
 .hidden copy_data
@@ -54,23 +55,24 @@ clear_bss:
 	sw x0, (x1)
 	addi x1, x1, 4
 	bne x1, x2, 1b
-
 2:
+
+// Sets up the stack pointer:
+.hidden init_stack
+init_stack:
+	xor sp, sp, sp		// Zero the stack pointer to start from the top of RAM
 
 .hidden call_main
 call_main:
-	la sp, __stack_top
-	jal main
+	call main
 	csrw mtohost, a0
+
 1:
 	j 1b
 
-.section .text
-
-.global exception_handler_wrapper
-exception_handler_wrapper:
-	// Save all registers (even those that are saved by the IRQ handler
-	// function, to aid in debugging):
+.global _machine_exception_handler
+_machine_exception_handler:
+	// Save all registers (to aid in debugging):
 	addi sp, sp, -124
 	sw x1, 0(sp)
 	sw x2, 4(sp)
@@ -104,16 +106,16 @@ exception_handler_wrapper:
 	sw x30, 116(sp)
 	sw x31, 120(sp)
 
-	csrr a0, mcause
-	csrr a1, mepc
-	mv a2, sp
-	jal exception_handler
+	csrr a0, mcause # First parameter: cause
+	csrr a1, mepc   # Second parameter: exception location
+	mv a2, sp	# Third parameter: start of stored register array
+	call exception_handler
 
-.hidden exception_return
-exception_return:
+.hidden _machine_exception_return
+_machine_exception_return:
 	// Restore all registers:
 	lw x1, 0(sp)
-	lw x2, 4(sp)
+	#lw x2, 4(sp) <- x2 = sp, so do not load this register
 	lw x3, 8(sp)
 	lw x4, 12(sp)
 	lw x5, 16(sp)

@@ -12,10 +12,10 @@ TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
 HEXDUMP ?= hexdump
 
 TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
-	-ffreestanding -fno-builtin -I.. -I../.. -std=gnu99 \
+	-ffreestanding -fno-builtin -I../.. -I../../libsoc -std=gnu99 \
 	-Wall -Werror=implicit-function-declaration
-TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -Wl,-m,elf32lriscv \
-	-Wl,-T../potato.ld
+TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -L../libsoc \
+	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-T../potato.ld
 
 OBJECTS := main.o start.o
 
@@ -31,6 +31,7 @@ hello.bin: hello.elf
 hello.coe: hello.bin
 	echo "memory_initialization_radix=16;" > hello.coe
 	echo "memory_initialization_vector=" >> hello.coe
+	for i in $$(seq 0 63); do echo 00000013 >> hello.coe; done
 	$(HEXDUMP) -v -e '1/4 "%08x\n"' hello.bin >> hello.coe
 	echo ";" >> hello.coe
 
@@ -40,9 +41,9 @@ clean:
 
 # Object file rules:
 
-main.o: main.c ../platform.h ../../potato.h
+main.o: main.c ../../potato.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
-start.o: ../start.S ../platform.h
+start.o: ../start.S
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 

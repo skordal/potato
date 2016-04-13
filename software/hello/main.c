@@ -3,22 +3,28 @@
 // Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 #include <stdint.h>
-#include "../platform.h"
+
+#include "platform.h"
+#include "uart.h"
 
 void exception_handler(uint32_t cause, void * epc, void * regbase)
 {
 	// Not used in this application
 }
 
+static struct uart uart0;
+
 int main(void)
 {
 	const char * hello_string = "Hello world\n\r";
-	volatile uint32_t * uart = IO_ADDRESS(UART_BASE);
+
+	uart_initialize(&uart0, (volatile void *) PLATFORM_UART0_BASE);
+	uart_set_divisor(&uart0, uart_baud2divisor(115200, PLATFORM_SYSCLK_FREQ));
 
 	for(int i = 0; hello_string[i] != 0; ++i)
 	{
-		while(uart[UART_STATUS >> 2] & (1 << 3));
-		uart[UART_TX >> 2] = hello_string[i] & 0x000000ff;
+		while(uart_tx_fifo_full(&uart0));
+		uart_tx(&uart0, hello_string[i]);
 	}
 
 	return 0;
