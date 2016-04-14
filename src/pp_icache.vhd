@@ -12,8 +12,9 @@ use work.pp_utilities.all;
 --! @brief Simple read-only direct-mapped instruction cache.
 entity pp_icache is
 	generic(
-		LINE_SIZE : natural := 4;  --! Number of words per cache line
-		NUM_LINES : natural := 128 --! Number of lines in the cache
+		LINE_SIZE    : natural := 4;   --! Number of words per cache line
+		NUM_LINES    : natural := 128; --! Number of lines in the cache
+		CACHED_AREAS : std_logic_vector(31 downto 0) := x"ffffffff" --! Areas to cache in 128 Mb blocks
 	);
 	port(
 		clk   : in std_logic;
@@ -22,7 +23,6 @@ entity pp_icache is
 		-- Control interface:
 		cache_enable    : in std_logic;
 		cache_flush     : in std_logic;
-		cached_areas    : in std_logic_vector(31 downto 0);
 
 		-- Memory interface:
 		mem_address_in   : in  std_logic_vector(31 downto 0);
@@ -142,9 +142,6 @@ begin
 	assert is_pow2(LINE_SIZE) report "Cache line size must be a power of 2!" severity FAILURE;
 	assert is_pow2(NUM_LINES) report "Number of cache lines must be a power of 2!" severity FAILURE;
 
-	-- Check if the current input address should be/is in the cache:
-	input_address_cached <= cached_areas(to_integer(unsigned(mem_address_in(31 downto 27)))) = '1'; 
-
 	mem_data_out <= current_cache_line_words(to_integer(unsigned(input_address_word))) when
 			input_address_cached and cache_enable = '1' and cache_flush = '0'
 		else read_data_out;
@@ -156,6 +153,14 @@ begin
 
 	input_address_line <= mem_address_in(log2(LINE_SIZE * 4) + log2(NUM_LINES) - 1 downto log2(LINE_SIZE * 4));
 	input_address_tag  <= mem_address_in(31 downto log2(LINE_SIZE * 4) + log2(NUM_LINES));
+
+	-- Check if the current input address should be/is in the cache:
+	check_address_cached: process(clk)
+	begin
+		if rising_edge(clk) then
+			input_address_cached <= CACHED_AREAS(to_integer(unsigned(mem_address_in(31 downto 27)))) = '1';
+		end if;
+	end process check_address_cached;
 
 	find_word: process(clk)
 	begin

@@ -105,13 +105,13 @@ begin
 		icache: entity work.pp_icache
 			generic map(
 				LINE_SIZE => ICACHE_LINE_SIZE,
-				NUM_LINES => ICACHE_NUM_LINES
+				NUM_LINES => ICACHE_NUM_LINES,
+				CACHED_AREAS => ICACHE_AREAS
 			) port map(
 				clk => clk,
 				reset => reset,
 				cache_enable => to_std_logic(ICACHE_ENABLE),
 				cache_flush => '0',
-				cached_areas => ICACHE_AREAS,
 				mem_address_in => imem_address,
 				mem_data_out => imem_data,
 				mem_data_in => (others => '0'),
