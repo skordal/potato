@@ -25,23 +25,13 @@ entity aee_rom_wrapper is
 end entity aee_rom_wrapper;
 
 architecture behaviour of aee_rom_wrapper is
-
-	type wb_state is (IDLE, READ_ACK);
-	signal state : wb_state := IDLE;
-
-	signal address : std_logic_vector(log2(MEMORY_SIZE) - 3 downto 0);
-	signal data : std_logic_vector(31 downto 0);
-
-	signal ack : std_logic := '0';
-
+	signal ack : std_logic;
 begin
 
 	rom: entity work.aee_rom
 		port map(
 			clka => clk,
-			ena => wb_cyc_in,
-			rsta => reset,
-			addra => address,
+			addra => wb_adr_in(log2(MEMORY_SIZE) - 1 downto 2),
 			douta => wb_dat_out
 		);
 
@@ -52,22 +42,12 @@ begin
 		if rising_edge(clk) then
 			if reset = '1' then
 				ack <= '0';
-				state <= IDLE;
 			else
-				case state is
-					when IDLE =>
-						if wb_cyc_in = '1' and wb_stb_in = '1' then
-							address <= wb_adr_in(log2(MEMORY_SIZE) - 1 downto 2);
-							state <= READ_ACK;
-						end if;
-					when READ_ACK =>
-						if ack = '0' then
-							ack <= '1';
-						elsif wb_stb_in = '0' then
-							ack <= '0';
-							state <= IDLE;
-						end if;
-				end case;
+				if wb_cyc_in = '1' and wb_stb_in = '1' then
+					ack <= '1';
+				else
+					ack <= '0';
+				end if;
 			end if;
 		end if;
 	end process wishbone;
