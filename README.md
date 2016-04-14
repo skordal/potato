@@ -8,7 +8,9 @@ The Potato Processor is a simple RISC-V processor for use in FPGAs. It implement
 of the RISC-V specification version 2.0 and supports the machine mode and the Mbare addressing environment of
 the RISC-V privileged architecture, version 1.7.
 
-The processor has been tested on a Arty board using the example SoC design provided in the `example/` directory.
+The processor has been tested on a Arty board using the example SoC design provided in the `example/` directory
+and the Hello World application available in `software/hello`. Synthesis and implementation has been tested on
+various versions of Xilinx' Vivado, most recently version 2016.1.
 
 ## Features
 
