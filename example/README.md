@@ -1,7 +1,7 @@
 # System-On-Chip Design using the Potato Processor
 
 This folder contains an SoC design using the Potato processor. The design
-has been synthesized using Vivado 2015.4 and tested on an Arty board from
+has been synthesized using Vivado 2016.1 and tested on an Arty board from
 Digilent.
 
 ## Quick Start
@@ -51,14 +51,11 @@ the toplevel entity, go to the "Port Renaming" tab and input the following setti
 * Rename `clk_out2` to `timer_clk`.
 * Rename `resetn` to `reset_n`.
 
-
 ### PAEE ROM
-
-** Note that the PAEE is not yet released, and you will therefore have to make your own test application. **
 
 The PAEE ROM is a read-only memory intended to store the Potato Application Execution
 Environment, a BIOS-like firmware providing a simple boot-loader and hardware abstraction
-layer. However, since the PAEE is still in development and not particularily useful yet,
+layer. However, since the PAEE is still in development and has not been released yet,
 this ROM is where you can put your application.
 
 Add a block RAM IP to use as the ROM using the Block Memory Generator. Name the component
@@ -70,21 +67,19 @@ Go to the "Port A Options" tab and set the following settings:
 * Port A Width: 32
 * Port A depth: 4096
 
-This will generate a 16 kb large ROM for storing application code. Set the
-"Enablee Port Type" to "Use ENA Pin" - this allows us to disable the ROM module
-when it is not in use, possibly saving a tiny bit of power. Also select
-the "RSTA Pin" option under "Port A Output Reset Options" and set the "Output
-Reset Value" to `00000013`. This value is the RISC-V no-operation opcode.
+Do not enable the use of the enable pin or reset functionality, as these are not currently
+supported by the ROM wrapper module.
 
 Under "Other Options", check the "Load Init File" option and give the location
-of the coefficient file for the application to store in the ROM. In the case of
-the PAEE, this is the `paee.coe` file generated when running `make` in the `paee/`
-directory.
+of the coefficient file for the application to store in the ROM. To test the
+basic functionality of the chip, you can use the `hello` application from the
+`software/` directory.
 
-Fill the remaining memory locations with no-ops by entering `00000013` in the
+Optionally, fill the remaining memory locations with no-ops by entering `00000013` in the
 correct field.
 
 ### Test it!
 
-You should now be able to synthesize and test the design. Hopefully it works :-)
+You should now be able to synthesize and test the design. Connect to the board and see if
+you can get some UART output. Hopefully it works :-)
 
