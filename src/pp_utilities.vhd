@@ -40,8 +40,8 @@ package body pp_utilities is
 	function is_pow2(input : in natural) return boolean is
 		variable c : natural := 1;
 	begin
-		for i in 0 to 30 loop -- FIXME: Simulator complains about 2^31 being out of range!
-			if input = i then
+		for i in 0 to 31 loop
+			if input = c then
 				return true;
 			end if;
 
