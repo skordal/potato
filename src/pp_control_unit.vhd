@@ -10,39 +10,45 @@ use work.pp_csr.all;
 use work.pp_types.all;
 use work.pp_utilities.all;
 
---! @brief Unit decoding instructions and setting control signals apropriately.
+--! @brief
+--! 	Instruction decoding and control unit.
+--! @details
+--!	Decodes incoming instructions and sets control signals accordingly.
+--!	Unknown or otherwise invalid instructions will cause an exception to
+--!	be signaled.
 entity pp_control_unit is
 	port(
 		-- Inputs, indices correspond to instruction word indices:
-		opcode  : in std_logic_vector( 4 downto 0);
-		funct3  : in std_logic_vector( 2 downto 0);
-		funct7  : in std_logic_vector( 6 downto 0);
-		funct12 : in std_logic_vectoR(11 downto 0);
+		opcode  : in std_logic_vector( 4 downto 0); --! Instruction opcode field.
+		funct3  : in std_logic_vector( 2 downto 0); --! Instruction @c funct3 field.
+		funct7  : in std_logic_vector( 6 downto 0); --! Instruction @c funct7 field.
+		funct12 : in std_logic_vector(11 downto 0); --! Instruction @c funct12 field.
 
 		-- Control signals:
-		rd_write            : out std_logic;
-		branch              : out branch_type;
+		rd_write            : out std_logic;   --! Signals that the instruction writes to a destination register.
+		branch              : out branch_type; --! Signals that the instruction is a branch.
 
 		-- Exception signals:
-		decode_exception       : out std_logic;
-		decode_exception_cause : out csr_exception_cause;
+		decode_exception       : out std_logic;           --! Signals an instruction decode exception.
+		decode_exception_cause : out csr_exception_cause; --! Specifies the cause of a decode exception.
 
 		-- Control register signals:
-		csr_write : out csr_write_mode;
-		csr_imm   : out std_logic; --! Indicating an immediate variant of the csrr* instructions.
+		csr_write : out csr_write_mode; --! Write mode for instructions accessing CSRs.
+		csr_imm   : out std_logic;      --! Indicates an immediate variant of a CSR instruction.
 
 		-- Sources of operands to the ALU:
-		alu_x_src, alu_y_src : out alu_operand_source;
+		alu_x_src, alu_y_src : out alu_operand_source; --! ALU operand source.
 
 		-- ALU operation:
-		alu_op : out alu_operation;
+		alu_op : out alu_operation; --! ALU operation to perform for the instruction.
 
 		-- Memory transaction parameters:
-		mem_op   : out memory_operation_type;
-		mem_size : out memory_operation_size
+		mem_op   : out memory_operation_type; --! Memory operation to perform for the instruction.
+		mem_size : out memory_operation_size  --! Size of the memory operation to perform.
 	);
 end entity pp_control_unit;
 
+--! @brief Behavioural description of the instruction decoding and control unit.
 architecture behaviour of pp_control_unit is
 	signal exception       : std_logic;
 	signal exception_cause : csr_exception_cause;
@@ -56,6 +62,9 @@ begin
 	decode_exception_cause <= exception_cause when alu_op_temp /= ALU_INVALID
 		else CSR_CAUSE_INVALID_INSTR;
 
+	--! @brief   ALU control unit.
+	--! @details Decodes arithmetic and logic instructions and sets the
+	--!          control signals relating to the ALU.
 	alu_control: entity work.pp_alu_control_unit
 		port map(
 			opcode => opcode,
@@ -66,6 +75,7 @@ begin
 			alu_op => alu_op_temp
 		);
 
+	--! @brief Decodes instructions.
 	decode_ctrl: process(opcode, funct3, funct12)
 	begin
 		case opcode is
@@ -154,6 +164,7 @@ begin
 		end case;
 	end process decode_ctrl;
 
+	--! @brief Determines the write mode of instructions accessing the CSR registers.
 	decode_csr: process(opcode, funct3)
 	begin
 		if opcode = b"11100" then
@@ -172,6 +183,7 @@ begin
 		end if;
 	end process decode_csr;
 
+	--! @brief Decodes the memory operation for instructions accessing memory.
 	decode_mem: process(opcode, funct3)
 	begin
 		case opcode is

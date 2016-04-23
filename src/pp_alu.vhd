@@ -8,17 +8,25 @@ use ieee.numeric_std.all;
 
 use work.pp_types.all;
 
+--! @brief
+--!	Arithmetic Logic Unit (ALU).
+--!
+--! @details
+--! 	Performs logic and arithmetic calculations. The operation to perform
+--!	is specified by the user of the module.
 entity pp_alu is
 	port(
-		x, y      : in  std_logic_vector(31 downto 0);
-		result    : out std_logic_vector(31 downto 0);
-		operation : in alu_operation
+		x, y      : in  std_logic_vector(31 downto 0); --! Input operand.
+		result    : out std_logic_vector(31 downto 0); --! Operation result.
+		operation : in alu_operation                   --! Operation type.
 	);
 end entity pp_alu;
 
+--! @brief Behavioural description of the ALU.
 architecture behaviour of pp_alu is
 begin
 
+	--! Performs the ALU calculation.
 	calculate: process(operation, x, y)
 	begin
 		case operation is
