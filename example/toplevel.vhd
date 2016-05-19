@@ -22,9 +22,9 @@ entity toplevel is
 		reset_n : in  std_logic;
 
 		-- GPIOs:
-		-- 4x Buttons     (bits  3 downto 0)
-		-- 4x Switches    (bits  7 downto 4)
 		-- 4x LEDs        (bits 11 downto 8)
+		-- 4x Switches    (bits  7 downto 4)
+		-- 4x Buttons     (bits  3 downto 0)
 		gpio_pins : inout std_logic_vector(11 downto 0);
 
 		-- UART0 signals:
@@ -277,8 +277,8 @@ begin
 	processor: entity work.pp_potato
 		generic map(
 			RESET_ADDRESS => x"ffff8200",
-			ICACHE_AREAS => x"80ffffff",
-			ICACHE_ENABLE => true
+			ICACHE_AREAS => x"ffffffff",
+			ICACHE_ENABLE => false
 		) port map(
 			clk => system_clk,
 			timer_clk => timer_clk,

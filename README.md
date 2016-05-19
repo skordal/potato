@@ -18,7 +18,6 @@ various versions of Xilinx' Vivado, most recently version 2016.1.
 * Supports machine mode and the Mbare addressing environment defined in the RISC-V privileged architecture version 1.7.
 * Supports up to 8 individually maskable external interrupts (IRQs).
 * 5-stage "classic" pipeline.
-* Optional instruction cache for improved performance.
 * Supports the Wishbone bus, version B4.
 
 ## Peripherals
