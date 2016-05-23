@@ -26,12 +26,12 @@ struct uart
 
 /**
  * Initializes a UART instance.
- * @param module Pointer to a UART instance structure.
- * @param base   Base address of the UART hardware instance.
+ * @param module       Pointer to a UART instance structure.
+ * @param base_address Base address of the UART hardware instance.
  */
-static inline void uart_initialize(struct uart * module, volatile void * base)
+static inline void uart_initialize(struct uart * module, volatile void * base_address)
 {
-	module->registers = base;
+	module->registers = base_address;
 }
 
 /**
@@ -85,6 +85,22 @@ static inline bool uart_tx_fifo_full(struct uart * module)
 static inline void uart_tx(struct uart * module, uint8_t byte)
 {
 	module->registers[UART_REG_TRANSMIT >> 2] = byte;
+}
+
+/**
+ * Transmits an array of bytes over the UART.
+ * This function blocks until the entire array has been queued for transfer.
+ * @param module Instance object.
+ * @param array  Pointer to the aray to send on the UART.
+ * @param length Length of the array.
+ */
+static inline void uart_tx_array(struct uart * module, uint8_t * array, uint32_t length)
+{
+	for(uint32_t i = 0; i < length; ++i)
+	{
+		while(uart_tx_fifo_full(module));
+		uart_tx(module, array[i]);
+	}
 }
 
 /**
