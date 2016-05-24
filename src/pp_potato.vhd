@@ -114,12 +114,8 @@ begin
 				cache_flush => '0',
 				mem_address_in => imem_address,
 				mem_data_out => imem_data,
-				mem_data_in => (others => '0'),
-				mem_data_size => (others => '0'),
 				mem_read_req => imem_req,
 				mem_read_ack => imem_ack,
-				mem_write_req => '0',
-				mem_write_ack => open,
 				wb_inputs => icache_inputs,
 				wb_outputs => icache_outputs
 			);
