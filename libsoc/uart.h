@@ -93,13 +93,31 @@ static inline void uart_tx(struct uart * module, uint8_t byte)
  * @param module Instance object.
  * @param array  Pointer to the aray to send on the UART.
  * @param length Length of the array.
+ * @see uart_tx_string()
  */
-static inline void uart_tx_array(struct uart * module, uint8_t * array, uint32_t length)
+static inline void uart_tx_array(struct uart * module, const uint8_t * array, uint32_t length)
 {
 	for(uint32_t i = 0; i < length; ++i)
 	{
 		while(uart_tx_fifo_full(module));
 		uart_tx(module, array[i]);
+	}
+}
+
+/**
+ * Transmits a character string over the UART.
+ * This function blocks until the entire array has been queued for transfer.
+ * @param module Instance object.
+ * @param string Pointer to the string to send on the UART. The string must be
+ *               NULL-terminated.
+ * @see uart_tx_array()
+ */
+static inline void uart_tx_string(struct uart * module, const char * string)
+{
+	for(uint32_t i = 0; string[i] != 0; ++i)
+	{
+		while(uart_tx_fifo_full(module));
+		uart_tx(module, string[i]);
 	}
 }
 
