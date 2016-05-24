@@ -15,7 +15,8 @@ TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
 	-ffreestanding -fno-builtin -I../.. -I../../libsoc -std=gnu99 \
 	-Wall -Werror=implicit-function-declaration
 TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -L../libsoc \
-	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-T../potato.ld
+	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-T../potato.ld \
+	-Wl,--gc-sections
 
 OBJECTS := main.o start.o
 
