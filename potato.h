@@ -30,6 +30,9 @@
 // Interrupt bit in the cause register:
 #define POTATO_MCAUSE_INTERRUPT_BIT	31
 
+// IRQ bit in the cause register:
+#define POTATO_MCAUSE_IRQ_BIT		 4
+
 // Status register bit indices:
 #define STATUS_IE	0		// Enable Interrupts
 #define STATUS_IE1	3		// Previous value of Enable Interrupts

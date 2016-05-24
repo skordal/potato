@@ -9,71 +9,71 @@
 #include "potato.h"
 
 #include "gpio.h"
-#include "seg7.h"
-#include "sha256.h"
 #include "timer.h"
 #include "uart.h"
+
+#include "sha256.h"
+
+static struct gpio gpio0;
+static struct uart uart0;
+static struct timer timer0;
 
 static int led_status = 0;
 static volatile int hashes_per_second = 0;
 
-// Handle an exception/interrupt.
-// Arguments:
-// - cause: exception cause, see potato.h for values
-// - epc: exception return address
-// - regbase: base of the stored context, can be used for printing all
-//            registers with regbase[0] = x1 and upwards.
-void exception_handler(uint32_t cause, void * epc, void * regbase)
+static void int2string(int i, char * s);
+
+void exception_handler(uint32_t mcause, uint32_t mepc, uint32_t sp)
 {
-	if(cause == ((1 << POTATO_MCAUSE_INTERRUPT_BIT) | (POTATO_MCAUSE_IRQ_BASE + 5))) // Timer interrupt
+	if((mcause & (1 << POTATO_MCAUSE_INTERRUPT_BIT)) && (mcause & (1 << POTATO_MCAUSE_IRQ_BIT)))
 	{
-		uart_puts(IO_ADDRESS(UART_BASE), "Hashes per second: ");
-		uart_puth(IO_ADDRESS(UART_BASE), hashes_per_second);
-		uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
-		seg7_set_value(IO_ADDRESS(SEG7_BASE), hashes_per_second);
+		uint8_t irq = mcause & 0x0f;
 
-		if(led_status == 0)
+		if(irq == PLATFORM_IRQ_TIMER0)
 		{
-			gpio_set_output(IO_ADDRESS(GPIO2_BASE), 1);
-			led_status = 1;
-		} else {
-			gpio_set_output(IO_ADDRESS(GPIO2_BASE), 0);
-			led_status = 0;
-		}
+			// Blink LED0 once per second:
+			if(led_status == 0)
+			{
+				gpio_set_output(&gpio0, 0x100);
+				led_status = 1;
+			} else {
+				gpio_set_output(&gpio0, 0x000);
+				led_status = 0;
+			}
 
-		hashes_per_second = 0;
-		timer_reset(IO_ADDRESS(TIMER_BASE));
-	} else {
-		uart_puts(IO_ADDRESS(UART_BASE), "Unhandled exception!\n\r");
-		uart_puts(IO_ADDRESS(UART_BASE), "Cause: ");
-		uart_puth(IO_ADDRESS(UART_BASE), cause);
-		uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
-		uart_puts(IO_ADDRESS(UART_BASE), "EPC: ");
-		uart_puth(IO_ADDRESS(UART_BASE), (uint32_t) epc);
-		uart_puts(IO_ADDRESS(UART_BASE), "\n\r");
+			timer_clear(&timer0);
 
-		while(1) asm volatile("nop\n");
+			// Print the number of hashes since last interrupt:
+			char hps_dec[11] = {0};
+			int2string(hashes_per_second, hps_dec);
+			uart_tx_string(&uart0, hps_dec);
+			uart_tx_string(&uart0, " H/s\n\r");
+			hashes_per_second = 0;
+		} else
+			potato_disable_irq(irq);
 	}
 }
 
 int main(void)
 {
 	// Configure GPIOs:
-	gpio_set_direction(IO_ADDRESS(GPIO1_BASE), 0x0000); // Switches
-	gpio_set_direction(IO_ADDRESS(GPIO2_BASE), 0xffff); // LEDs
+	gpio_initialize(&gpio0, (volatile void *) PLATFORM_GPIO_BASE);
+	gpio_set_direction(&gpio0, 0xf00);	// Set LEDs to output, buttons and switches to input
+	gpio_set_output(&gpio0, 0x100);		// Turn LED0 on.
 
-	// Configure the 7-segment displays:
-	seg7_set_enabled_displays(IO_ADDRESS(SEG7_BASE), 0xff);
-	seg7_set_value(IO_ADDRESS(SEG7_BASE), 0);
+	// Configure the UART:
+	uart_initialize(&uart0, (volatile void *) PLATFORM_UART0_BASE);
+	uart_set_divisor(&uart0, uart_baud2divisor(115200, PLATFORM_SYSCLK_FREQ));
+	uart_tx_string(&uart0, "--- SHA256 Benchmark Application ---\r\n\n");
 
-	// Set up the timer:
-	timer_set(IO_ADDRESS(TIMER_BASE), SYSTEM_CLK_FREQ);
-
-	// Print a startup message:
-	uart_puts(IO_ADDRESS(UART_BASE), "The Potato Processor SHA256 Benchmark\n\r\n\r");
+	// Set up the timer at 1 Hz:
+	timer_initialize(&timer0, (volatile void *) PLATFORM_TIMER0_BASE);
+	timer_reset(&timer0);
+	timer_set_compare(&timer0, PLATFORM_SYSCLK_FREQ);
+	timer_start(&timer0);
 
 	// Enable interrupts:
-	potato_enable_irq(IRQ_TIMER);
+	potato_enable_irq(PLATFORM_IRQ_TIMER0);
 	potato_enable_interrupts();
 
 	struct sha256_context context;
@@ -98,5 +98,34 @@ int main(void)
 	}
 
 	return 0;
+}
+
+static void int2string(int n, char * s)
+{
+	bool first = true;
+
+	if(n == 0)
+	{
+		*s = '0';
+		return;
+	}
+
+	if(n & (1 << 31))
+	{
+		n = ~n + 1;
+		*(s++) = '-';
+	}
+
+	for(int i = 1000000000; i > 0; i /= 10)
+	{
+		if(n / i == 0 && !first)
+			*(s++) = '0';
+		else if(n / i != 0)
+		{
+			*(s++) = '0' + n / i;
+			n %= i;
+			first = false;
+		}
+	}
 }
 

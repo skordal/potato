@@ -11,13 +11,14 @@ TARGET_SIZE := $(TARGET_PREFIX)-size
 TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
 HEXDUMP ?= hexdump
 
-TARGET_CFLAGS += -m32 -march=RV32I -Wall -O3 -fomit-frame-pointer \
-	-ffreestanding -fno-builtin -I.. -I../.. -std=gnu99 \
+TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
+	-ffreestanding -fno-builtin -I../.. -I../../libsoc -std=gnu99 \
 	-Wall -Werror=implicit-function-declaration
-TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -Wl,-m,elf32lriscv \
-	-Wl,-T../potato.ld
+TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -L../libsoc \
+	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-T../potato.ld \
+	-Wl,--gc-sections
 
-OBJECTS := gpio.o main.o seg7.o sha256.o start.o timer.o uart.o utilities.o
+OBJECTS := main.o sha256.o start.o
 
 all: sha256.coe
 
@@ -41,27 +42,12 @@ clean:
 
 # Object file rules:
 
-gpio.o: gpio.c gpio.h ../platform.h
-	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
-
-main.o: main.c gpio.h timer.h seg7.h sha256.h ../platform.h ../../potato.h
-	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
-
-seg7.o: seg7.c seg7.h ../platform.h
+main.o: main.c sha256.h ../../platform.h ../../potato.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
 sha256.o: sha256.c sha256.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
-start.o: ../start.S ../platform.h
-	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
-
-timer.o: timer.c timer.h ../platform.h
-	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
-
-uart.o: uart.c uart.h ../platform.h
-	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
-
-utilities.o: utilities.c utilities.h
+start.o: ../start.S ../../platform.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 

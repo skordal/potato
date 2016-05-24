@@ -45,6 +45,7 @@ copy_data:
 	bne x2, x3, 1b		// Repeat as long as there is more data to copy
 2:
 
+// Clears the .bss (zero initialized data) section:
 .hidden clear_bss
 clear_bss:
 	la x1, __bss_begin
@@ -115,7 +116,7 @@ _machine_exception_handler:
 _machine_exception_return:
 	// Restore all registers:
 	lw x1, 0(sp)
-	#lw x2, 4(sp) <- x2 = sp, so do not load this register
+	# lw x2, 4(sp) <- x2 = sp, so do not load this register
 	lw x3, 8(sp)
 	lw x4, 12(sp)
 	lw x5, 16(sp)
