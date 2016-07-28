@@ -94,7 +94,10 @@ int main(void)
 		sha256_reset(&context);
 		sha256_hash_block(&context, block);
 		sha256_get_hash(&context, hash);
+
+		potato_disable_interrupts();
 		++hashes_per_second;
+		potato_enable_interrupts();
 	}
 
 	return 0;
