@@ -10,7 +10,7 @@ the RISC-V privileged architecture, version 1.7.
 
 The processor has been tested on a Arty board using the example SoC design provided in the `example/` directory
 and the Hello World application available in `software/hello`. Synthesis and implementation has been tested on
-various versions of Xilinx' Vivado, most recently version 2016.1.
+various versions of Xilinx' Vivado, most recently version 2016.2.
 
 ## Features
 
@@ -28,7 +28,6 @@ The project includes a variety of Wishbone-compatible peripherals for use in sys
 * GPIO - a configurable-width generic GPIO module
 * Memory - a block RAM memory module
 * UART - a UART module with hardware FIFOs and configurable baudrate
-* 7-Segment - a 7-segment display module, supporting up to 8 displays
 
 ## Quick Start/Instantiating
 
