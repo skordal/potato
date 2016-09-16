@@ -403,7 +403,7 @@ begin
 	uart1_cyc_in <= processor_cyc_out when intercon_peripheral = PERIPHERAL_UART1 else '0';
 	uart1_stb_in <= processor_stb_out when intercon_peripheral = PERIPHERAL_UART1 else '0';
 
-	intercon_eror: entity work.pp_soc_intercon
+	intercon_error: entity work.pp_soc_intercon
 		port map(
 			clk => system_clk,
 			reset => reset,
