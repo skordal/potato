@@ -1,7 +1,7 @@
 # System-On-Chip Design using the Potato Processor
 
 This folder contains an SoC design using the Potato processor. The design
-has been synthesized using Vivado 2016.1 and tested on an Arty board from
+has been synthesized using Vivado 2016.3 and tested on an Arty board from
 Digilent.
 
 ## Quick Start
