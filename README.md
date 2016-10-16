@@ -34,5 +34,14 @@ The project includes a variety of Wishbone-compatible peripherals for use in sys
 To instantiate the processor, add the source files from the `src/` folder to your project. Use the `pp_potato`
 entity to instantiate a processor with a wishbone interface. Some generics are provided to configure the processor core.
 
-An example System-on-Chip for the Xilinx Arty board can be found in the `example/` directory of the source repository.
+An example System-on-Chip for the Arty development board can be found in the `example/` directory of the source repository.
+
+## Compiler Toolchain
+
+To program the processor, you need an appropriate compiler toolchain. Follow the instructions on the [RISCV tools repository](https://github.com/riscv/riscv-tools)
+to build and install a toolchain.
+
+## Reporting bugs and issues
+
+Bugs and issues related to the Potato processor can be reported on the project's [GitHub page](https://github.com/skordal/potato).
 
