@@ -12,17 +12,17 @@ TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
 HEXDUMP ?= hexdump
 
 TARGET_CFLAGS += -m32 -march=RV32I -Wall -Os -fomit-frame-pointer \
-	-ffreestanding -fno-builtin -I../.. -I../../libsoc -std=gnu99 \
-	-Wall -Werror=implicit-function-declaration
+	-ffreestanding -fno-builtin -I../.. -I../../libsoc -std=gnu11 \
+	-Wall -Werror=implicit-function-declaration -fdata-sections -ffunction-sections
 TARGET_LDFLAGS += -m32 -march=RV32I -nostartfiles -L../libsoc \
 	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-T../potato.ld \
-	-Wl,--gc-sections
+	-Wl,--gc-sections -Wl,--Map,sha256.map
 
 OBJECTS := main.o sha256.o start.o
 
 all: sha256.coe
 
-sha256.elf: $(OBJECTS)
+sha256.elf: $(OBJECTS) ../potato.ld
 	$(TARGET_LD) -o sha256.elf $(TARGET_LDFLAGS) $(OBJECTS)
 	$(TARGET_SIZE) sha256.elf
 
@@ -38,11 +38,11 @@ sha256.coe: sha256.bin
 
 clean:
 	-$(RM) $(OBJECTS)
-	-$(RM) sha256.elf sha256.bin sha256.coe
+	-$(RM) sha256.elf sha256.bin sha256.coe sha256.map
 
 # Object file rules:
 
-main.o: main.c sha256.h ../../platform.h ../../potato.h
+main.o: main.c sha256.h ../../platform.h ../../potato.h ../../libsoc/timer.h ../../libsoc/uart.h ../../libsoc/icerror.h ../../libsoc/gpio.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
 sha256.o: sha256.c sha256.h

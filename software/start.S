@@ -37,10 +37,10 @@ copy_data:
 	beq x2, x3, 2f		// Skip if there is no data to copy
 
 1:
-	lw x4, (x1)
-	sw x4, (x2)
-	addi x1, x1, 4
-	addi x2, x2, 4
+	lb x4, (x1)
+	sb x4, (x2)
+	addi x1, x1, 1
+	addi x2, x2, 1
 
 	bne x2, x3, 1b		// Repeat as long as there is more data to copy
 2:
