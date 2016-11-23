@@ -19,18 +19,14 @@ SECTIONS
 		*(.init)
 		*(.text*)
 		__text_end = .;
+		*(.rodata*)
 	} > AEE_ROM
 
-	.data : AT(ADDR(.text) + SIZEOF(.text))
+	.data 0xffffc000 : AT(ADDR(.text) + SIZEOF(.text))
 	{
 		__data_begin = .;
-		*(.eh_frame*)
-		/* The .rodata could be placed in ROM, but the ROM module does not
-		 * currently support anything other than 32-bit accesses, so it must
-		 * be placed in .data until this has been fixed.
-		 */
-		*(.rodata*)
 		*(.data*)
+		*(.eh_frame*)
 		__data_end = ALIGN(4);
 	} > AEE_RAM
 

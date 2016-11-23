@@ -139,6 +139,7 @@ architecture behaviour of toplevel is
 	signal aee_rom_dat_out : std_logic_vector(31 downto 0);
 	signal aee_rom_cyc_in  : std_logic;
 	signal aee_rom_stb_in  : std_logic;
+	signal aee_rom_sel_in  : std_logic_vector(3 downto 0);
 	signal aee_rom_ack_out : std_logic;
 
 	-- AEE RAM signals:
@@ -445,11 +446,13 @@ begin
 			wb_dat_out => aee_rom_dat_out,
 			wb_cyc_in => aee_rom_cyc_in,
 			wb_stb_in => aee_rom_stb_in,
+			wb_sel_in => aee_rom_sel_in,
 			wb_ack_out => aee_rom_ack_out
 		);
 	aee_rom_adr_in <= processor_adr_out(aee_rom_adr_in'range);
 	aee_rom_cyc_in <= processor_cyc_out when intercon_peripheral = PERIPHERAL_AEE_ROM else '0';
 	aee_rom_stb_in <= processor_stb_out when intercon_peripheral = PERIPHERAL_AEE_ROM else '0';
+	aee_rom_sel_in <= processor_sel_out;
 
 	aee_ram: entity work.pp_soc_memory
 		generic map(
