@@ -41,7 +41,7 @@ begin
 			douta => read_data
 		);
 
-	data_mask <= (31 downto 26 => wb_sel_in(3), 25 downto 16 => wb_sel_in(2),
+	data_mask <= (31 downto 24 => wb_sel_in(3), 23 downto 16 => wb_sel_in(2),
 		15 downto 8 => wb_sel_in(1), 7 downto 0 => wb_sel_in(0));
 
 	wb_dat_out <= read_data and data_mask;
