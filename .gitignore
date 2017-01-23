@@ -7,6 +7,7 @@ develop/
 *.elf
 *.bin
 *.coe
+*.map
 
 # LaTeX Files:
 *.aux
