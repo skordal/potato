@@ -1,6 +1,0 @@
-# RISC-V ISA Tests
-
-This directory contains a mirror of various tests from the riscv-tests repository
-(https://github.com/riscv/riscv-tests) that are used to verify the correct operation
-of the Potato processor.
-

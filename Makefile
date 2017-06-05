@@ -37,47 +37,7 @@ TESTBENCHES := \
 TOOLCHAIN_PREFIX ?= riscv64-unknown-elf
 
 # ISA tests to use from the riscv-tests repository:
-RISCV_TESTS += \
-	simple \
-	add \
-	addi \
-	and \
-	andi \
-	auipc \
-	beq \
-	bge \
-	bgeu \
-	blt \
-	bltu \
-	bne \
-	jal \
-	jalr \
-	j \
-	or \
-	ori \
-	sll \
-	slli \
-	slt \
-	slti \
-	sra \
-	srai \
-	srl \
-	srli \
-	sub \
-	sb \
-	sh \
-	sw \
-	xor \
-	xori \
-	lui \
-	lb \
-	lbu \
-	lh \
-	lhu \
-	lw \
-	ma_addr \
-	sbreak \
-	scall
+RISCV_TESTS +=
 
 # Local tests to run:
 LOCAL_TESTS ?= \
