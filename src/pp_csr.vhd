@@ -68,7 +68,7 @@ package pp_csr is
 	constant CSR_MFROMHOST : csr_address := x"781";
 
 	-- Values used as control register IDs in ERET:
-	constant CSR_EPC_ERET   : csr_address := x"100";
+	constant CSR_EPC_MRET   : csr_address := x"302";
 
 	-- Offset into the exception vector for handling machine-mode exceptions:
 	constant CSR_MTVEC_M_OFFSET : natural := 192;

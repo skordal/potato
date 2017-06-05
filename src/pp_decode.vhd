@@ -111,7 +111,7 @@ begin
 
 	decode_csr_addr: process(immediate_value)
 	begin
-		if immediate_value(11 downto 0) = CSR_EPC_ERET then
+		if immediate_value(11 downto 0) = CSR_EPC_MRET then
 			csr_addr <= CSR_MEPC;
 		else
 			csr_addr <= immediate_value(11 downto 0);

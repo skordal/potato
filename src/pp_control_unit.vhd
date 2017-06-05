@@ -141,7 +141,7 @@ begin
 						exception <= '1';
 						exception_cause <= CSR_CAUSE_BREAKPOINT;
 						branch <= BRANCH_NONE;
-					elsif funct12 = CSR_EPC_ERET then
+					elsif funct12 = CSR_EPC_MRET then
 						exception <= '0';
 						exception_cause <= CSR_CAUSE_NONE;
 						branch <= BRANCH_SRET;
