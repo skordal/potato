@@ -66,7 +66,6 @@ init_stack:
 .hidden call_main
 call_main:
 	call main
-	csrw mtohost, a0
 
 1:
 	j 1b
@@ -148,5 +147,5 @@ _machine_exception_return:
 	lw x31, 120(sp)
 	addi sp, sp, 124
 
-	eret
+	mret
 
