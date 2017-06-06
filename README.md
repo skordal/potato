@@ -9,15 +9,16 @@ of the RISC-V specification version 2.0 and supports the machine mode and the Mb
 the RISC-V privileged architecture, version 1.7.
 
 The processor has been tested on a Arty board using the example SoC design provided in the `example/` directory
-and the Hello World application available in `software/hello`. Synthesis and implementation has been tested on
-various versions of Xilinx' Vivado, most recently version 2016.4.
+and the Hello World application available in `software/hello`, as well as the SHA256 benchmark application available
+in `software/sha256`. Synthesis and implementation has been tested on various versions of Xilinx' Vivado, most recently
+version 2017.1.
 
 ## Features
 
 * Supports the complete 32-bit RISC-V base integer ISA (RV32I) version 2.0.
 * Supports machine mode and the Mbare addressing environment defined in the RISC-V privileged architecture version 1.7.
 * Supports up to 8 individually maskable external interrupts (IRQs).
-* 5-stage "classic" pipeline.
+* 5-stage "classic" RISC pipeline.
 * Supports the Wishbone bus, version B4.
 
 ## Peripherals
