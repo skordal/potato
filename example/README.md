@@ -1,7 +1,7 @@
 # System-On-Chip Design using the Potato Processor
 
 This folder contains an SoC design using the Potato processor. The design
-has been synthesized using Vivado 2016.4 and tested on an Arty board from
+has been synthesized using Vivado 2017.1 and tested on an Arty board from
 Digilent.
 
 ## Quick Start
@@ -9,7 +9,8 @@ Digilent.
 In order to test the design yourself, first import all source files from the
 `src/`, `soc/` and `example/` directories into your project. Some of the added
 files may not be used by the design; in the hierarchy view in Vivado you can
-remove any file that is not included under the `toplevel` entity.
+remove any file that is not included under the `toplevel` entity. Make sure
+that the "Target language" in the project settings is set to VHDL.
 
 In addition to the source files, a couple of IP modules are needed to take
 advantage of the FPGAs builtin resources - the following sections deal with
