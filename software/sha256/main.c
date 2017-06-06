@@ -52,9 +52,9 @@ void exception_handler(uint32_t mcause, uint32_t mepc, uint32_t sp)
 			}
 			case PLATFORM_IRQ_TIMER1:
 			{
-				led_status <<= 1;
+				led_status >>= 1;
 				if((led_status & 0xf) == 0)
-					led_status = 1;
+					led_status = 0x8;
 
 				gpio_set_output(&gpio0, (led_status & 0xf) << 8);
 				timer_clear(&timer1);
