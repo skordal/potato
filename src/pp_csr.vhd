@@ -51,7 +51,7 @@ package pp_csr is
 	constant CSR_MHARTID  : csr_address := x"f10";
 
 	constant CSR_MSTATUS  : csr_address := x"300";
-	constant CSR_MTVEC    : csr_address := x"301";
+	constant CSR_MTVEC    : csr_address := x"305";
 	constant CSR_MTDELEG  : csr_address := x"302";
 	constant CSR_MIE      : csr_address := x"304";
 
