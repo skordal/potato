@@ -40,9 +40,7 @@ TOOLCHAIN_PREFIX ?= riscv64-unknown-elf
 RISCV_TESTS +=
 
 # Local tests to run:
-LOCAL_TESTS ?= \
-	timer \
-	sw-jal
+LOCAL_TESTS +=
 
 all: potato.prj run-tests
 
