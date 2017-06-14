@@ -219,10 +219,12 @@ begin
 				case read_address is
 
 					-- Machine mode registers:
-					when CSR_MCPUID => -- CPU features register
+					when CSR_MISA => -- ISA features register
 						read_data_out <= (
-								8 => '1', -- Set the bit corresponding to I
+								30 => '1', -- Set the MXL0 bit, indicating XLEN = 32
+								 8 => '1', -- Set the bit corresponding to I (RV32I)
 								others => '0');
+
 					when CSR_MIMPID => -- Implementation/Implementor ID
 						read_data_out <= (31 downto 16 => '0') & x"8000";
 						-- The anonymous source ID, 0x8000 is used until an open-source implementation ID
