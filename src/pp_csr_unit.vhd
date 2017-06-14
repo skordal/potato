@@ -219,18 +219,6 @@ begin
 				case read_address is
 
 					-- Machine mode registers:
-					when CSR_MISA => -- ISA features register
-						read_data_out <= (
-								30 => '1', -- Set the MXL0 bit, indicating XLEN = 32
-								 8 => '1', -- Set the bit corresponding to I (RV32I)
-								others => '0');
-
-					when CSR_MIMPID => -- Implementation/Implementor ID
-						read_data_out <= (31 downto 16 => '0') & x"8000";
-						-- The anonymous source ID, 0x8000 is used until an open-source implementation ID
-						-- is available for use.
-					when CSR_MHARTID => -- Hardware thread ID
-						read_data_out <= PROCESSOR_ID;
 					when CSR_MFROMHOST => -- Data from a host environment
 						read_data_out <= fromhost;
 					when CSR_MSTATUS => -- Status register
@@ -252,6 +240,21 @@ begin
 						read_data_out <= mbadaddr;
 					when CSR_MCAUSE => -- Exception cause
 						read_data_out <= mcause(5) & (30 downto 5 => '0') & mcause(4 downto 0); --to_std_logic_vector(mcause);
+
+					-- Machine information registers:
+					when CSR_MISA => -- ISA features register
+						read_data_out <= (
+								30 => '1', -- Set the MXL0 bit, indicating XLEN = 32
+								 8 => '1', -- Set the bit corresponding to I (RV32I)
+								others => '0');
+					when CSR_MVENDORID => -- Vendor ID
+						read_data_out <= (others => '0'); -- Use 0 to indicate a non-commercial implementation
+					when CSR_MARCHID => -- Architecture ID
+						read_data_out <= (others => '0'); -- There is no architecture ID for the Potato core
+					when CSR_MIMPID => -- Implementation ID
+						read_data_out <= x"47495400"; -- Source of this implementation: 'G', 'I', 'T', 0
+					when CSR_MHARTID => -- Hardware thread ID
+						read_data_out <= PROCESSOR_ID;
 
 					-- Timers and counters:
 					when CSR_MTIME => -- Machine time counter register
