@@ -268,7 +268,7 @@ begin
 	clkgen: entity work.clock_generator
 		port map(
 			clk => clk,
-			reset_n => reset_n,
+			resetn => reset_n,
 			system_clk => system_clk,
 			timer_clk => timer_clk,
 			locked => system_clk_locked

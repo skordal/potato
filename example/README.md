@@ -1,7 +1,7 @@
 # System-On-Chip Design using the Potato Processor
 
 This folder contains an SoC design using the Potato processor. The design
-has been synthesized using Vivado 2017.1 and tested on an Arty board from
+has been synthesized using Vivado 2017.2 and tested on an Arty board from
 Digilent.
 
 ## Quick Start
@@ -36,6 +36,9 @@ of `clk_out1` to 50 MHz. This will be the main system clock. Set the frequency o
 If you have peripherals that require additional clocks, you can enable more clock
 outputs here.
 
+Rename `clk_out1` to `system_clk` and `clk_out2` to `timer_clk` to match the port
+names expected by the toplevel entity.
+
 At the bottom of the "Output Clocks" tab, find the "Enable Optional Inputs/Outputs"
 section and select `reset` and `locked` signals. The `locked` signal is used to
 release the system reset signal when the clock signal is stable.
@@ -43,14 +46,6 @@ release the system reset signal when the clock signal is stable.
 Set the "Reset Type" to "Active low" - this makes it possible to connect the reset
 signal for the clock generator directly to the processor reset button on the development
 board.
-
-To make the names of the outputs on the clock generator match the names expected by
-the toplevel entity, go to the "Port Renaming" tab and input the following settings:
-
-* Rename the primary input clock to `clk`.
-* Rename `clk_out1` to `system_clk`.
-* Rename `clk_out2` to `timer_clk`.
-* Rename `resetn` to `reset_n`.
 
 ### PAEE ROM
 
