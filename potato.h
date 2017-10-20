@@ -34,13 +34,16 @@
 #define POTATO_MCAUSE_IRQ_BIT		 4
 
 // Status register bit indices:
-#define STATUS_IE	0		// Enable Interrupts
-#define STATUS_IE1	3		// Previous value of Enable Interrupts
+#define STATUS_MIE	3		// Enable Interrupts
+#define STATUS_MPIE	7		// Previous value of Enable Interrupts
 
-#define potato_enable_interrupts()	asm volatile("csrsi mstatus, 1 << %[ie_bit]\n" \
-		:: [ie_bit] "i" (STATUS_IE))
-#define potato_disable_interrupts()	asm volatile("csrci mstatus, 1 << %[ie_bit] | 1 << %[ie1_bit]\n" \
-		:: [ie_bit] "i" (STATUS_IE), [ie1_bit] "i" (STATUS_IE1))
+#define potato_enable_interrupts()	asm volatile("csrsi mstatus, 1 << %[mie_bit]\n" \
+		:: [mie_bit] "i" (STATUS_MIE))
+#define potato_disable_interrupts() \
+	do { \
+		uint32_t temp = 1 << STATUS_MIE | 1 << STATUS_MPIE; \
+		asm volatile("csrc mstatus, %[temp]\n" :: [temp] "r" (temp)); \
+	} while(0)
 
 #define potato_write_host(data)	\
 	do { \

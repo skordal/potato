@@ -76,8 +76,8 @@ package pp_csr is
 	constant CSR_MTVEC_M_OFFSET : natural := 192;
 
 	-- Status register bit indices:
-	constant CSR_SR_IE  : natural := 0;
-	constant CSR_SR_IE1 : natural := 3;
+	constant CSR_SR_MIE_INDEX  : natural := 3;
+	constant CSR_SR_MPIE_INDEX : natural := 7;
 
 	-- MIE and MIP register bit indices:
 	constant CSR_MIE_MSIE : natural := 3;
@@ -95,7 +95,7 @@ package pp_csr is
 		end record;
 
 	--! Creates the value of the mstatus registe from the EI and EI1 bits.
-	function csr_make_mstatus(ie, ie1 : in std_logic) return std_logic_vector;
+	function csr_make_mstatus(mie, mpie : in std_logic) return std_logic_vector;
 
 end package pp_csr;
 
@@ -107,16 +107,12 @@ package body pp_csr is
 		return (31 => input(5), 30 downto 5 => '0') & input(4 downto 0);
 	end function to_std_logic_vector;
 
-	function csr_make_mstatus(ie, ie1 : in std_logic) return std_logic_vector is
+	function csr_make_mstatus(mie, mpie : in std_logic) return std_logic_vector is
 		variable retval : std_logic_vector(31 downto 0);
 	begin
 		retval := (
-			11 downto 10 => '1', -- PRV3
-			 8 downto  7 => '1', -- PRV2
-			 5 downto  4 => '1', -- PRV1
-			 CSR_SR_IE1 => ie1,  -- IE1
-			 2 downto  1 => '1', -- PRV
-			 CSR_SR_IE => ie,    -- IE
+			CSR_SR_MIE_INDEX => mie,
+			CSR_SR_MPIE_INDEX => mpie,
 			others => '0');
 		return retval;
 	end function csr_make_mstatus;

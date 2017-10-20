@@ -477,16 +477,16 @@ begin
 			exception_context_forwarded <= mem_exception_context;
 		elsif mem_csr_write /= CSR_WRITE_NONE and mem_csr_addr = CSR_MSTATUS then
 			exception_context_forwarded <= (
-				ie => mem_csr_value(CSR_SR_IE),
-				ie1 => mem_csr_value(CSR_SR_IE1),
+				ie => mem_csr_value(CSR_SR_MIE_INDEX),
+				ie1 => mem_csr_value(CSR_SR_MPIE_INDEX),
 				cause => exception_cause,
 				badaddr => exception_addr);
 		elsif wb_exception = '1' then
 			exception_context_forwarded <= wb_exception_context;
 		elsif wb_csr_write /= CSR_WRITE_NONE and wb_csr_addr = CSR_MSTATUS then
 			exception_context_forwarded <= (
-				ie => wb_csr_value(CSR_SR_IE),
-				ie1 => wb_csr_value(CSR_SR_IE1),
+				ie => wb_csr_value(CSR_SR_MIE_INDEX),
+				ie1 => wb_csr_value(CSR_SR_MPIE_INDEX),
 				cause => exception_cause,
 				badaddr => exception_addr);
 		else

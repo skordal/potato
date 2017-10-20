@@ -179,8 +179,8 @@ begin
 				if write_mode /= CSR_WRITE_NONE then
 					case write_address is
 						when CSR_MSTATUS => -- Status register
-							ie1 <= write_data_in(CSR_SR_IE1);
-							ie <= write_data_in(CSR_SR_IE);
+							ie1 <= write_data_in(CSR_SR_MPIE_INDEX);
+							ie <= write_data_in(CSR_SR_MIE_INDEX);
 						when CSR_MSCRATCH => -- Scratch register
 							mscratch <= write_data_in;
 						when CSR_MEPC => -- Exception return address
@@ -250,7 +250,7 @@ begin
 					when CSR_MVENDORID => -- Vendor ID
 						read_data_out <= (others => '0'); -- Use 0 to indicate a non-commercial implementation
 					when CSR_MARCHID => -- Architecture ID
-						read_data_out <= (others => '0'); -- There is no architecture ID for the Potato core
+						read_data_out <= (others => '0'); -- Use 0 to indicate an unsupported field.
 					when CSR_MIMPID => -- Implementation ID
 						read_data_out <= x"47495400"; -- Source of this implementation: 'G', 'I', 'T', 0
 					when CSR_MHARTID => -- Hardware thread ID
