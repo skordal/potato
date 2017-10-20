@@ -56,7 +56,14 @@ void exception_handler(uint32_t mcause, uint32_t mepc, uint32_t sp)
 				if((led_status & 0xf) == 0)
 					led_status = 0x8;
 
-				gpio_set_output(&gpio0, (led_status & 0xf) << 8);
+				// Read the switches to determine which LEDs should be used:
+				uint32_t switch_mask = (gpio_get_input(&gpio0) >> 4) & 0xf;
+
+				// Read the buttons and turn on the corresponding LED regardless of the switch settings:
+				uint32_t button_mask = gpio_get_input(&gpio0) & 0xf;
+
+				// Set the LEDs:
+				gpio_set_output(&gpio0, ((led_status & switch_mask) | button_mask) << 8);
 				timer_clear(&timer1);
 				break;
 			}
