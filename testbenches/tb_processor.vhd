@@ -8,6 +8,7 @@ use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
+use work.pp_types.all;
 use work.pp_constants.all;
 
 entity tb_processor is
@@ -54,6 +55,9 @@ architecture testbench of tb_processor is
 	signal tohost_write_en   : std_logic;
 	signal fromhost_write_en : std_logic := '0';
 
+	-- Test context:
+	signal test_context_out  : test_context;
+
 	-- External interrupt input:
 	signal irq : std_logic_vector(7 downto 0) := (others => '0');
 
@@ -98,6 +102,7 @@ begin
 			tohost_write_en => tohost_write_en,
 			fromhost_data => fromhost_data,
 			fromhost_write_en => fromhost_write_en,
+			test_context_out => test_context_out,
 			irq => irq
 		);
 

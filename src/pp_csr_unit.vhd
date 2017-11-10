@@ -33,6 +33,9 @@ entity pp_csr_unit is
 		tohost_data      : out std_logic_vector(31 downto 0);
 		tohost_updated   : out std_logic;
 
+		-- Test interface:
+		test_context_out : out test_context;
+
 		-- Read port:
 		read_address   : in csr_address;
 		read_data_out  : out std_logic_vector(31 downto 0);
@@ -85,7 +88,7 @@ architecture behaviour of pp_csr_unit is
 	signal fromhost: std_logic_vector(31 downto 0);
 
 	-- Test and debug register:
-	signal test : test_context;
+	signal test_register : test_context;
 
 	-- Interrupt signals:
 	signal timer_interrupt    : std_logic;
@@ -102,6 +105,9 @@ begin
 
 	-- The two upper bits of the CSR address encodes the accessibility of the CSR:
 	read_writeable <= read_address(11 downto 10) /= b"11";
+
+	--! Output the current test state:
+	test_context_out <= test_register;
 
 	--! Updates the FROMHOST register when new data is available.
 	htif_fromhost: process(clk)
@@ -173,7 +179,7 @@ begin
 				mie <= (others => '0');
 				ie <= '0';
 				ie1 <= '0';
-				test <= (TEST_IDLE, (others => '0'));
+				test_register <= (TEST_IDLE, (others => '0'));
 			else
 				if exception_context_write = '1' then
 					ie <= exception_context.ie;
@@ -202,7 +208,7 @@ begin
 						when CSR_MIP => -- Interrupt pending register:
 							software_interrupt <= write_data_in(CSR_MIP_MSIP);
 						when CSR_TEST => -- Test and debug register:
-							test <= std_logic_to_test_context(write_data_in);
+							test_register <= std_logic_to_test_context(write_data_in);
 						when others =>
 							-- Ignore writes to invalid or read-only registers
 					end case;
@@ -285,7 +291,7 @@ begin
 
 					-- Potato extensions:
 					when CSR_TEST =>
-						read_data_out <= test_context_to_std_logic(test);
+						read_data_out <= test_context_to_std_logic(test_register);
 
 					-- Return zero from write-only registers and invalid register addresses:
 					when others =>

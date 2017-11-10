@@ -34,6 +34,9 @@ entity pp_potato is
 		tohost_data      : out std_logic_vector(31 downto 0);
 		tohost_updated   : out std_logic;
 
+		-- Test interface:
+		test_context_out : out test_context;
+
 		-- Wishbone interface:
 		wb_adr_out : out std_logic_vector(31 downto 0);
 		wb_sel_out : out std_logic_vector( 3 downto 0);
@@ -97,6 +100,7 @@ begin
 			fromhost_write_en => fromhost_updated,
 			tohost_data => tohost_data,
 			tohost_write_en => tohost_updated,
+			test_context_out => test_context_out,
 			irq => irq
 		);
 

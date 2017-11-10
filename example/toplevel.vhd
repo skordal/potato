@@ -289,6 +289,7 @@ begin
 			fromhost_updated => '0',
 			tohost_data => open,
 			tohost_updated => open,
+			test_context_out => open,
 			wb_adr_out => processor_adr_out,
 			wb_dat_out => processor_dat_out,
 			wb_dat_in => processor_dat_in,
