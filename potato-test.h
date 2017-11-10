@@ -1,5 +1,5 @@
 // The Potato Processor
-// (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
+// (c) Kristian Klomsten Skordal 2017 <kristian.skordal@wafflemail.net>
 // Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 #ifndef POTATO_TEST_H
