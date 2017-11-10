@@ -24,16 +24,17 @@
 
 #define POTATO_TEST_START(testnum, tempreg) \
 	li tempreg, testnum; \
+	slli tempreg, tempreg, 2; \
 	ori tempreg, tempreg, POTATO_TEST_STATE_RUNNING; \
 	csrw POTATO_TEST_CSR, tempreg;
 
 #define POTATO_TEST_FAIL() \
-	csrrci x0, POTATO_TEST_CSR, 3; \
-	csrrsi x0, POTATO_TEST_CSR, POTATO_TEST_STATE_FAILED;
+	csrci POTATO_TEST_CSR, 3; \
+	csrsi POTATO_TEST_CSR, POTATO_TEST_STATE_FAILED;
 
 #define POTATO_TEST_PASS() \
-	csrrci x0, POTATO_TEST_CSR, 3; \
-	csrrsi x0, POTATO_TEST_CSR, POTATO_TEST_STATE_PASSED;
+	csrci POTATO_TEST_CSR, 3; \
+	csrsi POTATO_TEST_CSR, POTATO_TEST_STATE_PASSED;
 #else
 
 #define POTATO_TEST_START(testnum) \
