@@ -87,23 +87,23 @@ package body pp_types is
 	begin
 		case input.state is
 			when TEST_IDLE =>
-				retval(31 downto 30) := b"00";
+				retval(1 downto 0) := b"00";
 			when TEST_RUNNING =>
-				retval(31 downto 30) := b"01";
+				retval(1 downto 0) := b"01";
 			when TEST_FAILED =>
-				retval(31 downto 30) := b"10";
+				retval(1 downto 0) := b"10";
 			when TEST_PASSED =>
-				retval(31 downto 30) := b"11";
+				retval(1 downto 0) := b"11";
 		end case;
 
-		retval(29 downto 0) := input.number;
+		retval(31 downto 2) := input.number;
 		return retval;
 	end function test_context_to_std_logic;
 
 	function std_logic_to_test_context(input : in std_logic_vector(31 downto 0)) return test_context is
 		variable retval : test_context;
 	begin
-		case input(31 downto 30) is
+		case input(1 downto 0) is
 			when b"00" =>
 				retval.state := TEST_IDLE;
 			when b"01" =>
@@ -116,7 +116,7 @@ package body pp_types is
 				retval.state := TEST_FAILED;
 		end case;
 
-		retval.number := input(29 downto 0);
+		retval.number := input(31 downto 2);
 		return retval;
 	end function std_logic_to_test_context;
 
