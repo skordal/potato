@@ -13,7 +13,7 @@ if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
 fi
 
 if [ -z "$TOOLCHAIN_PREFIX" ]; then
-	TOOLCHAIN_PREFIX=riscv64-unknown-elf
+	TOOLCHAIN_PREFIX=riscv32-unknown-elf
 fi;
 
 $TOOLCHAIN_PREFIX-objdump -d -w $1 | sed '1,5d' | awk '!/:$/ { print $2; }' | sed '/^$/d' > $2; \

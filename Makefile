@@ -33,13 +33,17 @@ TESTBENCHES := \
 	testbenches/tb_soc.vhd \
 	soc/pp_soc_memory.vhd
 
-TOOLCHAIN_PREFIX ?= riscv64-unknown-elf
+TOOLCHAIN_PREFIX ?= riscv32-unknown-elf
 
 # ISA tests to use from the riscv-tests repository:
 RISCV_TESTS +=
 
 # Local tests to run:
 LOCAL_TESTS +=
+
+# Compiler flags to use when building tests:
+TARGET_CFLAGS += -march=rv32i -Wall -O0
+TARGET_LDFLAGS +=
 
 all: potato.prj run-tests
 
@@ -50,6 +54,7 @@ potato.prj:
 	done
 
 copy-riscv-tests:
+	test -d tests || mkdir tests
 	for test in $(RISCV_TESTS); do \
 		cp riscv-tests/$$test.S tests; \
 	done
@@ -58,8 +63,8 @@ compile-tests: copy-riscv-tests
 	test -d tests-build || mkdir tests-build
 	for test in $(RISCV_TESTS) $(LOCAL_TESTS); do \
 		echo "Compiling test $$test..."; \
-		$(TOOLCHAIN_PREFIX)-gcc -c -m32 -march=RV32I -Iriscv-tests -o tests-build/$$test.o tests/$$test.S; \
-		$(TOOLCHAIN_PREFIX)-ld -m elf32lriscv -T tests.ld tests-build/$$test.o -o tests-build/$$test.elf; \
+		$(TOOLCHAIN_PREFIX)-gcc -c $(TARGET_CFLAGS) -DPOTATO_TEST_ASSEMBLY -Iriscv-tests -o tests-build/$$test.o tests/$$test.S; \
+		$(TOOLCHAIN_PREFIX)-ld $(TARGET_LDFLAGS) -T tests.ld tests-build/$$test.o -o tests-build/$$test.elf; \
 		scripts/extract_hex.sh tests-build/$$test.elf tests-build/$$test-imem.hex tests-build/$$test-dmem.hex; \
 	done
 
