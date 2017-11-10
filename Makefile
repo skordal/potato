@@ -36,7 +36,8 @@ TESTBENCHES := \
 TOOLCHAIN_PREFIX ?= riscv32-unknown-elf
 
 # ISA tests to use from the riscv-tests repository:
-RISCV_TESTS +=
+RISCV_TESTS += \
+	simple
 
 # Local tests to run:
 LOCAL_TESTS +=

@@ -15,7 +15,7 @@ entity tb_processor is
 	generic(
 		IMEM_SIZE : natural := 4096; --! Size of the instruction memory in bytes.
 		DMEM_SIZE : natural := 4096; --! Size of the data memory in bytes.
-		RESET_ADDRESS   : std_logic_vector := x"00000200"; --! Processor reset address
+		RESET_ADDRESS   : std_logic_vector := x"00000100"; --! Processor reset address
 		IMEM_START_ADDR : std_logic_vector := x"00000100"; --! Instruction memory start address
 		IMEM_FILENAME   : string := "imem_testfile.hex";   --! File containing the contents of instruction memory.
 		DMEM_FILENAME   : string := "dmem_testfile.hex"    --! File containing the contents of data memory.
