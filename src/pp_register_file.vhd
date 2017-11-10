@@ -34,9 +34,6 @@ architecture behaviour of pp_register_file is
 	--! Register array type.
 	type regfile_array is array(0 to 31) of std_logic_vector(31 downto 0);
 
-	--! Register array.
-	--shared variable registers : regfile_array := (others => (others => '0')); -- Shared variable used to simulate write-first RAM
-
 begin
 
 	regfile: process(clk)
