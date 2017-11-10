@@ -6,9 +6,11 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.pp_types.all;
 use work.pp_csr.all;
 use work.pp_utilities.all;
 
+--! @brief Control and status unit.
 entity pp_csr_unit is
 	generic(
 		PROCESSOR_ID  : std_logic_vector(31 downto 0);
@@ -81,6 +83,9 @@ architecture behaviour of pp_csr_unit is
 
 	-- HTIF FROMHOST register:
 	signal fromhost: std_logic_vector(31 downto 0);
+
+	-- Test and debug register:
+	signal test : test_context;
 
 	-- Interrupt signals:
 	signal timer_interrupt    : std_logic;
@@ -168,6 +173,7 @@ begin
 				mie <= (others => '0');
 				ie <= '0';
 				ie1 <= '0';
+				test <= (TEST_IDLE, (others => '0'));
 			else
 				if exception_context_write = '1' then
 					ie <= exception_context.ie;
@@ -195,6 +201,8 @@ begin
 							mie <= write_data_in;
 						when CSR_MIP => -- Interrupt pending register:
 							software_interrupt <= write_data_in(CSR_MIP_MSIP);
+						when CSR_TEST => -- Test and debug register:
+							test <= std_logic_to_test_context(write_data_in);
 						when others =>
 							-- Ignore writes to invalid or read-only registers
 					end case;
@@ -274,6 +282,10 @@ begin
 						read_data_out <= counter_instret(31 downto 0);
 					when CSR_INSTRETH =>
 						read_data_out <= counter_instret(63 downto 32);
+
+					-- Potato extensions:
+					when CSR_TEST =>
+						read_data_out <= test_context_to_std_logic(test);
 
 					-- Return zero from write-only registers and invalid register addresses:
 					when others =>

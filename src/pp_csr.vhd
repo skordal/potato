@@ -69,6 +69,8 @@ package pp_csr is
 	constant CSR_MTOHOST   : csr_address := x"780";
 	constant CSR_MFROMHOST : csr_address := x"781";
 
+	constant CSR_TEST : csr_address := x"bf0";
+
 	-- Values used as control register IDs in ERET:
 	constant CSR_EPC_MRET   : csr_address := x"302";
 

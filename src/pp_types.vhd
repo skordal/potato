@@ -58,6 +58,21 @@ package pp_types is
 			ack : std_logic;
 		end record;
 
+	--! State of the currently running test:
+	type test_state is (TEST_IDLE, TEST_RUNNING, TEST_FAILED, TEST_PASSED);
+
+	--! Current test context:
+	type test_context is record
+			state  : test_state;
+			number : std_logic_vector(29 downto 0);
+		end record;
+
+	--! Converts a test context to an std_logic_vector:
+	function test_context_to_std_logic(input : in test_context) return std_logic_vector;
+
+	--! Converts an std_logic_vector to a test context:
+	function std_logic_to_test_context(input : in std_logic_vector(31 downto 0)) return test_context;
+
 end package pp_types;
 
 package body pp_types is
@@ -66,5 +81,43 @@ package body pp_types is
 	begin
 		return (input = MEMOP_TYPE_LOAD or input = MEMOP_TYPE_LOAD_UNSIGNED);
 	end function memop_is_load;
+
+	function test_context_to_std_logic(input : in test_context) return std_logic_vector is
+		variable retval : std_logic_vector(31 downto 0);
+	begin
+		case input.state is
+			when TEST_IDLE =>
+				retval(31 downto 30) := b"00";
+			when TEST_RUNNING =>
+				retval(31 downto 30) := b"01";
+			when TEST_FAILED =>
+				retval(31 downto 30) := b"10";
+			when TEST_PASSED =>
+				retval(31 downto 30) := b"11";
+		end case;
+
+		retval(29 downto 0) := input.number;
+		return retval;
+	end function test_context_to_std_logic;
+
+	function std_logic_to_test_context(input : in std_logic_vector(31 downto 0)) return test_context is
+		variable retval : test_context;
+	begin
+		case input(31 downto 30) is
+			when b"00" =>
+				retval.state := TEST_IDLE;
+			when b"01" =>
+				retval.state := TEST_RUNNING;
+			when b"10" =>
+				retval.state := TEST_FAILED;
+			when b"11" =>
+				retval.state := TEST_PASSED;
+			when others =>
+				retval.state := TEST_FAILED;
+		end case;
+
+		retval.number := input(29 downto 0);
+		return retval;
+	end function std_logic_to_test_context;
 
 end package body pp_types;
