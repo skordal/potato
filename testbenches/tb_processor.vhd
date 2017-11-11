@@ -8,8 +8,8 @@ use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
-use work.pp_types.all;
 use work.pp_constants.all;
+use work.pp_types.all;
 
 entity tb_processor is
 	generic(
@@ -267,12 +267,11 @@ begin
 		reset <= '0';
 		wait for clk_period;
 
-		wait until tohost_write_en = '1';
-		wait for clk_period; -- Let the signal "settle", because of clock edges
-		if tohost_data = x"00000001" then
+		wait until test_context_out.state = TEST_PASSED or test_context_out.state = TEST_FAILED;
+		if test_context_out.state = TEST_PASSED then
 			report "Success!" severity NOTE;
 		else
-			report "Failure in test " & integer'image(to_integer(shift_right(unsigned(tohost_data), 1))) & "!" severity NOTE;
+			report "Failure in test " & integer'image(to_integer(unsigned(test_context_out.number))) & "!" severity NOTE;
 		end if;
 
 		simulation_finished <= true;

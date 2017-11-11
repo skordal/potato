@@ -9,6 +9,7 @@ use ieee.std_logic_textio.all;
 use std.textio.all;
 
 use work.pp_constants.all;
+use work.pp_types.all;
 use work.pp_utilities.all;
 
 --! @brief Testbench providing a full SoC architecture connected with a Wishbone bus.
@@ -16,7 +17,7 @@ entity tb_soc is
 	generic(
 		IMEM_SIZE : natural := 4096; --! Size of the instruction memory in bytes.
 		DMEM_SIZE : natural := 4096; --! Size of the data memory in bytes.
-		RESET_ADDRESS   : std_logic_vector := x"00000200"; --! Processor reset address
+		RESET_ADDRESS   : std_logic_vector := x"00000100"; --! Processor reset address
 		IMEM_START_ADDR : std_logic_vector := x"00000100"; --! Instruction memory start address
 		IMEM_FILENAME   : string := "imem_testfile.hex"; --! File containing the contents of instruction memory.
 		DMEM_FILENAME   : string := "dmem_testfile.hex"  --! File containing the contents of data memory.
@@ -42,6 +43,9 @@ architecture testbench of tb_soc is
 	signal fromhost_data, tohost_data : std_logic_vector(31 downto 0);
 	signal fromhost_updated : std_logic := '0';
 	signal tohost_updated : std_logic;
+
+	-- Test context:
+	signal test_context_out  : test_context;
 
 	-- Instruction memory signals:
 	signal imem_adr_in : std_logic_vector(log2(IMEM_SIZE) - 1 downto 0);
@@ -109,6 +113,7 @@ begin
 			fromhost_updated => fromhost_updated,
 			tohost_data => tohost_data,
 			tohost_updated => tohost_updated,
+			test_context_out => test_context_out,
 			wb_adr_out => p_adr_out,
 			wb_sel_out => p_sel_out,
 			wb_cyc_out => p_cyc_out,
@@ -301,12 +306,11 @@ begin
 		wait until initialized;
 		processor_reset <= '0';
 
-		wait until tohost_updated = '1';
-		wait for clk_period; -- Let the signal "settle", because of stupid clock edges
-		if tohost_data = x"00000001" then
+		wait until test_context_out.state = TEST_PASSED or test_context_out.state = TEST_FAILED;
+		if test_context_out.state = TEST_PASSED then
 			report "Success!" severity NOTE;
 		else
-			report "Failure in test " & integer'image(to_integer(shift_right(unsigned(tohost_data), 1))) & "!" severity NOTE;
+			report "Failure in test " & integer'image(to_integer(unsigned(test_context_out.number))) & "!" severity NOTE;
 		end if;
 
 		simulation_finished <= true;
