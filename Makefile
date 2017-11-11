@@ -38,7 +38,42 @@ TOOLCHAIN_PREFIX ?= riscv32-unknown-elf
 
 # ISA tests to use from the riscv-tests repository:
 RISCV_TESTS += \
-	simple
+	simple \
+	add \
+	addi \
+	and \
+	andi \
+	auipc \
+	beq \
+	bge \
+	bgeu \
+	blt \
+	bltu \
+	bne \
+	jal \
+	jalr \
+	lb \
+	lbu \
+	lh \
+	lhu \
+	lui \
+	lw \
+	or \
+	ori \
+	sb \
+	sh \
+	sll \
+	slt \
+	slti \
+	sltiu \
+	sltu \
+	sra \
+	srai \
+	srl \
+	sub \
+	sw \
+	xor \
+	xori
 
 # Local tests to run:
 LOCAL_TESTS +=

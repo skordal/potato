@@ -1,12 +1,10 @@
 # See LICENSE for license details.
 
 #*****************************************************************************
-# simple.S
+# auipc.S
 #-----------------------------------------------------------------------------
 #
-# This is the most basic self checking test. If your simulator does not
-# pass thiss then there is little chance that it will pass any of the
-# more complicated self checking tests.
+# Test auipc instruction.
 #
 
 #include "riscv_test.h"
@@ -15,7 +13,21 @@
 RVTEST_RV32M
 RVTEST_CODE_BEGIN
 
-RVTEST_PASS
+  TEST_CASE(2, a0, 10000, \
+    .align 3; \
+    lla a0, 1f + 10000; \
+    jal a1, 1f; \
+    1: sub a0, a0, a1; \
+  )
+
+  TEST_CASE(3, a0, -10000, \
+    .align 3; \
+    lla a0, 1f - 10000; \
+    jal a1, 1f; \
+    1: sub a0, a0, a1; \
+  )
+
+  TEST_PASSFAIL
 
 RVTEST_CODE_END
 
