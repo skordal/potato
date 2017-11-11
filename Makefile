@@ -8,6 +8,7 @@ SOURCE_FILES := \
 	src/pp_alu.vhd \
 	src/pp_alu_mux.vhd \
 	src/pp_alu_control_unit.vhd \
+	src/pp_icache.vhd \
 	src/pp_comparator.vhd \
 	src/pp_constants.vhd \
 	src/pp_control_unit.vhd \
