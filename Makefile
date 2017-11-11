@@ -47,7 +47,7 @@ LOCAL_TESTS +=
 TARGET_CFLAGS += -march=rv32i -Wall -O0
 TARGET_LDFLAGS +=
 
-all: potato.prj run-tests
+all: potato.prj run-tests run-soc-tests
 
 potato.prj:
 	-$(RM) potato.prj
