@@ -39,11 +39,6 @@ architecture testbench of tb_soc is
 	-- Interrupts:
 	signal irq : std_logic_vector(7 downto 0) := (others => '0');
 
-	-- HTIF:
-	signal fromhost_data, tohost_data : std_logic_vector(31 downto 0);
-	signal fromhost_updated : std_logic := '0';
-	signal tohost_updated : std_logic;
-
 	-- Test context:
 	signal test_context_out  : test_context;
 
@@ -109,10 +104,6 @@ begin
 			reset => processor_reset,
 			timer_clk => timer_clk,
 			irq => irq,
-			fromhost_data => fromhost_data,
-			fromhost_updated => fromhost_updated,
-			tohost_data => tohost_data,
-			tohost_updated => tohost_updated,
 			test_context_out => test_context_out,
 			wb_adr_out => p_adr_out,
 			wb_sel_out => p_sel_out,

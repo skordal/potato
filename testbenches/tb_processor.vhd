@@ -49,12 +49,6 @@ architecture testbench of tb_processor is
 	signal dmem_read_req, dmem_write_req : std_logic;
 	signal dmem_read_ack, dmem_write_ack : std_logic := '1';
 
-	-- Tohost/Fromhost:
-	signal tohost_data       : std_logic_vector(31 downto 0);
-	signal fromhost_data     : std_logic_vectoR(31 downto 0) := (others => '0');
-	signal tohost_write_en   : std_logic;
-	signal fromhost_write_en : std_logic := '0';
-
 	-- Test context:
 	signal test_context_out  : test_context;
 
@@ -98,10 +92,6 @@ begin
 			dmem_read_ack => dmem_read_ack,
 			dmem_write_req => dmem_write_req,
 			dmem_write_ack => dmem_write_ack,
-			tohost_data => tohost_data,
-			tohost_write_en => tohost_write_en,
-			fromhost_data => fromhost_data,
-			fromhost_write_en => fromhost_write_en,
 			test_context_out => test_context_out,
 			irq => irq
 		);

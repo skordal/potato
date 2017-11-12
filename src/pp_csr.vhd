@@ -66,9 +66,6 @@ package pp_csr is
 	constant CSR_MBADADDR : csr_address := x"343";
 	constant CSR_MIP      : csr_address := x"344";
 
-	constant CSR_MTOHOST   : csr_address := x"780";
-	constant CSR_MFROMHOST : csr_address := x"781";
-
 	constant CSR_TEST : csr_address := x"bf0";
 
 	-- Values used as control register IDs in ERET:

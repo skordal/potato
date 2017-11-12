@@ -1,5 +1,5 @@
 % The Potato Processor - Processor Datasheet
-% (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
+% (c) Kristian Klomsten Skordal 2015 -2017 <kristian.skordal@wafflemail.net>
 % Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 \documentclass[10pt,a4paper]{article}
@@ -110,9 +110,8 @@ are active high and the following signals are provided:\\
 \hline
 \end{tabularx}\\
 
-Additional signals are used to implement a host-target interface used in the automatic testing
-environment. These signals have names starting with \texttt{fromhost} and \texttt{tohost} and
-should be left unconnected.\\
+An additional output, \texttt{test\_context\_out} is used to provide feedback to testbenches
+when running automated tests. In hardware designs, this port should be left unconnected.\\
 
 \section{Tools and Utilities}
 

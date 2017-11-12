@@ -44,12 +44,6 @@ entity pp_core is
 		-- Test interface:
 		test_context_out : out test_context;                 --! Test context output.
 
-		-- Tohost/fromhost interface:
-		fromhost_data     : in  std_logic_vector(31 downto 0); --! Data from the host/simulator.
-		fromhost_write_en : in  std_logic;                     --! Write enable signal from the host/simulator.
-		tohost_data       : out std_logic_vector(31 downto 0); --! Data to the host/simulator.
-		tohost_write_en   : out std_logic;                     --! Write enable signal to the host/simulator.
-
 		-- External interrupt input:
 		irq : in std_logic_vector(7 downto 0) --! IRQ inputs.
 	);
@@ -188,10 +182,6 @@ begin
 				timer_clk => timer_clk,
 				irq => irq,
 				count_instruction => wb_count_instruction,
-				fromhost_data => fromhost_data,
-				fromhost_updated => fromhost_write_en,
-				tohost_data => tohost_data,
-				tohost_updated => tohost_write_en,
 				test_context_out => test_context_out,
 				read_address => csr_read_address,
 				read_data_out => csr_read_data,

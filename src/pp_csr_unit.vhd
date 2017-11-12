@@ -27,12 +27,6 @@ entity pp_csr_unit is
 		-- Count retired instruction:
 		count_instruction : in std_logic;
 
-		-- HTIF interface:
-		fromhost_data    : in  std_logic_vector(31 downto 0);
-		fromhost_updated : in  std_logic;
-		tohost_data      : out std_logic_vector(31 downto 0);
-		tohost_updated   : out std_logic;
-
 		-- Test interface:
 		test_context_out : out test_context;
 
@@ -84,9 +78,6 @@ architecture behaviour of pp_csr_unit is
 	-- Interrupt enable bits:
 	signal ie, ie1    : std_logic;
 
-	-- HTIF FROMHOST register:
-	signal fromhost: std_logic_vector(31 downto 0);
-
 	-- Test and debug register:
 	signal test_register : test_context;
 
@@ -108,34 +99,6 @@ begin
 
 	--! Output the current test state:
 	test_context_out <= test_register;
-
-	--! Updates the FROMHOST register when new data is available.
-	htif_fromhost: process(clk)
-	begin
-		if rising_edge(clk) then
-			if fromhost_updated = '1' then
-				fromhost <= fromhost_data;
-			end if;
-		end if;	
-	end process htif_fromhost;
-
-	--! Sends a word to the host over the HTIF interface.
-	htif_tohost: process(clk)
-	begin
-		if rising_edge(clk) then
-			if reset = '1' then
-				tohost_data <= (others => '0');
-				tohost_updated <= '0';
-			else
-				if write_mode /= CSR_WRITE_NONE and write_address = CSR_MTOHOST then
-					tohost_data <= write_data_in;
-					tohost_updated <= '1';
-				else
-					tohost_updated <= '0';
-				end if;
-			end if;
-		end if;
-	end process htif_tohost;
 
 	mtime_counter: process(clk)
 	begin
@@ -233,8 +196,6 @@ begin
 				case read_address is
 
 					-- Machine mode registers:
-					when CSR_MFROMHOST => -- Data from a host environment
-						read_data_out <= fromhost;
 					when CSR_MSTATUS => -- Status register
 						read_data_out <= csr_make_mstatus(ie, ie1);
 					when CSR_MSCRATCH => -- Scratch register
