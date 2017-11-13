@@ -11,7 +11,7 @@ the RISC-V privileged architecture, version 1.7.
 The processor has been tested on a Arty board using the example SoC design provided in the `example/` directory
 and the Hello World application available in `software/hello`, as well as the SHA256 benchmark application available
 in `software/sha256`. Synthesis and implementation has been tested on various versions of Xilinx' Vivado, most recently
-version 2017.2.
+version 2017.3.
 
 ## Features
 
