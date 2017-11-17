@@ -118,7 +118,7 @@ entity pp_execute is
 
 		-- Hazard detection unit signals:
 		mem_mem_op : in memory_operation_type;
-		hazard_detected : out std_logic
+		load_hazard_detected : out std_logic
 	);
 end entity pp_execute;
 
@@ -505,9 +505,9 @@ begin
 			or
 				(alu_y_src = ALU_SRC_REG and mem_rd_addr = rs2_addr and rs2_addr /= b"00000"))
 		then
-			hazard_detected <= '1';
+			load_hazard_detected <= '1';
 		else
-			hazard_detected <= '0';
+			load_hazard_detected <= '0';
 		end if;
 	end process detect_load_hazard;
 

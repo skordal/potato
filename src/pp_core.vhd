@@ -366,7 +366,7 @@ begin
 			wb_exception => wb_exception,
 			wb_exception_context => wb_exception_context,
 			mem_mem_op => mem_mem_op,
-			hazard_detected => load_hazard_detected
+			load_hazard_detected => load_hazard_detected
 		);
 
 	dmem_address <= ex_dmem_address when stall_mem = '0' else dmem_address_p;
