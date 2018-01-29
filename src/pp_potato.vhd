@@ -16,7 +16,6 @@ entity pp_potato is
 		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"; --! Address of the first instruction to execute.
 		MTIME_DIVIDER          : positive                      := 5;           --! Divider for the clock driving the MTIME counter.
 		ICACHE_ENABLE          : boolean                       := true;        --! Whether to enable the instruction cache.
-		ICACHE_AREAS           : std_logic_vector(31 downto 0) := x"ffffffff"; --! Bitmap of 128 Mb memory areas that can be cached.
 		ICACHE_LINE_SIZE       : natural                       := 4;           --! Number of words per instruction cache line.
 		ICACHE_NUM_LINES       : natural                       := 128          --! Number of cache lines in the instryction cache.
 	);
@@ -99,13 +98,11 @@ begin
 		icache: entity work.pp_icache
 			generic map(
 				LINE_SIZE => ICACHE_LINE_SIZE,
-				NUM_LINES => ICACHE_NUM_LINES,
-				CACHED_AREAS => ICACHE_AREAS
+				NUM_LINES => ICACHE_NUM_LINES
 			) port map(
 				clk => clk,
 				reset => reset,
 				cache_enable => to_std_logic(ICACHE_ENABLE),
-				cache_flush => '0',
 				mem_address_in => imem_address,
 				mem_data_out => imem_data,
 				mem_read_req => imem_req,

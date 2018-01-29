@@ -13,16 +13,11 @@ use work.pp_utilities.all;
 entity pp_icache is
 	generic(
 		LINE_SIZE    : natural := 4;   --! Number of words per cache line
-		NUM_LINES    : natural := 128; --! Number of lines in the cache
-		CACHED_AREAS : std_logic_vector(31 downto 0) := x"ffffffff" --! Areas to cache in 128 Mb blocks
+		NUM_LINES    : natural := 128  --! Number of lines in the cache
 	);
 	port(
 		clk   : in std_logic;
 		reset : in std_logic;
-
-		-- Control interface:
-		cache_enable    : in std_logic;
-		cache_flush     : in std_logic;
 
 		-- Memory interface:
 		mem_address_in   : in  std_logic_vector(31 downto 0);
@@ -60,12 +55,9 @@ architecture behaviour of pp_icache is
 	attribute ram_style of cache_memory: signal is "block";
 
 	-- Cache controller signals:
-	type state_type is (IDLE, CACHE_READ_STALL, SINGLE_READ,
+	type state_type is (IDLE, CACHE_READ_STALL,
 		LOAD_CACHELINE_START, LOAD_CACHELINE_WAIT_ACK, LOAD_CACHELINE_FINISH);
 	signal state : state_type := IDLE;
-
-	-- Is the current input address in the cache?
-	signal input_address_cached : boolean;
 
 	-- Input address components:
 	signal input_address_line : std_logic_vector(log2(NUM_LINES) - 1 downto 0);
@@ -94,37 +86,25 @@ architecture behaviour of pp_icache is
 	-- Set when the current input address matches a cache line:
 	signal cache_hit : std_logic;
 
-	-- For regular reads:
-	signal read_ack      : std_logic;
-	signal read_data_out : std_logic_vector(31 downto 0);
-
 begin
 
 	assert is_pow2(LINE_SIZE) report "Cache line size must be a power of 2!" severity FAILURE;
 	assert is_pow2(NUM_LINES) report "Number of cache lines must be a power of 2!" severity FAILURE;
 
-	mem_data_out <= current_cache_line_words(to_integer(unsigned(input_address_word))) when
-					input_address_cached and cache_enable = '1' and cache_flush = '0'
-				else read_data_out;
-
-	mem_read_ack <= (cache_hit and mem_read_req)
-		when state = IDLE and input_address_cached and cache_enable = '1' and cache_flush = '0'
-		else read_ack;
+	mem_data_out <= current_cache_line_words(to_integer(unsigned(input_address_word)));
+	mem_read_ack <= (cache_hit and mem_read_req) when state = IDLE or state = CACHE_READ_STALL else '0';
 
 	input_address_line <= mem_address_in(log2(LINE_SIZE * 4) + log2(NUM_LINES) - 1 downto log2(LINE_SIZE * 4));
-
-	-- Check if the current input address should be/is in the cache:
-	input_address_cached <= CACHED_AREAS(to_integer(unsigned(mem_address_in(31 downto 27)))) = '1';
 
 	decompose_cache_line: for i in 0 to LINE_SIZE - 1 generate
 		current_cache_line_words(i) <= current_cache_line(32 * i + 31 downto 32 * i);
 	end generate decompose_cache_line;
 
+	input_address_tag  <= mem_address_in(31 downto log2(LINE_SIZE * 4) + log2(NUM_LINES));
 	find_indices: process(clk)
 	begin
 		if rising_edge(clk) then
 			input_address_word <= mem_address_in(log2(LINE_SIZE * 4) - 1 downto 2);
-			input_address_tag  <= mem_address_in(31 downto log2(LINE_SIZE * 4) + log2(NUM_LINES));
 		end if;
 	end process find_indices;
 
@@ -165,47 +145,23 @@ begin
 				wb_outputs.cyc <= '0';
 				wb_outputs.stb <= '0';
 				store_cache_line <= '0';
-				read_ack <= '0';
 				valid <= (others => '0');
-				read_data_out <= (others => '0');
 			else
 				case state is
 					when IDLE =>
-						read_ack <= '0';
-						if cache_flush = '1' then
-							valid <= (others => '0');
-						elsif input_address_cached and cache_enable = '1' then
-							if mem_read_req = '1' and cache_hit = '0' then
-								wb_outputs.adr <= mem_address_in(31 downto log2(LINE_SIZE * 4)) & (log2(LINE_SIZE * 4) - 1 downto 0 => '0');
-								wb_outputs.cyc <= '1';
-								wb_outputs.we <= '0';
-								wb_outputs.sel <= (others => '1');
-								load_buffer_tag <= input_address_tag;
-								cl_load_address <= mem_address_in(31 downto log2(LINE_SIZE * 4));
-								cl_current_line <= to_integer(unsigned(input_address_line));
-								cl_current_word <= 0;
-								state <= LOAD_CACHELINE_START;
-							end if;
-						else
-							if mem_read_req = '1' and read_ack = '0' then -- Do an uncached read
-								wb_outputs.adr <= mem_address_in;
-								wb_outputs.sel <= x"f";
-								wb_outputs.cyc <= '1';
-								wb_outputs.stb <= '1';
-								wb_outputs.we <= '0';
-								state <= SINGLE_READ;
-							end if;
+						if mem_read_req = '1' and cache_hit = '0' then
+							wb_outputs.adr <= mem_address_in(31 downto log2(LINE_SIZE * 4)) & (log2(LINE_SIZE * 4) - 1 downto 0 => '0');
+							wb_outputs.cyc <= '1';
+							wb_outputs.we <= '0';
+							wb_outputs.sel <= (others => '1');
+							load_buffer_tag <= input_address_tag;
+							cl_load_address <= mem_address_in(31 downto log2(LINE_SIZE * 4));
+							cl_current_line <= to_integer(unsigned(input_address_line));
+							cl_current_word <= 0;
+							state <= LOAD_CACHELINE_START;
 						end if;
 					when CACHE_READ_STALL =>
 						state <= IDLE;
-					when SINGLE_READ =>
-						if wb_inputs.ack = '1' then
-							read_data_out <= wb_inputs.dat;
-							wb_outputs.cyc <= '0';
-							wb_outputs.stb <= '0';
-							read_ack <= '1';
-							state <= IDLE;
-						end if;
 					when LOAD_CACHELINE_START =>
 						wb_outputs.stb <= '1';
 						wb_outputs.we <= '0';
