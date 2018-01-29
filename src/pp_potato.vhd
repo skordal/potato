@@ -17,7 +17,7 @@ entity pp_potato is
 		MTIME_DIVIDER          : positive                      := 5;           --! Divider for the clock driving the MTIME counter.
 		ICACHE_ENABLE          : boolean                       := true;        --! Whether to enable the instruction cache.
 		ICACHE_LINE_SIZE       : natural                       := 4;           --! Number of words per instruction cache line.
-		ICACHE_NUM_LINES       : natural                       := 128          --! Number of cache lines in the instryction cache.
+		ICACHE_NUM_LINES       : natural                       := 128          --! Number of cache lines in the instruction cache.
 	);
 	port(
 		clk       : in std_logic;
