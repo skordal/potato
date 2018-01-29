@@ -102,7 +102,6 @@ begin
 			) port map(
 				clk => clk,
 				reset => reset,
-				cache_enable => to_std_logic(ICACHE_ENABLE),
 				mem_address_in => imem_address,
 				mem_data_out => imem_data,
 				mem_read_req => imem_req,

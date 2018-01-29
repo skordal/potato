@@ -278,7 +278,7 @@ begin
 	processor: entity work.pp_potato
 		generic map(
 			RESET_ADDRESS => x"ffff8200",
-			ICACHE_ENABLE => false
+			ICACHE_ENABLE => true
 		) port map(
 			clk => system_clk,
 			timer_clk => timer_clk,
