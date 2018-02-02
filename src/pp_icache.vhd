@@ -137,7 +137,6 @@ begin
 	end process tag_lookup;
 
 	controller: process(clk)
-		variable current_word : std_logic_vector(31 downto 0);
 	begin
 		if rising_edge(clk) then
 			if reset = '1' then
