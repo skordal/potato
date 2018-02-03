@@ -51,7 +51,7 @@ begin
 	instruction_ready <= imem_ack and (not stall) and (not cancel_fetch);
 	instruction_address <= pc;
 
-	imem_req <= '1';
+	imem_req <= not reset;
 
 	set_pc: process(clk)
 	begin
@@ -64,7 +64,6 @@ begin
 					cancel_fetch <= '1';
 					pc <= pc_next;
 				elsif cancel_fetch = '1' and imem_ack = '1' then
-					--pc <= pc_next;
 					cancel_fetch <= '0';
 				else
 					pc <= pc_next;
