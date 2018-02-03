@@ -95,12 +95,12 @@ begin
 	mem_read_ack <= (cache_hit and mem_read_req) when state = IDLE or state = CACHE_READ_STALL else '0';
 
 	input_address_line <= mem_address_in(log2(LINE_SIZE * 4) + log2(NUM_LINES) - 1 downto log2(LINE_SIZE * 4));
+	input_address_tag  <= mem_address_in(31 downto log2(LINE_SIZE * 4) + log2(NUM_LINES));
 
 	decompose_cache_line: for i in 0 to LINE_SIZE - 1 generate
 		current_cache_line_words(i) <= current_cache_line(32 * i + 31 downto 32 * i);
 	end generate decompose_cache_line;
 
-	input_address_tag  <= mem_address_in(31 downto log2(LINE_SIZE * 4) + log2(NUM_LINES));
 	find_indices: process(clk)
 	begin
 		if rising_edge(clk) then
@@ -122,17 +122,13 @@ begin
 	tag_lookup: process(clk)
 	begin
 		if rising_edge(clk) then
-			if reset = '1' then
-				cache_hit <= '0';
-			else
-				if store_cache_line = '1' then
-					tag_memory(cl_current_line) <= load_buffer_tag;
-				end if;
-	
-				current_tag <= tag_memory(to_integer(unsigned(input_address_line)));
-				cache_hit <= valid(to_integer(unsigned(input_address_line)))
-					and to_std_logic(tag_memory(to_integer(unsigned(input_address_line))) = input_address_tag);
+			if store_cache_line = '1' then
+				tag_memory(cl_current_line) <= load_buffer_tag;
 			end if;
+
+			current_tag <= tag_memory(to_integer(unsigned(input_address_line)));
+			cache_hit <= valid(to_integer(unsigned(input_address_line)))
+				and to_std_logic(tag_memory(to_integer(unsigned(input_address_line))) = input_address_tag);
 		end if;
 	end process tag_lookup;
 
