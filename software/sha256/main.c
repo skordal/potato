@@ -176,7 +176,6 @@ int main(void)
 		potato_enable_interrupts();
 	}
 
-	uart_tx_string(&uart0, "exit\n\r");
 	return 0;
 }
 
