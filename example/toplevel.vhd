@@ -267,6 +267,7 @@ begin
 
 	reset_controller: entity work.pp_soc_reset
 		port map(
+			clk => clk,
 			reset_n => reset_n,
 			reset_out => reset,
 			system_clk => system_clk,

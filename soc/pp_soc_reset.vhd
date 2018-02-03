@@ -4,6 +4,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use work.pp_utilities.all;
 
 --! @brief System reset unit.
 --! Because most resets in the processor core are synchronous, at least one
@@ -13,13 +14,15 @@ use ieee.std_logic_1164.all;
 --! properly resetting.
 entity pp_soc_reset is
 	generic(
-		RESET_CYCLE_COUNT : natural := 2
+		RESET_CYCLE_COUNT : natural := 1
 	);
 	port(
-		reset_n : in std_logic;
+		clk : in std_logic;
+
+		reset_n   : in  std_logic;
 		reset_out : out std_logic;
 
-		system_clk : in std_logic;
+		system_clk        : in std_logic;
 		system_clk_locked : in std_logic
 	);
 end entity pp_soc_reset;
@@ -29,19 +32,37 @@ architecture behaviour of pp_soc_reset is
 	subtype counter_type is natural range 0 to RESET_CYCLE_COUNT;
 	signal counter : counter_type;
 
-	signal delayed_reset : std_logic;
+	signal fast_reset : std_logic := '0';
+	signal slow_reset : std_logic := '1';
 begin
 
-	delayed_reset <= '1' when counter /= 0 else '0';
-	reset_out <= not system_clk_locked or not reset_n or delayed_reset;
+	reset_out <= fast_reset or slow_reset;
 
-	process(system_clk_locked, reset_n, system_clk)
+	process(clk)
 	begin
-		if system_clk_locked = '0' or reset_n = '0' then
-			counter <= RESET_CYCLE_COUNT;
-		elsif rising_edge(system_clk) then
-			if counter /= 0 then
-				counter <= counter - 1;
+		if rising_edge(clk) then
+			if reset_n = '0' then
+				fast_reset <= '1';
+			elsif system_clk_locked = '1' then
+				if fast_reset = '1' and slow_reset = '1' then
+					fast_reset <= '0';
+				end if;
+			end if;
+		end if;
+	end process;
+
+	process(system_clk)
+	begin
+		if rising_edge(system_clk) then
+			if fast_reset = '1' then
+				slow_reset <= '1';
+				counter <= RESET_CYCLE_COUNT;
+			else
+				if counter = 0 then
+					slow_reset <= '0';
+				else
+					counter <= counter - 1;
+				end if;
 			end if;
 		end if;
 	end process;
