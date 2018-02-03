@@ -265,6 +265,14 @@ begin
 		end case;
 	end process processor_intercon;
 
+	reset_controller: entity work.pp_soc_reset
+		port map(
+			reset_n => reset_n,
+			reset_out => reset,
+			system_clk => system_clk,
+			system_clk_locked => system_clk_locked
+		);
+
 	clkgen: entity work.clock_generator
 		port map(
 			clk => clk,
@@ -273,7 +281,6 @@ begin
 			timer_clk => timer_clk,
 			locked => system_clk_locked
 		);
-	reset <= (not reset_n) or (not system_clk_locked);
 
 	processor: entity work.pp_potato
 		generic map(
