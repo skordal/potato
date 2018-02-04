@@ -1,4 +1,4 @@
--- The Potato Processor - SoC design for the Arty FPGA board
+-- The Potato Processor - A simple processor for FPGAs
 -- (c) Kristian Klomsten Skordal 2018 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
