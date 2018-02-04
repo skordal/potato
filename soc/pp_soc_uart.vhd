@@ -56,7 +56,7 @@ entity pp_soc_uart is
 		wb_we_in   : in  std_logic;
 		wb_cyc_in  : in  std_logic;
 		wb_stb_in  : in  std_logic;
-		wb_ack_out : out std_logic 
+		wb_ack_out : out std_logic
 	);
 end entity pp_soc_uart;
 

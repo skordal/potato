@@ -9,7 +9,7 @@ use ieee.numeric_std.all;
 --! @brief Simple timer module for generating periodic interrupts.
 --!
 --! The following registers are defined:
---! |---------------|------------|
+--! |---------|------------------|
 --! | Address | Description      |
 --! |---------|------------------|
 --! | 0x00    | Control register |
