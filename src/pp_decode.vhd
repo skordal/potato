@@ -14,7 +14,7 @@ use work.pp_csr.all;
 entity pp_decode is
 	generic(
 		RESET_ADDRESS : std_logic_vector(31 downto 0);
-		PROCESSOR_ID : std_logic_vector(31 downto 0)
+		PROCESSOR_ID  : std_logic_vector(31 downto 0)
 	);
 	port(
 		clk    : in std_logic;

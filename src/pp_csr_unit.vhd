@@ -72,7 +72,7 @@ architecture behaviour of pp_csr_unit is
 	signal mbadaddr : std_logic_vector(31 downto 0);
 	signal mscratch : std_logic_vector(31 downto 0);
 	signal mepc     : std_logic_vector(31 downto 0);
-	signal mtvec    : std_logic_vector(31 downto 0) := x"00000100";
+	signal mtvec    : std_logic_vector(31 downto 2) := (others => '0');
 	signal mie      : std_logic_vector(31 downto 0) := (others => '0');
 
 	-- Interrupt enable bits:
@@ -137,8 +137,8 @@ begin
 		if rising_edge(clk) then
 			if reset = '1' then
 				software_interrupt <= '0';
-				mtvec <= x"00000100";
-				mepc <= x"00000100";
+				mtvec <= (others => '0');
+				mepc <= (others => '0');
 				mie <= (others => '0');
 				ie <= '0';
 				ie1 <= '0';
@@ -163,7 +163,7 @@ begin
 						--when CSR_MCAUSE => -- Exception cause
 						--	mcause <= write_data_in(31) & write_data_in(4 downto 0);
 						when CSR_MTVEC => -- Exception vector address
-							mtvec <= write_data_in;
+							mtvec <= write_data_in(31 downto 2);
 						when CSR_MTIMECMP => -- Time compare register
 							mtime_compare <= write_data_in;
 						when CSR_MIE => -- Interrupt enable register:
@@ -185,9 +185,9 @@ begin
 		if rising_edge(clk) then
 
 			if write_mode /= CSR_WRITE_NONE and write_address = CSR_MTVEC then
-				mtvec_out <= write_data_in;
+				mtvec_out <= write_data_in(31 downto 2) & b"00";
 			else
-				mtvec_out <= mtvec;
+				mtvec_out <= mtvec & b"00";
 			end if;
 
 			if write_mode /= CSR_WRITE_NONE and write_address = read_address then
@@ -203,7 +203,7 @@ begin
 					when CSR_MEPC => -- Exception PC value
 						read_data_out <= mepc;
 					when CSR_MTVEC => -- Exception vector address
-						read_data_out <= mtvec;
+						read_data_out <= mtvec & b"00";
 					when CSR_MTDELEG => -- Exception vector delegation register, unsupported
 						read_data_out <= (others => '0');
 					when CSR_MIP => -- Interrupt pending

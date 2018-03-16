@@ -15,7 +15,7 @@ use work.pp_csr.all;
 entity pp_core is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
-		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000200"; --! Address of the first instruction to execute.
+		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000000"; --! Address of the first instruction to execute.
 		MTIME_DIVIDER          : positive := 5                                 --! Divider for the clock driving the MTIME counter
 	);
 	port(

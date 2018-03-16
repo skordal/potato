@@ -71,9 +71,6 @@ package pp_csr is
 	-- Values used as control register IDs in ERET:
 	constant CSR_EPC_MRET   : csr_address := x"302";
 
-	-- Offset into the exception vector for handling machine-mode exceptions:
-	constant CSR_MTVEC_M_OFFSET : natural := 192;
-
 	-- Status register bit indices:
 	constant CSR_SR_MIE_INDEX  : natural := 3;
 	constant CSR_SR_MPIE_INDEX : natural := 7;

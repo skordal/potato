@@ -32,7 +32,6 @@ sha256.bin: sha256.elf
 sha256.coe: sha256.bin
 	echo "memory_initialization_radix=16;" > sha256.coe
 	echo "memory_initialization_vector=" >> sha256.coe
-	for i in $$(seq 0 63); do echo 00000013 >> sha256.coe; done
 	$(HEXDUMP) -v -e '1/4 "%08x\n"' sha256.bin >> sha256.coe
 	echo ";" >> sha256.coe
 

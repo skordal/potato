@@ -200,7 +200,7 @@ begin
 	jump_out <= do_jump;
 	jump_target_out <= jump_target;
 
-	mtvec_out <= std_logic_vector(unsigned(mtvec_forwarded) + CSR_MTVEC_M_OFFSET);
+	mtvec_out <= std_logic_vector(unsigned(mtvec_forwarded));
 	exception_taken <= not stall and (decode_exception or to_std_logic(exception_cause /= CSR_CAUSE_NONE)); 
 
 	irq_asserted <= to_std_logic(exception_context_forwarded.ie = '1' and (irq and mie_forwarded(31 downto 24)) /= x"00");

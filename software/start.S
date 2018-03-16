@@ -5,26 +5,13 @@
 .section .init
 
 .align 6
-tvec_user: // User mode is not supported by Potato
-	j tvec_machine
-.align 6
-tvec_supervisor: // Supervisor mode is not supported by Potato
-	j tvec_machine
-.align 6
-tvec_hypervisor: // Hypervisor mode is not supported by Potato
-	j tvec_machine
-.align 6
-tvec_machine:
-	j _machine_exception_handler
-
-.align 6
 .global _start
 _start:
 
 // Sets the exception handler address:
 .hidden init_mtvec
 init_mtvec:
-	la x1, tvec_user
+	la x1, _machine_exception_handler
 	csrw mtvec, x1
 
 // Copies the .data section into the data memory section:

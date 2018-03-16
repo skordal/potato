@@ -32,7 +32,6 @@ hello.bin: hello.elf
 hello.coe: hello.bin
 	echo "memory_initialization_radix=16;" > hello.coe
 	echo "memory_initialization_vector=" >> hello.coe
-	for i in $$(seq 0 63); do echo 00000013 >> hello.coe; done
 	$(HEXDUMP) -v -e '1/4 "%08x\n"' hello.bin >> hello.coe
 	echo ";" >> hello.coe
 
