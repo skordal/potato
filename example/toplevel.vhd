@@ -7,11 +7,11 @@ use ieee.std_logic_1164.all;
 
 -- This is a SoC design for the Arty development board. It has the following memory layout:
 --
--- 0x00000000: Application RAM (DDR3) (NOTE: Not yet supported!)
+-- 0x00000000: Main memory (128 kB)
 -- 0xc0000000: Timer0
 -- 0xc0001000: Timer1
 -- 0xc0002000: UART0 (for host communication)
--- 0xc0003000: UART1 (for connecting a GPS to JA)
+-- 0xc0003000: UART1 (for connecting a GPS PMOD to JA)
 -- 0xc0004000: GPIO0
 -- 0xc0005000: Interconnect control/error module
 -- 0xffff8000: Application execution environment ROM (16 kB)
@@ -152,12 +152,22 @@ architecture behaviour of toplevel is
 	signal aee_ram_we_in   : std_logic;
 	signal aee_ram_ack_out : std_logic;
 
+	-- Main memory signals:
+	signal main_memory_adr_in  : std_logic_vector(16 downto 0);
+	signal main_memory_dat_in  : std_logic_vector(31 downto 0);
+	signal main_memory_dat_out : std_logic_vector(31 downto 0);
+	signal main_memory_cyc_in  : std_logic;
+	signal main_memory_stb_in  : std_logic;
+	signal main_memory_sel_in  : std_logic_vector(3 downto 0);
+	signal main_memory_we_in   : std_logic;
+	signal main_memory_ack_out : std_logic;
+
 	-- Selected peripheral on the interconnect:
 	type intercon_peripheral_type is (
 		PERIPHERAL_TIMER0, PERIPHERAL_TIMER1,
 		PERIPHERAL_UART0, PERIPHERAL_UART1, PERIPHERAL_GPIO,
 		PERIPHERAL_AEE_ROM, PERIPHERAL_AEE_RAM, PERIPHERAL_INTERCON,
-		PERIPHERAL_ERROR, PERIPHERAL_NONE);
+		PERIPHERAL_MAIN_MEMORY, PERIPHERAL_ERROR, PERIPHERAL_NONE);
 	signal intercon_peripheral : intercon_peripheral_type := PERIPHERAL_NONE;
 
 	-- Interconnect address decoder state:
@@ -208,6 +218,8 @@ begin
 							elsif processor_adr_out(15 downto 14) = b"11" then -- AEE RAM
 								intercon_peripheral <= PERIPHERAL_AEE_RAM;
 							end if;
+						elsif processor_adr_out(31 downto 17) = x"0000" & b"000" then
+							intercon_peripheral <= PERIPHERAL_MAIN_MEMORY;
 						else
 							intercon_peripheral <= PERIPHERAL_ERROR;
 						end if;
@@ -259,6 +271,9 @@ begin
 			when PERIPHERAL_ERROR =>
 				processor_ack_in <= error_ack_out;
 				processor_dat_in <= (others => '0');
+			when PERIPHERAL_MAIN_MEMORY =>
+				processor_ack_in <= main_memory_ack_out;
+				processor_dat_in <= main_memory_dat_out;
 			when PERIPHERAL_NONE =>
 				processor_ack_in <= '0';
 				processor_dat_in <= (others => '0');
@@ -479,5 +494,27 @@ begin
 	aee_ram_sel_in <= processor_sel_out;
 	aee_ram_cyc_in <= processor_cyc_out when intercon_peripheral = PERIPHERAL_AEE_RAM else '0';
 	aee_ram_stb_in <= processor_stb_out when intercon_peripheral = PERIPHERAL_AEE_RAM else '0';
+
+	main_memory: entity work.pp_soc_memory
+		generic map(
+			MEMORY_SIZE => 131072
+		) port map(
+			clk => system_clk,
+			reset => reset,
+			wb_adr_in => main_memory_adr_in,
+			wb_dat_in => main_memory_dat_in,
+			wb_dat_out => main_memory_dat_out,
+			wb_cyc_in => main_memory_cyc_in,
+			wb_stb_in => main_memory_stb_in,
+			wb_sel_in => main_memory_sel_in,
+			wb_we_in => main_memory_we_in,
+			wb_ack_out => main_memory_ack_out
+		);
+	main_memory_adr_in <= processor_adr_out(main_memory_adr_in'range);
+	main_memory_dat_in <= processor_dat_out;
+	main_memory_we_in  <= processor_we_out;
+	main_memory_sel_in <= processor_sel_out;
+	main_memory_cyc_in <= processor_cyc_out when intercon_peripheral = PERIPHERAL_MAIN_MEMORY else '0';
+	main_memory_stb_in <= processor_stb_out when intercon_peripheral = PERIPHERAL_MAIN_MEMORY else '0';
 
 end architecture behaviour;
