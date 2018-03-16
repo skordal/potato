@@ -12,12 +12,17 @@
 #define UART_REG_RECEIVE	0x04
 #define UART_REG_STATUS		0x08
 #define UART_REG_DIVISOR	0x0c
+#define UART_REG_INTERRUPT	0x10
 
 // Status register bit names:
 #define UART_STATUS_TX_FULL	3
 #define UART_STATUS_RX_FULL	2
 #define UART_STATUS_TX_EMPTY	1
 #define UART_STATUS_RX_EMPTY	0
+
+// Interrupt enable register bit names:
+#define UART_REG_INTERRUPT_TX_READY	1
+#define UART_REG_INTERRUPT_RECV		0
 
 struct uart
 {
@@ -43,6 +48,19 @@ static inline void uart_initialize(struct uart * module, volatile void * base_ad
 static inline void uart_set_divisor(struct uart * module, uint32_t divisor)
 {
 	module->registers[UART_REG_DIVISOR >> 2] = divisor;
+}
+
+/**
+ * Enables or disables UART IRQs.
+ * @param module   Instance object.
+ * @param tx_ready Specifies whether to enable or disable the `TX ready` interrupt.
+ * @param recv     Specifies whether to enable or disable the `Data received` interrupt.
+ */
+static inline void uart_enable_interrupt(struct uart * module, bool tx_ready, bool recv)
+{
+	module->registers[UART_REG_INTERRUPT >> 2] = 0
+		| (tx_ready << UART_REG_INTERRUPT_TX_READY)
+		| (recv << UART_REG_INTERRUPT_RECV);
 }
 
 /**
