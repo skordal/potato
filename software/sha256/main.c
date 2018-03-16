@@ -102,7 +102,7 @@ void exception_handler(uint32_t mcause, uint32_t mepc, uint32_t sp)
 				}
 
 				potato_disable_interrupts();
-				while(1) asm volatile("nop");
+				while(1) potato_wfi();
 
 				break;
 			}
