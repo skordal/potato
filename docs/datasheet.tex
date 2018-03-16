@@ -45,11 +45,12 @@
 
 \begin{itemize}
 \item Supports the complete 32-bit RISC-V base integer ISA (RV32I) version 2.0
-\item Supports machine mode as defined by the RISC-V supervisor extensions version 1.7
+\item Supports machine mode from the RISC-V Privileged Architecture version 1.10
 \item Includes a hardware timer with microsecond resolution and compare interrupt
-\item 8 IRQ inputs that can be invidually enabled
+\item Up to 8 IRQ inputs that can be individually enabled
 \item Classic 5-stage RISC pipeline
 \item Wishbone interface
+\item Optional instruction cache
 \item Automatic test suite
 \end{itemize}
 
@@ -111,13 +112,13 @@ are active high and the following signals are provided:\\
 \end{tabularx}\\
 
 An additional output, \texttt{test\_context\_out} is used to provide feedback to testbenches
-when running automated tests. In hardware designs, this port should be left unconnected.\\
+when running automated tests. This port should be left unconnected.\\
 
 \section{Tools and Utilities}
 
 Tools for writing applications for the RISC-V architecture are available from the
 RISC-V project, at:\\[1em]
-\url{https://github.com/riscv/riscv-tools}\\
+\url{https://github.com/riscv/riscv-gnu-toolchain}\\
 
 \end{minipage}
 
