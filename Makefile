@@ -76,7 +76,8 @@ RISCV_TESTS += \
 	xori
 
 # Local tests to run:
-LOCAL_TESTS +=
+LOCAL_TESTS += \
+	csr_hazard
 
 # Compiler flags to use when building tests:
 TARGET_CFLAGS += -march=rv32i -Wall -O0
