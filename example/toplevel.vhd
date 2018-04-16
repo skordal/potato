@@ -241,7 +241,8 @@ begin
 		uart0_ack_out, uart0_dat_out, uart1_ack_out, uart1_dat_out,
 		gpio_ack_out, gpio_dat_out,
 		intercon_ack_out, intercon_dat_out, error_ack_out,
-		aee_rom_ack_out, aee_rom_dat_out, aee_ram_ack_out, aee_ram_dat_out)
+		aee_rom_ack_out, aee_rom_dat_out, aee_ram_ack_out, aee_ram_dat_out,
+		main_memory_ack_out, main_memory_dat_out)
 	begin
 		case intercon_peripheral is
 			when PERIPHERAL_TIMER0 =>
