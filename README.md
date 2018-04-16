@@ -10,7 +10,7 @@ Architecture Specification v1.10.
 
 The processor has been tested on an Arty board using the example SoC design provided in the `example/` directory
 and the applications found in the `software/` directory. Synthesis and implementation has been tested on various versions
-of Xilinx' Vivado toolchain, most recently version 2017.4.
+of Xilinx' Vivado toolchain, most recently version 2018.1.
 
 ## Features
 

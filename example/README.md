@@ -1,7 +1,7 @@
 # System-On-Chip Design using the Potato Processor
 
 This folder contains an SoC design using the Potato processor. The design
-has been synthesized using Vivado 2017.3 and tested on an Arty board from
+has been synthesized using Vivado 2018.1 and tested on an Arty board from
 Digilent.
 
 ## Quick Start
@@ -37,7 +37,7 @@ If you have peripherals that require additional clocks, you can enable more cloc
 outputs here.
 
 Rename `clk_out1` to `system_clk` and `clk_out2` to `timer_clk` to match the port
-names expected by the toplevel entity.
+names expected by the toplevel entity. Set the name of the input clock to be `clk`.
 
 At the bottom of the "Output Clocks" tab, find the "Enable Optional Inputs/Outputs"
 section and select `reset` and `locked` signals. The `locked` signal is used to
@@ -64,7 +64,7 @@ Go to the "Port A Options" tab and set the following settings:
 * Port A depth: 4096
 
 Do not enable the use of the enable pin or reset functionality, as these are not currently
-supported by the ROM wrapper module.
+supported by the ROM wrapper module. Uncheck the "Primitives Output Register" box register.
 
 Under "Other Options", check the "Load Init File" option and give the location
 of the coefficient file for the application to store in the ROM. To test the
