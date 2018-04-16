@@ -76,10 +76,11 @@ architecture behaviour of pp_soc_uart is
 	signal rx_current_bit : bitnumber;
 
 	subtype rx_sample_counter_type is natural range 0 to 15;
-	subtype rx_sample_delay_type is natural range 0 to 7;
-	signal rx_sample_delay   : rx_sample_counter_type;
 	signal rx_sample_counter : rx_sample_counter_type;
 	signal rx_sample_value   : rx_sample_counter_type;
+
+	subtype rx_sample_delay_type is natural range 0 to 7;
+	signal rx_sample_delay   : rx_sample_delay_type;
 
 	-- UART transmit process signals:
 	type tx_state_type is (IDLE, TRANSMIT, STOPBIT);
