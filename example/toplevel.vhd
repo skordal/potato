@@ -218,7 +218,7 @@ begin
 							elsif processor_adr_out(15 downto 14) = b"11" then -- AEE RAM
 								intercon_peripheral <= PERIPHERAL_AEE_RAM;
 							end if;
-						elsif processor_adr_out(31 downto 17) = x"0000" & b"000" then
+						elsif processor_adr_out(31 downto 17) = x"000" & b"000" then
 							intercon_peripheral <= PERIPHERAL_MAIN_MEMORY;
 						else
 							intercon_peripheral <= PERIPHERAL_ERROR;
