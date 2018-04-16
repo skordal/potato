@@ -190,7 +190,7 @@ static void int2string(int n, char * s)
 		return;
 	}
 
-	if(n & (1 << 31))
+	if(n & (1u << 31))
 	{
 		n = ~n + 1;
 		*(s++) = '-';
