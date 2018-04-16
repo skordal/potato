@@ -55,7 +55,6 @@ entity pp_execute is
 		csr_write_out        : out csr_write_mode;
 		csr_value_in         : in  std_logic_vector(31 downto 0);
 		csr_value_out        : out std_logic_vector(31 downto 0);
-		csr_writeable_in     : in  boolean;
 		csr_use_immediate_in : in  std_logic; 
 
 		-- Control signals:
@@ -147,7 +146,6 @@ architecture behaviour of pp_execute is
 	signal csr_write : csr_write_mode;
 	signal csr_addr  : csr_address;
 	signal csr_use_immediate : std_logic;
-	signal csr_writeable : boolean;
 
 	signal csr_value : std_logic_vector(31 downto 0);
 	
@@ -249,7 +247,6 @@ begin
 				csr_write <= csr_write_in;
 				csr_addr <= csr_addr_in;
 				csr_use_immediate <= csr_use_immediate_in;
-				csr_writeable <= csr_writeable_in;
 
 				-- Exception vector base:
 				mtvec <= mtvec_in;

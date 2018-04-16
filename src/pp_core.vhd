@@ -65,7 +65,6 @@ architecture behaviour of pp_core is
 
 	-- CSR read port signals:
 	signal csr_read_data      : std_logic_vector(31 downto 0);
-	signal csr_read_writeable : boolean;
 	signal csr_read_address, csr_read_address_p : csr_address;
 
 	-- Status register outputs:
@@ -185,7 +184,6 @@ begin
 				test_context_out => test_context_out,
 				read_address => csr_read_address,
 				read_data_out => csr_read_data,
-				read_writeable => csr_read_writeable,
 				write_address => wb_csr_address,
 				write_data_in => wb_csr_data,
 				write_mode => wb_csr_write,
@@ -322,7 +320,6 @@ begin
 			csr_write_out => ex_csr_write,
 			csr_value_in => csr_read_data,
 			csr_value_out => ex_csr_data,
-			csr_writeable_in => csr_read_writeable,
 			csr_use_immediate_in => id_csr_use_immediate,
 			alu_op_in => id_alu_op,
 			alu_x_src_in => id_alu_x_src,

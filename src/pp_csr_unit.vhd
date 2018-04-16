@@ -33,7 +33,6 @@ entity pp_csr_unit is
 		-- Read port:
 		read_address   : in csr_address;
 		read_data_out  : out std_logic_vector(31 downto 0);
-		read_writeable : out boolean;
 
 		-- Write port:
 		write_address : in csr_address;
@@ -93,9 +92,6 @@ begin
 	ie_out <= ie;
 	ie1_out <= ie1;
 	mie_out <= mie;
-
-	-- The two upper bits of the CSR address encodes the accessibility of the CSR:
-	read_writeable <= read_address(11 downto 10) /= b"11";
 
 	--! Output the current test state:
 	test_context_out <= test_register;
