@@ -15,29 +15,29 @@ TARGET_CFLAGS +=  -march=rv32i -Wall -Os -fomit-frame-pointer \
 	-ffreestanding -fno-builtin -I../.. -I../../libsoc -std=gnu99 \
 	-Wall -Werror=implicit-function-declaration
 TARGET_LDFLAGS += -march=rv32i -nostartfiles -L../libsoc \
-	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-Tpotato_boot.ld \
+	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-Tbootloader.ld \
 	-Wl,--gc-sections
 
 OBJECTS := main.o start.o
 
-all: boot.coe
+all: bootloader.coe
 
-boot.elf: $(OBJECTS)
-	$(TARGET_LD) -o boot.elf $(TARGET_LDFLAGS) $(OBJECTS)
-	$(TARGET_SIZE) boot.elf
+bootloader.elf: $(OBJECTS)
+	$(TARGET_LD) -o bootloader.elf $(TARGET_LDFLAGS) $(OBJECTS)
+	$(TARGET_SIZE) bootloader.elf
 
-boot.bin: boot.elf
-	$(TARGET_OBJCOPY) -j .text -j .data -O binary boot.elf boot.bin
+bootloader.bin: bootloader.elf
+	$(TARGET_OBJCOPY) -j .text -j .data -O binary bootloader.elf bootloader.bin
 
-boot.coe: boot.bin
-	echo "memory_initialization_radix=16;" > boot.coe
-	echo "memory_initialization_vector=" >> boot.coe
-	$(HEXDUMP) -v -e '1/4 "%08x\n"' boot.bin >> boot.coe
-	echo ";" >> boot.coe
+bootloader.coe: bootloader.bin
+	echo "memory_initialization_radix=16;" > bootloader.coe
+	echo "memory_initialization_vector=" >> bootloader.coe
+	$(HEXDUMP) -v -e '1/4 "%08x\n"' bootloader.bin >> bootloader.coe
+	echo ";" >> bootloader.coe
 
 clean:
 	-$(RM) $(OBJECTS)
-	-$(RM) boot.elf boot.bin boot.coe
+	-$(RM) bootloader.elf bootloader.bin bootloader.coe
 
 # Object file rules:
 
