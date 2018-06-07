@@ -16,7 +16,7 @@ TARGET_CFLAGS +=  -march=rv32i -Wall -Os -fomit-frame-pointer \
 	-Wall -Werror=implicit-function-declaration
 TARGET_LDFLAGS += -march=rv32i -nostartfiles -L../libsoc \
 	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-T../potato.ld \
-	-Wl,--gc-sections
+	-Wl,--no-relax -Wl,--gc-sections
 
 OBJECTS := main.o start.o
 
@@ -27,7 +27,7 @@ hello.elf: $(OBJECTS)
 	$(TARGET_SIZE) hello.elf
 
 hello.bin: hello.elf
-	$(TARGET_OBJCOPY) -j .text -j .data -O binary hello.elf hello.bin
+	$(TARGET_OBJCOPY) -j .text -j .rodata -j .data -O binary hello.elf hello.bin
 
 hello.coe: hello.bin
 	echo "memory_initialization_radix=16;" > hello.coe

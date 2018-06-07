@@ -13,7 +13,8 @@ init_mtvec:
 	la x1, _machine_exception_handler
 	csrw mtvec, x1
 
-// Copies the .data section into the data memory section:
+// Copies the .data from ROM to RAM - this is only used by the bootloader, which runs from ROM:
+#ifdef COPY_DATA_TO_RAM
 .hidden copy_data
 copy_data:
 	la x1, __text_end	// Copy source address
@@ -30,6 +31,7 @@ copy_data:
 
 	bne x2, x3, 1b		// Repeat as long as there is more data to copy
 2:
+#endif
 
 // Clears the .bss (zero initialized data) section:
 .hidden clear_bss

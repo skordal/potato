@@ -8,8 +8,6 @@ ENTRY(_start)
 MEMORY
 {
 	RAM (rwx)    : ORIGIN = 0x00000000, LENGTH = 0x00020000
-	AEE_ROM (rwx) : ORIGIN = 0xffffc000, LENGTH = 0x00002000
-	AEE_RAM (rwx) : ORIGIN = 0xffffe000, LENGTH = 0x00002000
 }
 
 SECTIONS
@@ -17,29 +15,37 @@ SECTIONS
 	.text :
 	{
 		*(.init)
+
+		__text_begin = .;
 		*(.text*)
 		__text_end = .;
-		*(.rodata*)
-	} > AEE_ROM
+	} > RAM
 
-	.data : AT(ADDR(.text) + SIZEOF(.text))
+	.rodata :
+	{
+		__rodata_begin = .;
+		*(.rodata*)
+		__rodata_end = .;
+	} > RAM
+
+	.data :
 	{
 		__data_begin = .;
 		*(.data*)
 		*(.eh_frame*)
-		__data_end = ALIGN(4);
-	} > AEE_RAM
+		__data_end = .;
+	} > RAM
 
 	.bss ALIGN(4) :
 	{
 		__bss_begin = .;
 		*(.bss*)
-		*(.sbss)
+		*(.sbss*)
 		__bss_end = ALIGN(4);
-	} > AEE_RAM
+	} > RAM
 
 	/* Set the start of the stack to the top of RAM: */
-	__stack_top = 0x00000000;
+	__stack_top = 0x00020000;
 
 	/DISCARD/ :
 	{

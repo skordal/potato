@@ -27,7 +27,7 @@ sha256.elf: $(OBJECTS) ../potato.ld
 	$(TARGET_SIZE) sha256.elf
 
 sha256.bin: sha256.elf
-	$(TARGET_OBJCOPY) -j .text -j .data -O binary sha256.elf sha256.bin
+	$(TARGET_OBJCOPY) -j .text -j .data -j .rodata -O binary sha256.elf sha256.bin
 
 sha256.coe: sha256.bin
 	echo "memory_initialization_radix=16;" > sha256.coe

@@ -45,5 +45,5 @@ main.o: main.c ../../potato.h
 	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
 
 start.o: ../start.S
-	$(TARGET_CC) -c -o $@ $(TARGET_CFLAGS) $<
+	$(TARGET_CC) -DCOPY_DATA_TO_RAM -c -o $@ $(TARGET_CFLAGS) $<
 
