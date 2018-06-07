@@ -27,7 +27,7 @@ bootloader.elf: $(OBJECTS)
 	$(TARGET_SIZE) bootloader.elf
 
 bootloader.bin: bootloader.elf
-	$(TARGET_OBJCOPY) -j .text -j .data -O binary bootloader.elf bootloader.bin
+	$(TARGET_OBJCOPY) -j .text -j .data -j .rodata -O binary bootloader.elf bootloader.bin
 
 bootloader.coe: bootloader.bin
 	echo "memory_initialization_radix=16;" > bootloader.coe

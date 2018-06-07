@@ -8,7 +8,7 @@
 #include "uart.h"
 
 #define APP_START (0x00000000)
-#define APP_LEN   (0x2000)
+#define APP_LEN   (0x20000)
 #define APP_ENTRY (0x00000000)
 
 static struct uart uart0;
@@ -33,7 +33,7 @@ int main(void)
 		*((volatile uint8_t*)(APP_START + i)) = uart_rx(&uart0);
 
 		/* Print some dots */
-		if(((i & 0x7f) == 0) && !uart_tx_fifo_full(&uart0))
+		if(((i & 0x7ff) == 0) && !uart_tx_fifo_full(&uart0))
 			uart_tx(&uart0, '.');
 	}
 
