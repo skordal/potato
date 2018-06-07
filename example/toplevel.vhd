@@ -195,7 +195,10 @@ begin
 					if processor_cyc_out = '1' then
 						intercon_busy <= true;
 
-						if processor_adr_out(31 downto 16) = x"c000" then -- Peripheral memory space
+						if processor_adr_out(31 downto 16) = x"0000"
+							or processor_adr_out(31 downto 16) = x"0001" then -- Main memory space
+								intercon_peripheral <= PERIPHERAL_MAIN_MEMORY;
+						elsif processor_adr_out(31 downto 16) = x"c000" then -- Peripheral memory space
 							case processor_adr_out(15 downto 12) is
 								when x"0" =>
 									intercon_peripheral <= PERIPHERAL_TIMER0;
@@ -218,8 +221,6 @@ begin
 							elsif processor_adr_out(15 downto 14) = b"11" then -- AEE RAM
 								intercon_peripheral <= PERIPHERAL_AEE_RAM;
 							end if;
-						elsif processor_adr_out(31 downto 17) = x"000" & b"000" then
-							intercon_peripheral <= PERIPHERAL_MAIN_MEMORY;
 						else
 							intercon_peripheral <= PERIPHERAL_ERROR;
 						end if;
