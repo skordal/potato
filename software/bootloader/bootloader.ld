@@ -9,7 +9,7 @@ MEMORY
 {
 	RAM (rwx)    : ORIGIN = 0x00000000, LENGTH = 0x00020000
 	AEE_ROM (rx) : ORIGIN = 0xffff8000, LENGTH = 0x00004000
-	AEE_RAM (rw) : ORIGIN = 0xffffe000, LENGTH = 0x00002000
+	AEE_RAM (rw) : ORIGIN = 0xffffc000, LENGTH = 0x00004000
 }
 
 SECTIONS
@@ -37,6 +37,9 @@ SECTIONS
 		*(.sbss)
 		__bss_end = ALIGN(4);
 	} > AEE_RAM
+
+	/* Use the top of RAM and downwards for the stack: */
+	__stack_top = 0x00000000;
 
 	/DISCARD/ :
 	{

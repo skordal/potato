@@ -47,7 +47,7 @@ clear_bss:
 // Sets up the stack pointer:
 .hidden init_stack
 init_stack:
-	xor sp, sp, sp		// Zero the stack pointer to start from the top of RAM
+	la sp, __stack_top
 
 .hidden call_main
 call_main:

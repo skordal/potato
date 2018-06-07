@@ -38,6 +38,9 @@ SECTIONS
 		__bss_end = ALIGN(4);
 	} > AEE_RAM
 
+	/* Set the start of the stack to the top of RAM: */
+	__stack_top = 0x00000000;
+
 	/DISCARD/ :
 	{
 		*(.comment)
