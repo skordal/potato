@@ -3,37 +3,18 @@
 # Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 .PHONY: all clean
+include ../common.mk
 
-TARGET_PREFIX ?= riscv32-unknown-elf
-TARGET_CC := $(TARGET_PREFIX)-gcc
-TARGET_LD := $(TARGET_PREFIX)-gcc
-TARGET_SIZE := $(TARGET_PREFIX)-size
-TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
-HEXDUMP ?= hexdump
-
-TARGET_CFLAGS += -march=rv32i -Wall -Os -fomit-frame-pointer \
-	-ffreestanding -fno-builtin -I../.. -I../../libsoc -std=gnu11 \
-	-Wall -Werror=implicit-function-declaration -fdata-sections -ffunction-sections
-TARGET_LDFLAGS += -march=rv32i -nostartfiles -L../libsoc \
-	-Wl,-m,elf32lriscv --specs=nosys.specs -Wl,-T../potato.ld \
-	-Wl,--gc-sections -Wl,--Map,sha256.map
+TARGET_LDFLAGS += -Wl,-T../potato.ld -Wl,--Map,sha256.map
 
 OBJECTS := main.o sha256.o start.o
+LINKER_SCRIPT := ../potato.ld
 
-all: sha256.coe
+all: sha256.elf sha256.bin sha256.coe
 
-sha256.elf: $(OBJECTS) ../potato.ld
+sha256.elf: $(OBJECTS) $(LINKER_SCRIPT)
 	$(TARGET_LD) -o sha256.elf $(TARGET_LDFLAGS) $(OBJECTS)
 	$(TARGET_SIZE) sha256.elf
-
-sha256.bin: sha256.elf
-	$(TARGET_OBJCOPY) -j .text -j .data -j .rodata -O binary sha256.elf sha256.bin
-
-sha256.coe: sha256.bin
-	echo "memory_initialization_radix=16;" > sha256.coe
-	echo "memory_initialization_vector=" >> sha256.coe
-	$(HEXDUMP) -v -e '1/4 "%08x\n"' sha256.bin >> sha256.coe
-	echo ";" >> sha256.coe
 
 clean:
 	-$(RM) $(OBJECTS)
