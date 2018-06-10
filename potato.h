@@ -52,7 +52,7 @@
 			:: [temp] "r" (temp)); \
 	} while(0);
 
-#define potato_wfi() asm volatile("nop\n") /* The WFI instruction is not yet supported on Potato. */
+#define potato_wfi() asm volatile("wfi\n\t")
 
 /**
  * Gets the value of the MCAUSE register.

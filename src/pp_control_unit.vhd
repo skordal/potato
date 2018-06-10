@@ -145,6 +145,10 @@ begin
 						exception <= '0';
 						exception_cause <= CSR_CAUSE_NONE;
 						branch <= BRANCH_SRET;
+					elsif funct12 = x"105" then -- WFI, currently ignored
+						exception <= '0';
+						exception_cause <= CSR_CAUSE_NONE;
+						branch <= BRANCH_NONE;
 					else
 						exception <= '1';
 						exception_cause <= CSR_CAUSE_INVALID_INSTR;

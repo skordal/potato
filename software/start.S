@@ -56,6 +56,7 @@ call_main:
 	call main
 
 1:
+	wfi
 	j 1b
 
 .global _machine_exception_handler
