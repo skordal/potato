@@ -1,7 +1,5 @@
 # The Potato Processor
 
-**Note that the master branch may be in an unstable state.**
-
 ![Processor architecture overview diagramme](https://github.com/skordal/potato/blob/master/docs/diagram.png?raw=true)
 
 The Potato Processor is a simple RISC-V processor written in VHDL for use in FPGAs. It implements the 32-bit integer subset
@@ -10,7 +8,7 @@ Architecture Specification v1.10.
 
 The processor has been tested on an Arty board using the example SoC design provided in the `example/` directory
 and the applications found in the `software/` directory. Synthesis and implementation has been tested on various versions
-of Xilinx' Vivado toolchain, most recently version 2018.1.
+of Xilinx' Vivado toolchain, most recently version 2018.2.
 
 ## Features
 
