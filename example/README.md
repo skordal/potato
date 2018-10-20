@@ -55,7 +55,7 @@ If you have peripherals that require additional clocks, you can enable more cloc
 outputs here.
 
 Rename `clk_out1` to `system_clk` and `clk_out2` to `timer_clk` to match the port
-names expected by the toplevel entity. Set the name of the input clock to be `clk`.
+names expected by the toplevel entity.
 
 At the bottom of the "Output Clocks" tab, find the "Enable Optional Inputs/Outputs"
 section and select `reset` and `locked` signals. The `locked` signal is used to
@@ -83,12 +83,7 @@ Do not enable the use of the enable pin or reset functionality, as these are not
 supported by the ROM wrapper module. Uncheck the "Primitives Output Register" box register.
 
 Under "Other Options", check the "Load Init File" option and give the location
-of the coefficient file for the application to store in the ROM. To test the
-basic functionality of the chip, you can use the `hello` application from the
-`software/` directory.
-
-Optionally, fill the remaining memory locations with no-ops by entering `00000013` in the
-correct field.
+of the coefficient file for the bootloader application.
 
 ### Test it!
 
