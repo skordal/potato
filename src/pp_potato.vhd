@@ -21,7 +21,6 @@ entity pp_potato is
 	);
 	port(
 		clk       : in std_logic;
-		timer_clk : in std_logic;
 		reset     : in std_logic;
 
 		-- Interrupts:
@@ -76,7 +75,6 @@ begin
 		) port map(
 			clk => clk,
 			reset => reset,
-			timer_clk => timer_clk,
 			imem_address => imem_address,
 			imem_data_in => imem_data,
 			imem_req => imem_req,

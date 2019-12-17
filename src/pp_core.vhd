@@ -16,14 +16,13 @@ entity pp_core is
 	generic(
 		PROCESSOR_ID           : std_logic_vector(31 downto 0) := x"00000000"; --! Processor ID.
 		RESET_ADDRESS          : std_logic_vector(31 downto 0) := x"00000000"; --! Address of the first instruction to execute.
-		MTIME_DIVIDER          : positive := 5                                 --! Divider for the clock driving the MTIME counter
+		MTIME_DIVIDER          : positive := 5;                                --! Divider for the clock driving the MTIME counter
+		TIME_DIVIDER           : positive := 5                                 --! Divider for the clock dirivng the TIME counter
 	);
 	port(
 		-- Control inputs:
 		clk       : in std_logic; --! Processor clock
 		reset     : in std_logic; --! Reset signal
-
-		timer_clk : in std_logic; --! Clock used for the timer/counter
 
 		-- Instruction memory interface:
 		imem_address : out std_logic_vector(31 downto 0); --! Address of the next instruction
@@ -174,11 +173,12 @@ begin
 	------- Control and status module -------
 	csr_unit: entity work.pp_csr_unit
 			generic map(
-				PROCESSOR_ID => PROCESSOR_ID
+				PROCESSOR_ID  => PROCESSOR_ID,
+				MTIME_DIVIDER => MTIME_DIVIDER,
+				TIME_DIVIDER  => TIME_DIVIDER
 			) port map(
 				clk => clk,
 				reset => reset,
-				timer_clk => timer_clk,
 				irq => irq,
 				count_instruction => wb_count_instruction,
 				test_context_out => test_context_out,

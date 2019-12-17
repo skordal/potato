@@ -14,11 +14,11 @@ use work.pp_utilities.all;
 entity pp_csr_unit is
 	generic(
 		PROCESSOR_ID  : std_logic_vector(31 downto 0);
-		MTIME_DIVIDER : positive := 5 --! Divider for the clock driving the MTIME counter.
+		MTIME_DIVIDER : positive := 5; --! Divider for the clock driving the MTIME counter.
+		TIME_DIVIDER  : positive := 5  --! Divider for the clock driving the TIME counter.
 	);
 	port(
 		clk       : in std_logic;
-		timer_clk : in std_logic;
 		reset     : in std_logic;
 
 		-- IRQ signals:
@@ -55,6 +55,10 @@ entity pp_csr_unit is
 end entity pp_csr_unit;
 
 architecture behaviour of pp_csr_unit is
+
+	-- Timer clock:
+	signal time_clk         : std_logic;
+	signal time_clk_counter : natural := 0;
 
 	-- Counters:
 	signal counter_time    : std_logic_vector(63 downto 0);
@@ -95,6 +99,23 @@ begin
 
 	--! Output the current test state:
 	test_context_out <= test_register;
+
+	time_clk_gen: process(clk)
+	begin
+		if rising_edge(clk) then
+			if reset = '1' then
+				time_clk <= '0';
+				time_clk_counter <= 0;
+			else
+				if time_clk_counter = TIME_DIVIDER - 1 then
+					time_clk_counter <= 0;
+					time_clk <= not time_clk;
+				else
+					time_clk_counter <= time_clk_counter + 1;
+				end if;
+			end if;
+		end if;
+	end process time_clk_gen;
 
 	mtime_counter: process(clk)
 	begin
@@ -260,7 +281,7 @@ begin
 
 	timer_counter: entity work.pp_counter
 		port map(
-			clk => timer_clk,
+			clk => time_clk,
 			reset => reset,
 			count => counter_time,
 			increment => '1'

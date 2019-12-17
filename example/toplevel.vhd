@@ -44,7 +44,6 @@ architecture behaviour of toplevel is
 
 	-- Internal clock signals:
 	signal system_clk : std_logic;
-	signal timer_clk  : std_logic;
 	signal system_clk_locked : std_logic;
 
 	-- Interrupt indices:
@@ -296,7 +295,6 @@ begin
 			clk => clk,
 			resetn => reset_n,
 			system_clk => system_clk,
-			timer_clk => timer_clk,
 			locked => system_clk_locked
 		);
 
@@ -306,7 +304,6 @@ begin
 			ICACHE_ENABLE => false
 		) port map(
 			clk => system_clk,
-			timer_clk => timer_clk,
 			reset => reset,
 			irq => irq_array,
 			test_context_out => open,
