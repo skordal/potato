@@ -1,7 +1,7 @@
 # System-On-Chip Design using the Potato Processor
 
 This folder contains an SoC design using the Potato processor. The design
-has been synthesized using Vivado 2018.2 and tested on an Arty board from
+has been synthesized using Vivado 2019.2 and tested on an Arty board from
 Digilent.
 
 ## Quick Start
@@ -65,10 +65,14 @@ Set the "Reset Type" to "Active low" - this makes it possible to connect the res
 signal for the clock generator directly to the processor reset button on the development
 board.
 
-### PAEE ROM
+### AEE ROM
 
-The PAEE ROM is a read-only memory intended to store bootloaders. Before continuing,
-build the bootloader application, located in the `software/` directory.
+The AEE (Application Execution Environment) ROM is a read-only memory intended to
+store bootloaders. Before continuing, build the bootloader application, located in
+the `software/` directory.
+
+    cd software/bootloader
+    make
 
 Add a block RAM IP to use as the ROM using the Block Memory Generator. Name the component
 "aee_rom". In the "Basic" tab choose a "Native" interface type and set "Memory Type" to
@@ -79,8 +83,8 @@ Go to the "Port A Options" tab and set the following settings:
 * Port A Width: 32
 * Port A depth: 4096
 
-Do not enable the use of the enable pin or reset functionality, as these are not currently
-supported by the ROM wrapper module. Uncheck the "Primitives Output Register" box register.
+Disable the use of the enable pin and reset functionality, as these are not
+used by the ROM wrapper module. Also uncheck the "Primitives Output Register" box register.
 
 Under "Other Options", check the "Load Init File" option and give the location
 of the coefficient file for the bootloader application.

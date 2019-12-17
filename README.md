@@ -8,7 +8,7 @@ Architecture Specification v1.10.
 
 The processor has been tested on an Arty board using the example SoC design provided in the `example/` directory
 and the applications found in the `software/` directory. Synthesis and implementation has been tested on various versions
-of Xilinx' Vivado toolchain, most recently version 2018.2.
+of Xilinx' Vivado toolchain, most recently version 2019.2.
 
 ## Features
 
@@ -38,8 +38,13 @@ An example System-on-Chip for the Arty development board can be found in the `ex
 
 ## Compiler Toolchain
 
-To program the processor, you need an appropriate compiler toolchain. Follow the instructions on the
-[RISCV GNU toolchain repository](https://github.com/riscv/riscv-gnu-toolchain) site to build and install a 32-bit RISC-V toolchain.
+To program the processor, you need an appropriate compiler toolchain. To compile a working toolchain, go to the
+[RISCV GNU toolchain repository](https://github.com/riscv/riscv-gnu-toolchain) and clone the project. Compile and install
+the toolchain using the following commands (note that `make` will both build and install the toolchain, ensure that the
+destination directory is writeable by your user):
+
+    ./configure --prefix=/opt/riscv-toolchain --with-abi=ilp32 --with-arch=rv32i
+    make
 
 ## Reporting bugs and issues
 
