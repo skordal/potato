@@ -47,15 +47,13 @@ component "clock_generator". Make sure the following options are selected in the
 Set the name of the primary input clock to be `clk`, and verify that the input
 frequency is set to 100 MHz.
 
-Go to the "Output Clocks" tab and enable `clk_out1` and `clk_out2`. Set the frequency
-of `clk_out1` to 50 MHz. This will be the main system clock. Set the frequency of
-`clk_out2` to 10 MHz - this clock will be used to run the 10 MHz system timer.
+Go to the "Output Clocks" tab and enable `clk_out1`. Set the frequency
+of `clk_out1` to 50 MHz. This will be the main system clock.
 
 If you have peripherals that require additional clocks, you can enable more clock
 outputs here.
 
-Rename `clk_out1` to `system_clk` and `clk_out2` to `timer_clk` to match the port
-names expected by the toplevel entity.
+Rename `clk_out1` to `system_clk` to match the port names expected by the toplevel entity.
 
 At the bottom of the "Output Clocks" tab, find the "Enable Optional Inputs/Outputs"
 section and select `reset` and `locked` signals. The `locked` signal is used to
