@@ -81,6 +81,6 @@ begin
 				end if;
 			end if;
 		end if;
-	end process clk;
+	end process;
 
 end architecture behaviour;
