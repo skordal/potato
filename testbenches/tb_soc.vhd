@@ -1,5 +1,5 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014-2021 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -29,9 +29,6 @@ architecture testbench of tb_soc is
 	-- Clock signals:
 	signal clk : std_logic;
 	constant clk_period : time := 10 ns;
-
-	signal timer_clk : std_logic;
-	constant timer_clk_period : time := 100 ns;
 
 	-- Reset:
 	signal reset : std_logic := '1';
@@ -102,7 +99,6 @@ begin
 		) port map(
 			clk => clk,
 			reset => processor_reset,
-			timer_clk => timer_clk,
 			irq => irq,
 			test_context_out => test_context_out,
 			wb_adr_out => p_adr_out,
@@ -276,18 +272,6 @@ begin
 			wait;
 		end if;
 	end process clock;
-
-	timer_clock: process
-	begin
-		timer_clk <= '1';
-		wait for timer_clk_period / 2;
-		timer_clk <= '0';
-		wait for timer_clk_period / 2;
-
-		if simulation_finished then
-			wait;
-		end if;
-	end process timer_clock;
 
 	stimulus: process
 	begin

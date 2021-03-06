@@ -1,5 +1,5 @@
 -- The Potato Processor - A simple processor for FPGAs
--- (c) Kristian Klomsten Skordal 2014 <kristian.skordal@wafflemail.net>
+-- (c) Kristian Klomsten Skordal 2014-2021 <kristian.skordal@wafflemail.net>
 -- Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 library ieee;
@@ -27,10 +27,6 @@ architecture testbench of tb_processor is
 	-- Clock signal:
 	signal clk : std_logic := '0';
 	constant clk_period : time := 10 ns;
-
-	-- Timer clock signal:
-	signal timer_clk : std_logic := '0';
-	constant timer_clk_period : time := 100 ns;
 
 	-- Common inputs:
 	signal reset  : std_logic := '1';
@@ -79,7 +75,6 @@ begin
 		) port map(
 			clk => clk,
 			reset => reset,
-			timer_clk => timer_clk,
 			imem_address => imem_address,
 			imem_data_in => imem_data_in,
 			imem_req => imem_req,
@@ -107,18 +102,6 @@ begin
 			wait;
 		end if;
 	end process clock;
-
-	timer_clock: process
-	begin
-		timer_clk <= '0';
-		wait for timer_clk_period / 2;
-		timer_clk <= '1';
-		wait for timer_clk_period / 2;
-
-		if simulation_finished then
-			wait;
-		end if;
-	end process timer_clock;
 
 	--! Initializes the instruction memory from file.
 	imem_init: process
