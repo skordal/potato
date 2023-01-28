@@ -1,14 +1,14 @@
 # The Potato Processor Software Components
-# (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
+# (c) Kristian Klomsten Skordal 2015-2023 <kristian.skordal@wafflemail.net>
 # Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 .PHONY: all clean
 include ../common.mk
 
-TARGET_LDFLAGS += -Wl,-T../potato.ld -Wl,--Map,sha256.map
+LINKER_SCRIPT := ../potato.ld
+TARGET_LDFLAGS += -Wl,-T$(LINKER_SCRIPT) -Wl,--Map,sha256.map
 
 OBJECTS := main.o sha256.o start.o
-LINKER_SCRIPT := ../potato.ld
 
 all: sha256.elf sha256.bin sha256.coe
 

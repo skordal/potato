@@ -1,5 +1,5 @@
 /* Linker script for standalone test applications for the Potato SoC
- * (c) Kristian Klomsten Skordal 2016 <kristian.skordal@wafflemail.net>
+ * (c) Kristian Klomsten Skordal 2016-2023 <kristian.skordal@wafflemail.net>
  * Report bugs and issues on <https://github.com/skordal/potato/issues>
  */
 
@@ -32,6 +32,7 @@ SECTIONS
 	{
 		__data_begin = .;
 		*(.data*)
+		*(.sdata*)
 		*(.eh_frame*)
 		__data_end = .;
 	} > RAM
