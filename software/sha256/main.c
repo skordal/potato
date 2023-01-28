@@ -1,5 +1,5 @@
 // The Potato Processor Benchmark Applications
-// (c) Kristian Klomsten Skordal 2015 <kristian.skordal@wafflemail.net>
+// (c) Kristian Klomsten Skordal 2015-2023 <kristian.skordal@wafflemail.net>
 // Report bugs and issues on <https://github.com/skordal/potato/issues>
 
 #include <stdbool.h>
@@ -79,7 +79,7 @@ void exception_handler(uint32_t mcause, uint32_t mepc, uint32_t sp)
 						uart_tx_string(&uart0, "\tType: read\n\r");
 
 						uart_tx_string(&uart0, "\tAddress: ");
-						char address_buffer[5];
+						char address_buffer[9];
 						int2hex32(icerror_get_read_address(&icerror0), address_buffer);
 						uart_tx_string(&uart0, address_buffer);
 						uart_tx_string(&uart0, "\n\r");
@@ -89,7 +89,7 @@ void exception_handler(uint32_t mcause, uint32_t mepc, uint32_t sp)
 					{
 						uart_tx_string(&uart0, "\tType: write\n\r");
 
-						char address_buffer[5];
+						char address_buffer[9];
 						int2hex32(icerror_get_write_address(&icerror0), address_buffer);
 						uart_tx_string(&uart0, address_buffer);
 						uart_tx_string(&uart0, "\n\r");
