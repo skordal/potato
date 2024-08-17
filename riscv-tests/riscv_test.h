@@ -64,10 +64,10 @@
   .align 2;                                                             \
 1:
 
-#define INIT_SPTBR                                                      \
+#define INIT_SATP                                                      \
   la t0, 1f;                                                            \
   csrw mtvec, t0;                                                       \
-  csrwi sptbr, 0;                                                       \
+  csrwi satp, 0;                                                       \
   .align 2;                                                             \
 1:
 
@@ -143,7 +143,7 @@ handle_exception:                                                       \
         j write_tohost;                                                 \
 reset_vector:                                                           \
         RISCV_MULTICORE_DISABLE;                                        \
-        INIT_SPTBR;                                                     \
+        INIT_SATP;                                                     \
         INIT_PMP;                                                       \
         DELEGATE_NO_TRAPS;                                              \
 	POTATO_TEST_START(0, TESTNUM);                                  \
