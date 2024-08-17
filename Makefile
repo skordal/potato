@@ -80,7 +80,7 @@ LOCAL_TESTS += \
 	csr_hazard
 
 # Compiler flags to use when building tests:
-TARGET_CFLAGS += -march=rv32i -Wall -O0
+TARGET_CFLAGS += -march=rv32i_zicsr -Wall -O0
 TARGET_LDFLAGS +=
 
 all: potato.prj run-tests run-soc-tests
